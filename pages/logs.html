@@ -1,0 +1,520 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Delivery Logs — NotifyPro</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../assets/css/dashboard.css" />
+    <style>
+      .filter-bar {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+        padding: 1rem;
+        background: var(--bg2);
+        border: 1px solid var(--card-border);
+        border-radius: var(--radius-md);
+      }
+      .filter-bar select,
+      .filter-bar input[type="text"] {
+        background: var(--bg3);
+        border: 1px solid var(--card-border);
+        border-radius: var(--radius-sm);
+        padding: 7px 12px;
+        color: var(--text);
+        font-family: var(--font-body);
+        font-size: 13px;
+        outline: none;
+        transition: border-color var(--transition);
+        appearance: none;
+      }
+      .filter-bar select:focus,
+      .filter-bar input:focus {
+        border-color: rgba(0, 232, 122, 0.35);
+      }
+      .filter-bar input[type="text"] {
+        flex: 1;
+        min-width: 160px;
+      }
+      .log-row {
+        display: grid;
+        grid-template-columns: 140px 1fr 100px 80px 100px 90px 36px;
+        align-items: center;
+        gap: 1rem;
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+        font-size: 13px;
+        transition: background var(--transition);
+        cursor: pointer;
+      }
+      .log-row:hover {
+        background: rgba(255, 255, 255, 0.02);
+      }
+      .log-row:last-child {
+        border-bottom: none;
+      }
+      .log-header {
+        display: grid;
+        grid-template-columns: 140px 1fr 100px 80px 100px 90px 36px;
+        gap: 1rem;
+        padding: 0 1rem 0.6rem;
+        font-size: 10px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--muted);
+        border-bottom: 1px solid var(--card-border);
+        margin-bottom: 4px;
+      }
+      .log-id {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        color: var(--muted);
+      }
+      .log-to-val {
+        font-weight: 500;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .log-camp {
+        font-size: 11px;
+        color: var(--muted);
+        margin-top: 1px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .channel-icon {
+        font-size: 14px;
+      }
+      .expand-btn {
+        background: none;
+        border: 1px solid var(--card-border);
+        border-radius: var(--radius-sm);
+        width: 28px;
+        height: 28px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        color: var(--muted);
+        font-size: 12px;
+        transition: all var(--transition);
+      }
+      .expand-btn:hover {
+        border-color: rgba(255, 255, 255, 0.2);
+        color: var(--text);
+      }
+      .log-detail {
+        background: var(--bg);
+        border: 1px solid var(--card-border);
+        border-radius: var(--radius-sm);
+        padding: 1rem 1.2rem;
+        margin: 0 1rem 8px;
+        display: none;
+        font-size: 12px;
+        animation: fadeUp 0.2s ease;
+      }
+      .log-detail.open {
+        display: block;
+      }
+      .detail-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: 0.75rem;
+      }
+      .detail-item label {
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--muted);
+        display: block;
+        margin-bottom: 3px;
+      }
+      .detail-item span {
+        color: var(--text);
+        font-weight: 500;
+      }
+      .pagination {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1rem;
+        font-size: 13px;
+      }
+      .page-btns {
+        display: flex;
+        gap: 4px;
+      }
+      .page-btn {
+        width: 32px;
+        height: 32px;
+        border: 1px solid var(--card-border);
+        border-radius: var(--radius-sm);
+        background: none;
+        cursor: pointer;
+        color: var(--muted);
+        font-size: 13px;
+        transition: all var(--transition);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .page-btn:hover {
+        border-color: rgba(255, 255, 255, 0.2);
+        color: var(--text);
+      }
+      .page-btn.active {
+        background: var(--accent);
+        color: #000;
+        border-color: var(--accent);
+        font-weight: 700;
+      }
+      @media (max-width: 900px) {
+        .log-row,
+        .log-header {
+          grid-template-columns: 1fr auto auto;
+        }
+        .log-row > *:nth-child(n + 4):not(:last-child),
+        .log-header > *:nth-child(n + 4):not(:last-child) {
+          display: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="dash-layout">
+      <div class="main">
+        <main class="page-content">
+          <!-- HEADER -->
+          <div class="page-header">
+            <div class="page-header-left">
+              <h1>Delivery Logs</h1>
+              <p>Full audit trail of every message sent through NotifyPro.</p>
+            </div>
+            <div class="page-header-actions">
+              <div class="live-badge">
+                <div class="live-dot"></div>
+                Live
+              </div>
+              <button class="btn-secondary" onclick="exportLogs()">
+                <svg
+                  width="13"
+                  height="13"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                  <polyline points="7 10 12 15 17 10" />
+                  <line x1="12" y1="15" x2="12" y2="3" />
+                </svg>
+                Export CSV
+              </button>
+            </div>
+          </div>
+
+          <!-- STATS -->
+          <div class="stats-row">
+            <div class="stat-card green">
+              <div class="stat-card-top">
+                <div class="stat-label">Delivered Today</div>
+                <div class="stat-icon green">✅</div>
+              </div>
+              <div class="stat-val green" id="lStatDel">0</div>
+              <div class="stat-change up">
+                ↑ 12.4% <span>vs yesterday</span>
+              </div>
+            </div>
+            <div class="stat-card amber">
+              <div class="stat-card-top">
+                <div class="stat-label">Pending</div>
+                <div class="stat-icon amber">⏳</div>
+              </div>
+              <div class="stat-val amber" id="lStatPend">0</div>
+              <div class="stat-change up">↓ 3.1% <span>vs yesterday</span></div>
+            </div>
+            <div class="stat-card red">
+              <div class="stat-card-top">
+                <div class="stat-label">Failed</div>
+                <div class="stat-icon red">⚠️</div>
+              </div>
+              <div class="stat-val red" id="lStatFail">0</div>
+              <div class="stat-change down">↑ 28 <span>vs yesterday</span></div>
+            </div>
+            <div class="stat-card blue">
+              <div class="stat-card-top">
+                <div class="stat-label">Delivery Rate</div>
+                <div class="stat-icon blue">📈</div>
+              </div>
+              <div class="stat-val blue">98.6%</div>
+              <div class="stat-change up">↑ 0.2% <span>vs yesterday</span></div>
+            </div>
+          </div>
+
+          <!-- FILTER BAR -->
+          <div class="filter-bar">
+            <svg
+              width="13"
+              height="13"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              style="color: var(--muted); flex-shrink: 0"
+            >
+              <circle cx="11" cy="11" r="8" />
+              <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+            <input
+              type="text"
+              placeholder="Search by phone, email or message ID…"
+              id="logSearch"
+              oninput="filterLogs()"
+            />
+            <select id="filterChannel" onchange="filterLogs()">
+              <option value="all">All Channels</option>
+              <option value="SMS">Bulk SMS</option>
+              <option value="Email">Email</option>
+              <option value="OTP">OTP</option>
+              <option value="2FA">2FA</option>
+            </select>
+            <select id="filterStatus" onchange="filterLogs()">
+              <option value="all">All Statuses</option>
+              <option value="sent">Delivered</option>
+              <option value="sending">Sending</option>
+              <option value="failed">Failed</option>
+            </select>
+            <select id="filterNetwork" onchange="filterLogs()">
+              <option value="all">All Networks</option>
+              <option value="MTN">MTN</option>
+              <option value="Airtel">Airtel</option>
+              <option value="Glo">Glo</option>
+              <option value="9mobile">9mobile</option>
+            </select>
+            <button class="btn-secondary text-sm" onclick="resetFilters()">
+              Clear
+            </button>
+          </div>
+
+          <!-- LOGS TABLE -->
+          <div class="card" style="padding: 0">
+            <div class="log-header">
+              <span>Message ID</span><span>Recipient</span><span>Channel</span
+              ><span>Network</span><span>Sent At</span><span>Status</span
+              ><span></span>
+            </div>
+            <div id="logsContainer"></div>
+            <div class="pagination">
+              <span class="text-muted text-sm" id="pageInfo"
+                >Showing 1–20 of 1,073</span
+              >
+              <div class="page-btns">
+                <button class="page-btn">‹</button>
+                <button class="page-btn active">1</button>
+                <button class="page-btn">2</button>
+                <button class="page-btn">3</button>
+                <span
+                  style="color: var(--muted); padding: 0 4px; font-size: 13px"
+                  >…</span
+                >
+                <button class="page-btn">54</button>
+                <button class="page-btn">›</button>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <script>
+      window.NP_PAGE = "logs";
+      window.NP_TITLE = "Delivery Logs";
+    </script>
+    <script src="../assets/js/sidebar.js"></script>
+    <script type="module" src="../assets/js/auth-guard.js"></script>
+    <script src="../assets/js/topbar.js"></script>
+    <script>
+      "use strict";
+      function animateCount(id, target) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        const inc = target / 80;
+        let c = 0;
+        const iv = setInterval(() => {
+          c = Math.min(c + inc, target);
+          el.textContent = Math.floor(c).toLocaleString("en-NG");
+          if (c >= target) clearInterval(iv);
+        }, 16);
+      }
+      setTimeout(() => {
+        animateCount("lStatDel", 1058177);
+        animateCount("lStatPend", 312);
+        animateCount("lStatFail", 1247);
+      }, 300);
+
+      // ── Generate mock log data ──
+      const networks = ["MTN", "Airtel", "Glo", "9mobile"];
+      const channels = ["SMS", "Email", "OTP", "2FA"];
+      const campaigns = [
+        "Ramadan Promo Blast",
+        "Newsletter March",
+        "Flash Sale Alert",
+        "OTP Login Flow",
+        "Welcome Series",
+        "Easter Promo",
+      ];
+      const statuses = ["sent", "sent", "sent", "sent", "sending", "failed"];
+      const chIcons = { SMS: "💬", Email: "📧", OTP: "🔐", "2FA": "🛡️" };
+
+      function rndPhone() {
+        return `+234 ${[803, 706, 811, 909, 813][Math.floor(Math.random() * 5)]} ${Math.floor(1000000 + Math.random() * 8999999)}`;
+      }
+      function rndTime() {
+        const h = String(Math.floor(Math.random() * 12 + 7)).padStart(2, "0");
+        const m = String(Math.floor(Math.random() * 60)).padStart(2, "0");
+        return `${h}:${m} AM`;
+      }
+      function rndId() {
+        return "NP-" + Math.random().toString(36).substr(2, 8).toUpperCase();
+      }
+
+      let allLogs = Array.from({ length: 80 }, () => {
+        const ch = channels[Math.floor(Math.random() * channels.length)];
+        const to =
+          ch === "Email"
+            ? `user${Math.floor(Math.random() * 9999)}@gmail.com`
+            : rndPhone();
+        return {
+          id: rndId(),
+          to,
+          ch,
+          network:
+            ch === "Email"
+              ? "—"
+              : networks[Math.floor(Math.random() * networks.length)],
+          camp: campaigns[Math.floor(Math.random() * campaigns.length)],
+          time: rndTime(),
+          status: statuses[Math.floor(Math.random() * statuses.length)],
+          msgId: Math.floor(1000000000 + Math.random() * 8999999999),
+          latency: (Math.random() * 3 + 0.4).toFixed(2) + "s",
+          cost:
+            "₦" +
+            (ch === "SMS"
+              ? "6.00"
+              : ch === "OTP"
+                ? "7.50"
+                : ch === "2FA"
+                  ? "3.00"
+                  : "2.50"),
+        };
+      });
+
+      function renderLogs(data) {
+        const container = document.getElementById("logsContainer");
+        container.innerHTML = data
+          .slice(0, 20)
+          .map(
+            (l, i) => `
+    <div>
+      <div class="log-row" onclick="toggleDetail('d${i}')">
+        <span class="log-id">${l.id}</span>
+        <div>
+          <div class="log-to-val">${l.to}</div>
+          <div class="log-camp">${l.camp}</div>
+        </div>
+        <span>${chIcons[l.ch]} ${l.ch}</span>
+        <span class="text-muted text-sm">${l.network}</span>
+        <span class="text-muted text-sm">${l.time}</span>
+        <span class="status-pill ${l.status}">${l.status.charAt(0).toUpperCase() + l.status.slice(1)}</span>
+        <button class="expand-btn" aria-label="Expand">⌄</button>
+      </div>
+      <div class="log-detail" id="d${i}">
+        <div class="detail-grid">
+          <div class="detail-item"><label>Message ID</label><span class="font-mono">${l.id}</span></div>
+          <div class="detail-item"><label>Platform ID</label><span class="font-mono">${l.msgId}</span></div>
+          <div class="detail-item"><label>Channel</label><span>${l.ch}</span></div>
+          <div class="detail-item"><label>Network</label><span>${l.network}</span></div>
+          <div class="detail-item"><label>Latency</label><span>${l.latency}</span></div>
+          <div class="detail-item"><label>Cost</label><span>${l.cost}</span></div>
+          <div class="detail-item"><label>Campaign</label><span>${l.camp}</span></div>
+          <div class="detail-item"><label>Status</label><span class="status-pill ${l.status}" style="display:inline-flex">${l.status}</span></div>
+        </div>
+      </div>
+    </div>`,
+          )
+          .join("");
+      }
+
+      function toggleDetail(id) {
+        const el = document.getElementById(id);
+        if (el) el.classList.toggle("open");
+      }
+
+      function filterLogs() {
+        const q = document.getElementById("logSearch").value.toLowerCase();
+        const ch = document.getElementById("filterChannel").value;
+        const st = document.getElementById("filterStatus").value;
+        const nw = document.getElementById("filterNetwork").value;
+        const filtered = allLogs.filter(
+          (l) =>
+            (!q ||
+              l.to.toLowerCase().includes(q) ||
+              l.id.toLowerCase().includes(q)) &&
+            (ch === "all" || l.ch === ch) &&
+            (st === "all" || l.status === st) &&
+            (nw === "all" || l.network === nw),
+        );
+        renderLogs(filtered);
+        document.getElementById("pageInfo").textContent =
+          `Showing 1–${Math.min(20, filtered.length)} of ${filtered.length.toLocaleString()}`;
+      }
+
+      function resetFilters() {
+        document.getElementById("logSearch").value = "";
+        document.getElementById("filterChannel").value = "all";
+        document.getElementById("filterStatus").value = "all";
+        document.getElementById("filterNetwork").value = "all";
+        renderLogs(allLogs);
+      }
+
+      function exportLogs() {
+        alert("Exporting logs to CSV… (connect to backend)");
+      }
+
+      // Initial render
+      renderLogs(allLogs);
+
+      // Live feed — append new log every few seconds
+      setInterval(() => {
+        const ch = channels[Math.floor(Math.random() * channels.length)];
+        const to =
+          ch === "Email"
+            ? `user${Math.floor(Math.random() * 9999)}@gmail.com`
+            : rndPhone();
+        allLogs.unshift({
+          id: rndId(),
+          to,
+          ch,
+          network: networks[Math.floor(Math.random() * networks.length)],
+          camp: campaigns[Math.floor(Math.random() * campaigns.length)],
+          time: "now",
+          status: "sent",
+          msgId: Math.floor(1000000000 + Math.random() * 8999999999),
+          latency: (Math.random() * 2 + 0.4).toFixed(2) + "s",
+          cost: "₦6.00",
+        });
+        renderLogs(allLogs);
+      }, 5000);
+    </script>
+  </body>
+</html>

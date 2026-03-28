@@ -1,0 +1,672 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>API Keys — NotifyPro</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../assets/css/dashboard.css" />
+    <style>
+      .key-card {
+        background: var(--bg2);
+        border: 1px solid var(--card-border);
+        border-radius: var(--radius-md);
+        padding: 1.3rem;
+        margin-bottom: 10px;
+        transition: border-color var(--transition);
+      }
+      .key-card:hover {
+        border-color: rgba(255, 255, 255, 0.12);
+      }
+      .key-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+      .key-name {
+        font-family: var(--font-display);
+        font-size: 15px;
+        font-weight: 700;
+      }
+      .key-env {
+        font-size: 10px;
+        font-weight: 600;
+        padding: 2px 8px;
+        border-radius: 100px;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+      }
+      .key-env.live {
+        background: rgba(0, 232, 122, 0.1);
+        color: var(--accent);
+        border: 1px solid rgba(0, 232, 122, 0.2);
+      }
+      .key-env.test {
+        background: rgba(255, 184, 0, 0.1);
+        color: var(--accent3);
+        border: 1px solid rgba(255, 184, 0, 0.2);
+      }
+      .key-string {
+        flex: 1;
+        font-family: var(--font-mono);
+        font-size: 12px;
+        background: var(--bg);
+        border: 1px solid var(--card-border);
+        border-radius: var(--radius-sm);
+        padding: 8px 12px;
+        color: var(--muted);
+        letter-spacing: 0.05em;
+        min-width: 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .key-meta {
+        font-size: 11px;
+        color: var(--muted);
+        margin-top: 6px;
+      }
+      .key-perms {
+        display: flex;
+        gap: 6px;
+        margin-top: 8px;
+        flex-wrap: wrap;
+      }
+      .perm-tag {
+        font-size: 10px;
+        font-weight: 600;
+        padding: 2px 8px;
+        border-radius: 100px;
+        background: rgba(0, 191, 255, 0.08);
+        color: var(--accent2);
+        border: 1px solid rgba(0, 191, 255, 0.15);
+      }
+      .webhook-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 0.85rem 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      }
+      .webhook-row:last-child {
+        border-bottom: none;
+      }
+      .webhook-url {
+        font-family: var(--font-mono);
+        font-size: 12px;
+        color: var(--accent2);
+        flex: 1;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .webhook-events {
+        font-size: 11px;
+        color: var(--muted);
+        margin-top: 2px;
+      }
+      .sdk-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: 10px;
+      }
+      .sdk-card {
+        background: var(--bg3);
+        border: 1px solid var(--card-border);
+        border-radius: var(--radius-md);
+        padding: 1rem;
+        text-align: center;
+        cursor: pointer;
+        transition:
+          border-color var(--transition),
+          transform var(--transition);
+      }
+      .sdk-card:hover {
+        border-color: rgba(255, 255, 255, 0.2);
+        transform: translateY(-2px);
+      }
+      .sdk-icon {
+        font-size: 28px;
+        margin-bottom: 8px;
+      }
+      .sdk-name {
+        font-family: var(--font-display);
+        font-size: 14px;
+        font-weight: 700;
+      }
+      .sdk-version {
+        font-size: 11px;
+        color: var(--muted);
+        margin-top: 2px;
+      }
+      .security-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 0.85rem 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      }
+      .security-item:last-child {
+        border-bottom: none;
+      }
+      .security-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        flex-shrink: 0;
+      }
+      .two-col {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+      }
+      @media (max-width: 900px) {
+        .two-col {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="dash-layout">
+      <div class="main">
+        <main class="page-content">
+          <!-- HEADER -->
+          <div class="page-header">
+            <div class="page-header-left">
+              <h1>API Keys</h1>
+              <p>Manage your API keys, webhooks, and developer integrations.</p>
+            </div>
+            <div class="page-header-actions">
+              <a
+                href="https://docs.notifypro.ng"
+                target="_blank"
+                class="btn-secondary"
+              >
+                <svg
+                  width="13"
+                  height="13"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+                  <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+                </svg>
+                API Docs
+              </a>
+              <button class="btn-primary" onclick="createKey()">
+                + Generate Key
+              </button>
+            </div>
+          </div>
+
+          <!-- SECURITY ALERT -->
+          <div
+            style="
+              background: rgba(255, 184, 0, 0.06);
+              border: 1px solid rgba(255, 184, 0, 0.2);
+              border-radius: var(--radius-md);
+              padding: 1rem 1.2rem;
+              display: flex;
+              align-items: flex-start;
+              gap: 12px;
+            "
+          >
+            <span style="font-size: 18px; flex-shrink: 0">🔒</span>
+            <div>
+              <div
+                style="font-size: 13px; font-weight: 600; color: var(--accent3)"
+              >
+                Keep your API keys secure
+              </div>
+              <div
+                style="font-size: 12px; color: var(--muted); margin-top: 2px"
+              >
+                Never share keys in public repositories or client-side code. Use
+                environment variables. Rotate keys regularly. Restrict
+                permissions to only what each integration needs.
+              </div>
+            </div>
+          </div>
+
+          <!-- API KEYS -->
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Your API Keys</div>
+                <div class="card-subtitle">
+                  2 keys · last rotated 14 days ago
+                </div>
+              </div>
+            </div>
+
+            <div class="key-card">
+              <div class="key-row">
+                <div>
+                  <div
+                    style="
+                      display: flex;
+                      align-items: center;
+                      gap: 8px;
+                      margin-bottom: 4px;
+                    "
+                  >
+                    <div class="key-name">Production Key</div>
+                    <span class="key-env live">Live</span>
+                  </div>
+                </div>
+                <div class="key-string" id="liveKeyStr">
+                  npk_live_••••••••••••••••••••••••••••••••
+                </div>
+                <button
+                  class="btn-icon"
+                  onclick="
+                    toggleKey(
+                      'liveKeyStr',
+                      'npk_live_k8t4uvizycK8OsU1a2b3c4d5e6f7g8h9',
+                    )
+                  "
+                  title="Show/Hide"
+                >
+                  👁
+                </button>
+                <button
+                  class="btn-icon"
+                  onclick="copyKey('npk_live_k8t4uvizycK8OsU1a2b3c4d5e6f7g8h9')"
+                  title="Copy"
+                >
+                  ⎘
+                </button>
+                <button
+                  class="btn-danger"
+                  style="font-size: 12px; padding: 6px 12px"
+                  onclick="rotateKey('production')"
+                >
+                  Rotate
+                </button>
+              </div>
+              <div class="key-perms">
+                <span class="perm-tag">sms:send</span>
+                <span class="perm-tag">email:send</span>
+                <span class="perm-tag">otp:send</span>
+                <span class="perm-tag">otp:verify</span>
+                <span class="perm-tag">contacts:read</span>
+                <span class="perm-tag">reports:read</span>
+              </div>
+              <div class="key-meta">
+                Created Mar 1, 2026 · Last used 2 minutes ago · IP:
+                41.58.xxx.xxx (Lagos)
+              </div>
+            </div>
+
+            <div class="key-card">
+              <div class="key-row">
+                <div>
+                  <div
+                    style="
+                      display: flex;
+                      align-items: center;
+                      gap: 8px;
+                      margin-bottom: 4px;
+                    "
+                  >
+                    <div class="key-name">Test Key</div>
+                    <span class="key-env test">Sandbox</span>
+                  </div>
+                </div>
+                <div class="key-string" id="testKeyStr">
+                  npk_test_••••••••••••••••••••••••••••••••
+                </div>
+                <button
+                  class="btn-icon"
+                  onclick="
+                    toggleKey(
+                      'testKeyStr',
+                      'npk_test_z9x8w7v6u5t4s3r2q1p0o9n8m7l6k5j4',
+                    )
+                  "
+                  title="Show/Hide"
+                >
+                  👁
+                </button>
+                <button
+                  class="btn-icon"
+                  onclick="copyKey('npk_test_z9x8w7v6u5t4s3r2q1p0o9n8m7l6k5j4')"
+                  title="Copy"
+                >
+                  ⎘
+                </button>
+                <button
+                  class="btn-danger"
+                  style="font-size: 12px; padding: 6px 12px"
+                  onclick="rotateKey('test')"
+                >
+                  Rotate
+                </button>
+              </div>
+              <div class="key-perms">
+                <span class="perm-tag">sms:send</span>
+                <span class="perm-tag">otp:send</span>
+                <span class="perm-tag">otp:verify</span>
+              </div>
+              <div class="key-meta">
+                Created Jan 12, 2026 · Last used 3 hours ago · No rate limits in
+                sandbox
+              </div>
+            </div>
+          </div>
+
+          <!-- WEBHOOKS + SDKs -->
+          <div class="two-col">
+            <div class="card">
+              <div class="card-header">
+                <div>
+                  <div class="card-title">Webhooks</div>
+                  <div class="card-subtitle">Real-time delivery callbacks</div>
+                </div>
+                <button class="btn-secondary text-sm" onclick="addWebhook()">
+                  + Add
+                </button>
+              </div>
+              <div id="webhookList">
+                <div class="webhook-row">
+                  <div
+                    style="
+                      width: 8px;
+                      height: 8px;
+                      border-radius: 50%;
+                      background: var(--accent);
+                      box-shadow: 0 0 6px rgba(0, 232, 122, 0.5);
+                      flex-shrink: 0;
+                    "
+                  ></div>
+                  <div style="flex: 1; min-width: 0">
+                    <div class="webhook-url">
+                      https://api.yourbiz.ng/webhooks/notify
+                    </div>
+                    <div class="webhook-events">
+                      delivery.success · delivery.failed · otp.verified
+                    </div>
+                  </div>
+                  <button class="btn-icon" onclick="deleteWebhook(this)">
+                    ✕
+                  </button>
+                </div>
+                <div class="webhook-row">
+                  <div
+                    style="
+                      width: 8px;
+                      height: 8px;
+                      border-radius: 50%;
+                      background: var(--accent3);
+                      flex-shrink: 0;
+                    "
+                  ></div>
+                  <div style="flex: 1; min-width: 0">
+                    <div class="webhook-url">
+                      https://staging.yourbiz.ng/hooks/sms
+                    </div>
+                    <div class="webhook-events">delivery.success</div>
+                  </div>
+                  <button class="btn-icon" onclick="deleteWebhook(this)">
+                    ✕
+                  </button>
+                </div>
+              </div>
+              <hr class="divider" />
+              <div style="font-size: 12px; color: var(--muted)">
+                Webhook signature verified via
+                <span class="font-mono text-blue">X-NotifyPro-Signature</span>
+                header. HMAC-SHA256.
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">SDKs & Libraries</div>
+              </div>
+              <div class="sdk-grid">
+                <div class="sdk-card" onclick="openSDK('node')">
+                  <div class="sdk-icon">🟩</div>
+                  <div class="sdk-name">Node.js</div>
+                  <div class="sdk-version">v2.4.1</div>
+                </div>
+                <div class="sdk-card" onclick="openSDK('php')">
+                  <div class="sdk-icon">🐘</div>
+                  <div class="sdk-name">PHP</div>
+                  <div class="sdk-version">v1.8.0</div>
+                </div>
+                <div class="sdk-card" onclick="openSDK('python')">
+                  <div class="sdk-icon">🐍</div>
+                  <div class="sdk-name">Python</div>
+                  <div class="sdk-version">v1.5.2</div>
+                </div>
+                <div class="sdk-card" onclick="openSDK('java')">
+                  <div class="sdk-icon">☕</div>
+                  <div class="sdk-name">Java</div>
+                  <div class="sdk-version">v1.2.0</div>
+                </div>
+                <div class="sdk-card" onclick="openSDK('rest')">
+                  <div class="sdk-icon">🔗</div>
+                  <div class="sdk-name">REST API</div>
+                  <div class="sdk-version">v3 · Postman</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- QUICK START -->
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Quick Start</div>
+                <div class="card-subtitle">
+                  Send your first message in 3 lines
+                </div>
+              </div>
+              <div style="display: flex; gap: 6px">
+                <button
+                  class="btn-secondary text-sm"
+                  id="langNode"
+                  onclick="setLang('node', this)"
+                >
+                  Node.js
+                </button>
+                <button
+                  class="btn-secondary text-sm"
+                  id="langPHP"
+                  onclick="setLang('php', this)"
+                  style="opacity: 0.5"
+                >
+                  PHP
+                </button>
+                <button
+                  class="btn-secondary text-sm"
+                  id="langPy"
+                  onclick="setLang('python', this)"
+                  style="opacity: 0.5"
+                >
+                  Python
+                </button>
+              </div>
+            </div>
+            <div class="code-block" id="codeBlock">
+              <button class="code-copy" onclick="copyCode()">Copy</button>
+              <span id="codeContent"></span>
+            </div>
+          </div>
+
+          <!-- SECURITY LOG -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Recent API Activity</div>
+              <div class="card-subtitle">Last 24 hours</div>
+            </div>
+            <div id="securityLog"></div>
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <script>
+      window.NP_PAGE = "api-keys";
+      window.NP_TITLE = "API Keys";
+    </script>
+    <script src="../assets/js/sidebar.js"></script>
+    <script type="module" src="../assets/js/auth-guard.js"></script>
+    <script src="../assets/js/topbar.js"></script>
+    <script>
+      "use strict";
+      const CODES = {
+        node: `<span style="color:var(--muted)">// npm install notifypro-node</span>
+<span style="color:var(--accent3)">const</span> NotifyPro = <span style="color:var(--accent)">require</span>(<span style="color:var(--accent)">'notifypro-node'</span>);
+<span style="color:var(--accent3)">const</span> client = <span style="color:var(--accent3)">new</span> NotifyPro(<span style="color:var(--accent)">'npk_live_...'</span>);
+
+<span style="color:var(--muted)">// Send Bulk SMS</span>
+<span style="color:var(--accent3)">await</span> client.sms.send({
+  to: <span style="color:var(--accent)">'08034567890'</span>,
+  from: <span style="color:var(--accent)">'NotifyPro'</span>,
+  message: <span style="color:var(--accent)">'Hello from NotifyPro! 🎉'</span>
+});`,
+        php: `<span style="color:var(--muted)">// composer require notifypro/php-sdk</span>
+<span style="color:var(--accent3)">use</span> NotifyPro\Client;
+<span style="color:var(--accent3)">$client</span> = <span style="color:var(--accent3)">new</span> Client(<span style="color:var(--accent)">'npk_live_...'</span>);
+
+<span style="color:var(--muted)">// Send Bulk SMS</span>
+<span style="color:var(--accent3)">$client</span>->sms->send([
+  <span style="color:var(--accent)">'to'</span>      => <span style="color:var(--accent)">'08034567890'</span>,
+  <span style="color:var(--accent)">'from'</span>    => <span style="color:var(--accent)">'NotifyPro'</span>,
+  <span style="color:var(--accent)">'message'</span> => <span style="color:var(--accent)">'Hello from NotifyPro!'</span>
+]);`,
+        python: `<span style="color:var(--muted)"># pip install notifypro-python</span>
+<span style="color:var(--accent3)">import</span> notifypro
+
+client = notifypro.Client(<span style="color:var(--accent)">'npk_live_...'</span>)
+
+<span style="color:var(--muted)"># Send Bulk SMS</span>
+client.sms.send(
+  to=<span style="color:var(--accent)">'08034567890'</span>,
+  sender_id=<span style="color:var(--accent)">'NotifyPro'</span>,
+  message=<span style="color:var(--accent)">'Hello from NotifyPro!'</span>
+)`,
+      };
+
+      let currentLang = "node";
+      function setLang(lang, btn) {
+        currentLang = lang;
+        document
+          .querySelectorAll('[id^="lang"]')
+          .forEach((b) => (b.style.opacity = "0.5"));
+        btn.style.opacity = "1";
+        document.getElementById("codeContent").innerHTML = CODES[lang];
+      }
+      document.getElementById("codeContent").innerHTML = CODES["node"];
+
+      function copyCode() {
+        const text = document.getElementById("codeContent").innerText;
+        navigator.clipboard.writeText(text);
+        const btn = document.querySelector(".code-copy");
+        btn.textContent = "Copied!";
+        setTimeout(() => (btn.textContent = "Copy"), 2000);
+      }
+
+      let keyVisible = {};
+      function toggleKey(elId, val) {
+        const el = document.getElementById(elId);
+        keyVisible[elId] = !keyVisible[elId];
+        el.textContent = keyVisible[elId]
+          ? val
+          : val.replace(
+              /npk_(live|test)_[a-z0-9]+/i,
+              (m) => m.slice(0, 8) + "••••••••••••••••••••••••••••••••",
+            );
+      }
+      function copyKey(val) {
+        navigator.clipboard.writeText(val);
+        alert("API key copied! Keep it safe — never commit to Git.");
+      }
+      function rotateKey(env) {
+        if (
+          confirm(
+            `Rotate ${env} key? The old key will stop working immediately.`,
+          )
+        ) {
+          alert("Key rotated. Update your environment variables now.");
+        }
+      }
+      function addWebhook() {
+        alert("Add webhook modal — connect to backend");
+      }
+      function deleteWebhook(btn) {
+        if (confirm("Delete this webhook?"))
+          btn.closest(".webhook-row").remove();
+      }
+      function openSDK(lang) {
+        alert(`Opening ${lang} SDK docs — connect to docs site`);
+      }
+      function createKey() {
+        alert("Create API key modal — connect to backend");
+      }
+
+      // Activity log
+      const acts = [
+        {
+          method: "POST",
+          path: "/v1/sms/send",
+          ip: "41.58.xxx.xxx",
+          status: 200,
+          time: "2m ago",
+        },
+        {
+          method: "POST",
+          path: "/v1/otp/send",
+          ip: "41.58.xxx.xxx",
+          status: 200,
+          time: "4m ago",
+        },
+        {
+          method: "GET",
+          path: "/v1/reports/summary",
+          ip: "41.58.xxx.xxx",
+          status: 200,
+          time: "12m ago",
+        },
+        {
+          method: "POST",
+          path: "/v1/otp/verify",
+          ip: "41.58.xxx.xxx",
+          status: 200,
+          time: "15m ago",
+        },
+        {
+          method: "POST",
+          path: "/v1/sms/send",
+          ip: "197.210.xxx.xxx",
+          status: 401,
+          time: "1hr ago",
+        },
+      ];
+      const log = document.getElementById("securityLog");
+      acts.forEach((a) => {
+        const isOk = a.status < 400;
+        log.innerHTML += `
+    <div class="security-item">
+      <div class="security-dot" style="background:${isOk ? "var(--accent)" : "var(--accent4)"}"></div>
+      <div style="font-family:var(--font-mono);font-size:11px;color:${isOk ? "var(--accent2)" : "var(--accent4)"};width:40px">${a.method}</div>
+      <div style="font-family:var(--font-mono);font-size:12px;flex:1">${a.path}</div>
+      <div class="text-xs text-muted">${a.ip}</div>
+      <div style="font-size:12px;font-weight:600;color:${isOk ? "var(--accent)" : "var(--accent4)"}">${a.status}</div>
+      <div class="text-xs text-muted">${a.time}</div>
+    </div>`;
+      });
+    </script>
+  </body>
+</html>

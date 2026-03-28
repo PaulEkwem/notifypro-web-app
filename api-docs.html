@@ -1,0 +1,1440 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>API Documentation — NotifyPro</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="assets/css/style.css" />
+    <style>
+      .docs-layout {
+        display: flex;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 6rem 2rem 5rem;
+        gap: 3rem;
+      }
+      .docs-sidebar {
+        width: 220px;
+        flex-shrink: 0;
+        position: sticky;
+        top: 5rem;
+        align-self: flex-start;
+      }
+      .docs-sidebar h3 {
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--muted);
+        margin: 1.5rem 0 0.5rem;
+      }
+      .docs-sidebar h3:first-child {
+        margin-top: 0;
+      }
+      .docs-sidebar a {
+        display: block;
+        font-size: 13px;
+        color: var(--muted);
+        text-decoration: none;
+        padding: 4px 0;
+        transition: color 0.2s;
+      }
+      .docs-sidebar a:hover,
+      .docs-sidebar a.active {
+        color: var(--accent);
+      }
+      .docs-content {
+        flex: 1;
+        min-width: 0;
+      }
+      .docs-content h1 {
+        font-family: var(--font-head);
+        font-size: clamp(2rem, 5vw, 2.8rem);
+        font-weight: 800;
+        margin-bottom: 0.5rem;
+      }
+      .docs-content h2 {
+        font-family: var(--font-head);
+        font-size: 1.4rem;
+        font-weight: 700;
+        margin: 3rem 0 0.8rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--card-border);
+        color: var(--text);
+      }
+      .docs-content h3 {
+        font-family: var(--font-head);
+        font-size: 1rem;
+        font-weight: 600;
+        margin: 1.8rem 0 0.5rem;
+        color: var(--text);
+      }
+      .docs-content p,
+      .docs-content li {
+        color: var(--muted);
+        font-size: 15px;
+        line-height: 1.8;
+        margin-bottom: 0.6rem;
+      }
+      .docs-content ul {
+        padding-left: 1.5rem;
+        margin-bottom: 1rem;
+      }
+      .docs-content a {
+        color: var(--accent);
+        text-decoration: none;
+      }
+      .docs-content a:hover {
+        text-decoration: underline;
+      }
+      .badge {
+        display: inline-block;
+        font-size: 11px;
+        font-weight: 700;
+        padding: 2px 8px;
+        border-radius: 4px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-right: 8px;
+        vertical-align: middle;
+      }
+      .badge-get {
+        background: rgba(0, 232, 122, 0.12);
+        color: #00e87a;
+      }
+      .badge-post {
+        background: rgba(99, 102, 241, 0.15);
+        color: #818cf8;
+      }
+      .endpoint-card {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: var(--radius);
+        padding: 1.2rem 1.5rem;
+        margin-bottom: 1.5rem;
+      }
+      .endpoint-card .path {
+        font-family: monospace;
+        font-size: 14px;
+        color: var(--text);
+        margin-bottom: 0.5rem;
+      }
+      .endpoint-card p {
+        margin-bottom: 0;
+      }
+
+      /* ── Code tabs ── */
+      .code-tabs {
+        background: #0d1117;
+        border: 1px solid var(--card-border);
+        border-radius: var(--radius-sm);
+        margin: 1rem 0 1.5rem;
+        overflow: hidden;
+      }
+      .tab-bar {
+        display: flex;
+        border-bottom: 1px solid var(--card-border);
+        background: rgba(255, 255, 255, 0.02);
+      }
+      .tab-btn {
+        padding: 8px 16px;
+        font-family: var(--font-body);
+        font-size: 12px;
+        font-weight: 500;
+        color: var(--muted);
+        background: none;
+        border: none;
+        border-bottom: 2px solid transparent;
+        cursor: pointer;
+        transition:
+          color 0.15s,
+          border-color 0.15s;
+        margin-bottom: -1px;
+      }
+      .tab-btn:hover {
+        color: var(--text);
+      }
+      .tab-btn.active {
+        color: var(--accent);
+        border-bottom-color: var(--accent);
+      }
+      .tab-pane {
+        display: none;
+      }
+      .tab-pane.active {
+        display: block;
+      }
+      .tab-pane pre {
+        margin: 0;
+        border: none;
+        border-radius: 0;
+        background: transparent;
+        padding: 1.2rem 1.5rem;
+      }
+
+      pre {
+        background: #0d1117;
+        border: 1px solid var(--card-border);
+        border-radius: var(--radius-sm);
+        padding: 1.2rem 1.5rem;
+        overflow-x: auto;
+        margin: 1rem 0 1.5rem;
+      }
+      code {
+        font-family: "Courier New", monospace;
+        font-size: 13px;
+        line-height: 1.7;
+        color: #e6edf3;
+      }
+      .inline-code {
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid var(--card-border);
+        border-radius: 4px;
+        padding: 1px 6px;
+        font-family: monospace;
+        font-size: 13px;
+        color: var(--accent);
+      }
+      .param-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 1rem 0 1.5rem;
+        font-size: 14px;
+      }
+      .param-table th {
+        text-align: left;
+        padding: 8px 12px;
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--muted);
+        border-bottom: 1px solid var(--card-border);
+      }
+      .param-table td {
+        padding: 10px 12px;
+        color: var(--muted);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+        vertical-align: top;
+      }
+      .param-table td:first-child {
+        font-family: monospace;
+        color: var(--accent);
+        font-size: 13px;
+      }
+      .required-tag {
+        font-size: 10px;
+        font-weight: 700;
+        color: #ff4d6d;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-left: 4px;
+      }
+      .base-url-box {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: var(--radius-sm);
+        padding: 12px 16px;
+        font-family: monospace;
+        font-size: 14px;
+        color: var(--accent);
+        margin: 1rem 0 2rem;
+      }
+      .intro-meta {
+        color: var(--muted);
+        font-size: 13px;
+        margin-bottom: 2rem;
+        padding-bottom: 2rem;
+        border-bottom: 1px solid var(--card-border);
+      }
+      @media (max-width: 768px) {
+        .docs-layout {
+          flex-direction: column;
+        }
+        .docs-sidebar {
+          width: 100%;
+          position: static;
+        }
+        .tab-btn {
+          padding: 8px 10px;
+          font-size: 11px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+
+    <nav>
+      <a href="index.html" class="logo">Notify<span>Pro</span></a>
+      <a href="index.html" class="nav-back">← Back to home</a>
+    </nav>
+
+    <div class="docs-layout">
+      <!-- Sidebar -->
+      <aside class="docs-sidebar">
+        <h3>Getting Started</h3>
+        <a href="#intro">Introduction</a>
+        <a href="#auth">Authentication</a>
+        <a href="#errors">Errors</a>
+
+        <h3>SMS</h3>
+        <a href="#sms-send">Send SMS</a>
+        <a href="#sms-bulk">Bulk SMS</a>
+        <a href="#sms-status">Delivery Status</a>
+
+        <h3>Email</h3>
+        <a href="#email-send">Send Email</a>
+
+        <h3>OTP</h3>
+        <a href="#otp-send">Send OTP</a>
+        <a href="#otp-verify">Verify OTP</a>
+
+        <h3>Account</h3>
+        <a href="#balance">Wallet Balance</a>
+        <a href="#logs">Delivery Logs</a>
+      </aside>
+
+      <!-- Main content -->
+      <main class="docs-content">
+        <h1>API Documentation</h1>
+        <p class="intro-meta">
+          Version 1.0 &nbsp;·&nbsp; REST API &nbsp;·&nbsp; JSON
+        </p>
+
+        <p>
+          The NotifyPro API lets you send SMS, emails, and OTP codes
+          programmatically from your application. All requests use HTTPS and
+          return JSON responses.
+        </p>
+
+        <div class="base-url-box">
+          <span
+            style="
+              color: var(--muted);
+              font-size: 11px;
+              font-family: var(--font-body);
+              text-transform: uppercase;
+              letter-spacing: 0.06em;
+            "
+            >Base URL</span
+          >
+          https://api.notifypro.ng/v1
+        </div>
+
+        <!-- Auth -->
+        <h2 id="auth">Authentication</h2>
+        <p>
+          All API requests must include your secret API key in the request
+          header. Generate API keys from your
+          <a href="pages/api-keys.html">dashboard</a>.
+        </p>
+        <pre><code>Authorization: Bearer YOUR_API_KEY</code></pre>
+        <p>
+          <strong>Keep your API key secret.</strong> Never expose it in frontend
+          code or public repositories.
+        </p>
+
+        <!-- Errors -->
+        <h2 id="errors">Error Codes</h2>
+        <table class="param-table">
+          <thead>
+            <tr>
+              <th>Code</th>
+              <th>Meaning</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>200</td>
+              <td>Success</td>
+            </tr>
+            <tr>
+              <td>400</td>
+              <td>Bad request — missing or invalid parameters</td>
+            </tr>
+            <tr>
+              <td>401</td>
+              <td>Unauthorized — invalid or missing API key</td>
+            </tr>
+            <tr>
+              <td>402</td>
+              <td>Insufficient wallet balance</td>
+            </tr>
+            <tr>
+              <td>422</td>
+              <td>Unprocessable — e.g. invalid phone number format</td>
+            </tr>
+            <tr>
+              <td>429</td>
+              <td>Rate limit exceeded</td>
+            </tr>
+            <tr>
+              <td>500</td>
+              <td>Internal server error</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- ── SEND SMS ── -->
+        <h2 id="sms-send">Send SMS</h2>
+        <div class="endpoint-card">
+          <div class="path">
+            <span class="badge badge-post">POST</span>/sms/send
+          </div>
+          <p>Send a single SMS to one recipient.</p>
+        </div>
+
+        <h3>Request Body</h3>
+        <table class="param-table">
+          <thead>
+            <tr>
+              <th>Parameter</th>
+              <th>Type</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>to<span class="required-tag">required</span></td>
+              <td>string</td>
+              <td>
+                Recipient phone number in E.164 format (e.g.
+                <span class="inline-code">+2348012345678</span>)
+              </td>
+            </tr>
+            <tr>
+              <td>message<span class="required-tag">required</span></td>
+              <td>string</td>
+              <td>SMS body text. Max 160 characters per SMS unit.</td>
+            </tr>
+            <tr>
+              <td>sender_id</td>
+              <td>string</td>
+              <td>
+                Custom sender name (max 11 chars). Defaults to
+                <span class="inline-code">NotifyPro</span>.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Example Request</h3>
+        <div class="code-tabs">
+          <div class="tab-bar">
+            <button
+              class="tab-btn active"
+              onclick="switchTab(this, 'sms-send-curl')"
+            >
+              cURL
+            </button>
+            <button class="tab-btn" onclick="switchTab(this, 'sms-send-js')">
+              JavaScript
+            </button>
+            <button
+              class="tab-btn"
+              onclick="switchTab(this, 'sms-send-python')"
+            >
+              Python
+            </button>
+            <button class="tab-btn" onclick="switchTab(this, 'sms-send-php')">
+              PHP
+            </button>
+            <button class="tab-btn" onclick="switchTab(this, 'sms-send-json')">
+              JSON
+            </button>
+          </div>
+          <div class="tab-pane active" id="sms-send-curl">
+            <pre><code>curl -X POST https://api.notifypro.ng/v1/sms/send \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "to": "+2348012345678",
+    "message": "Your order #1042 has been shipped!",
+    "sender_id": "MyBrand"
+  }'</code></pre>
+          </div>
+          <div class="tab-pane" id="sms-send-js">
+            <pre><code>const res = await fetch('https://api.notifypro.ng/v1/sms/send', {
+  method: 'POST',
+  headers: {
+    'Authorization': 'Bearer YOUR_API_KEY',
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    to: '+2348012345678',
+    message: 'Your order #1042 has been shipped!',
+    sender_id: 'MyBrand'
+  })
+});
+const data = await res.json();
+console.log(data);</code></pre>
+          </div>
+          <div class="tab-pane" id="sms-send-python">
+            <pre><code>import requests
+
+response = requests.post(
+    'https://api.notifypro.ng/v1/sms/send',
+    headers={
+        'Authorization': 'Bearer YOUR_API_KEY',
+        'Content-Type': 'application/json'
+    },
+    json={
+        'to': '+2348012345678',
+        'message': 'Your order #1042 has been shipped!',
+        'sender_id': 'MyBrand'
+    }
+)
+print(response.json())</code></pre>
+          </div>
+          <div class="tab-pane" id="sms-send-php">
+            <pre><code>&lt;?php
+$ch = curl_init('https://api.notifypro.ng/v1/sms/send');
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_POST, true);
+curl_setopt($ch, CURLOPT_HTTPHEADER, [
+    'Authorization: Bearer YOUR_API_KEY',
+    'Content-Type: application/json'
+]);
+curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode([
+    'to'        =&gt; '+2348012345678',
+    'message'   =&gt; 'Your order #1042 has been shipped!',
+    'sender_id' =&gt; 'MyBrand'
+]));
+$response = curl_exec($ch);
+curl_close($ch);
+echo $response;</code></pre>
+          </div>
+          <div class="tab-pane" id="sms-send-json">
+            <pre><code>{
+  "to": "+2348012345678",
+  "message": "Your order #1042 has been shipped!",
+  "sender_id": "MyBrand"
+}</code></pre>
+          </div>
+        </div>
+
+        <h3>Example Response</h3>
+        <pre><code>{
+  "status": "queued",
+  "message_id": "msg_01HXYZ123ABC",
+  "to": "+2348012345678",
+  "units": 1,
+  "cost": 4.00
+}</code></pre>
+
+        <!-- ── BULK SMS ── -->
+        <h2 id="sms-bulk">Bulk SMS</h2>
+        <div class="endpoint-card">
+          <div class="path">
+            <span class="badge badge-post">POST</span>/sms/bulk
+          </div>
+          <p>
+            Send the same message to multiple recipients at once. Maximum 10,000
+            recipients per request.
+          </p>
+        </div>
+
+        <h3>Request Body</h3>
+        <table class="param-table">
+          <thead>
+            <tr>
+              <th>Parameter</th>
+              <th>Type</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>recipients<span class="required-tag">required</span></td>
+              <td>array</td>
+              <td>Array of phone numbers in E.164 format.</td>
+            </tr>
+            <tr>
+              <td>message<span class="required-tag">required</span></td>
+              <td>string</td>
+              <td>SMS body text.</td>
+            </tr>
+            <tr>
+              <td>sender_id</td>
+              <td>string</td>
+              <td>Custom sender name (max 11 chars).</td>
+            </tr>
+            <tr>
+              <td>schedule_at</td>
+              <td>string</td>
+              <td>
+                ISO 8601 datetime to schedule delivery. Omit to send
+                immediately.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Example Request</h3>
+        <div class="code-tabs">
+          <div class="tab-bar">
+            <button
+              class="tab-btn active"
+              onclick="switchTab(this, 'bulk-curl')"
+            >
+              cURL
+            </button>
+            <button class="tab-btn" onclick="switchTab(this, 'bulk-js')">
+              JavaScript
+            </button>
+            <button class="tab-btn" onclick="switchTab(this, 'bulk-python')">
+              Python
+            </button>
+            <button class="tab-btn" onclick="switchTab(this, 'bulk-php')">
+              PHP
+            </button>
+            <button class="tab-btn" onclick="switchTab(this, 'bulk-json')">
+              JSON
+            </button>
+          </div>
+          <div class="tab-pane active" id="bulk-curl">
+            <pre><code>curl -X POST https://api.notifypro.ng/v1/sms/bulk \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "recipients": ["+2348012345678", "+2348087654321"],
+    "message": "Flash sale! 30% off all items today only.",
+    "sender_id": "MyBrand"
+  }'</code></pre>
+          </div>
+          <div class="tab-pane" id="bulk-js">
+            <pre><code>const res = await fetch('https://api.notifypro.ng/v1/sms/bulk', {
+  method: 'POST',
+  headers: {
+    'Authorization': 'Bearer YOUR_API_KEY',
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    recipients: ['+2348012345678', '+2348087654321'],
+    message: 'Flash sale! 30% off all items today only.',
+    sender_id: 'MyBrand'
+  })
+});
+const data = await res.json();
+console.log(data);</code></pre>
+          </div>
+          <div class="tab-pane" id="bulk-python">
+            <pre><code>import requests
+
+response = requests.post(
+    'https://api.notifypro.ng/v1/sms/bulk',
+    headers={
+        'Authorization': 'Bearer YOUR_API_KEY',
+        'Content-Type': 'application/json'
+    },
+    json={
+        'recipients': ['+2348012345678', '+2348087654321'],
+        'message': 'Flash sale! 30% off all items today only.',
+        'sender_id': 'MyBrand'
+    }
+)
+print(response.json())</code></pre>
+          </div>
+          <div class="tab-pane" id="bulk-php">
+            <pre><code>&lt;?php
+$ch = curl_init('https://api.notifypro.ng/v1/sms/bulk');
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_POST, true);
+curl_setopt($ch, CURLOPT_HTTPHEADER, [
+    'Authorization: Bearer YOUR_API_KEY',
+    'Content-Type: application/json'
+]);
+curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode([
+    'recipients' =&gt; ['+2348012345678', '+2348087654321'],
+    'message'    =&gt; 'Flash sale! 30% off all items today only.',
+    'sender_id'  =&gt; 'MyBrand'
+]));
+$response = curl_exec($ch);
+curl_close($ch);
+echo $response;</code></pre>
+          </div>
+          <div class="tab-pane" id="bulk-json">
+            <pre><code>{
+  "recipients": ["+2348012345678", "+2348087654321"],
+  "message": "Flash sale! 30% off all items today only.",
+  "sender_id": "MyBrand"
+}</code></pre>
+          </div>
+        </div>
+
+        <h3>Example Response</h3>
+        <pre><code>{
+  "status": "queued",
+  "batch_id": "batch_01HXYZ456DEF",
+  "total_recipients": 2,
+  "total_units": 2,
+  "total_cost": 8.00
+}</code></pre>
+
+        <!-- ── DELIVERY STATUS ── -->
+        <h2 id="sms-status">Delivery Status</h2>
+        <div class="endpoint-card">
+          <div class="path">
+            <span class="badge badge-get">GET</span>/sms/status/:message_id
+          </div>
+          <p>Check the delivery status of a sent message.</p>
+        </div>
+
+        <h3>Example Request</h3>
+        <div class="code-tabs">
+          <div class="tab-bar">
+            <button
+              class="tab-btn active"
+              onclick="switchTab(this, 'status-curl')"
+            >
+              cURL
+            </button>
+            <button class="tab-btn" onclick="switchTab(this, 'status-js')">
+              JavaScript
+            </button>
+            <button class="tab-btn" onclick="switchTab(this, 'status-python')">
+              Python
+            </button>
+            <button class="tab-btn" onclick="switchTab(this, 'status-php')">
+              PHP
+            </button>
+            <button class="tab-btn" onclick="switchTab(this, 'status-json')">
+              JSON
+            </button>
+          </div>
+          <div class="tab-pane active" id="status-curl">
+            <pre><code>curl https://api.notifypro.ng/v1/sms/status/msg_01HXYZ123ABC \
+  -H "Authorization: Bearer YOUR_API_KEY"</code></pre>
+          </div>
+          <div class="tab-pane" id="status-js">
+            <pre><code>const res = await fetch(
+  'https://api.notifypro.ng/v1/sms/status/msg_01HXYZ123ABC',
+  { headers: { 'Authorization': 'Bearer YOUR_API_KEY' } }
+);
+const data = await res.json();
+console.log(data);</code></pre>
+          </div>
+          <div class="tab-pane" id="status-python">
+            <pre><code>import requests
+
+response = requests.get(
+    'https://api.notifypro.ng/v1/sms/status/msg_01HXYZ123ABC',
+    headers={'Authorization': 'Bearer YOUR_API_KEY'}
+)
+print(response.json())</code></pre>
+          </div>
+          <div class="tab-pane" id="status-php">
+            <pre><code>&lt;?php
+$ch = curl_init(
+    'https://api.notifypro.ng/v1/sms/status/msg_01HXYZ123ABC'
+);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_HTTPHEADER, [
+    'Authorization: Bearer YOUR_API_KEY'
+]);
+$response = curl_exec($ch);
+curl_close($ch);
+echo $response;</code></pre>
+          </div>
+          <div class="tab-pane" id="status-json">
+            <pre><code>// GET request — no request body.
+// Pass the message_id in the URL path:
+// GET /sms/status/{message_id}</code></pre>
+          </div>
+        </div>
+
+        <h3>Example Response</h3>
+        <pre><code>{
+  "message_id": "msg_01HXYZ123ABC",
+  "to": "+2348012345678",
+  "status": "delivered",
+  "delivered_at": "2026-03-27T10:45:00Z"
+}</code></pre>
+        <p>
+          Status values: <span class="inline-code">queued</span> ·
+          <span class="inline-code">sent</span> ·
+          <span class="inline-code">delivered</span> ·
+          <span class="inline-code">failed</span>
+        </p>
+
+        <!-- ── EMAIL ── -->
+        <h2 id="email-send">Send Email</h2>
+        <div class="endpoint-card">
+          <div class="path">
+            <span class="badge badge-post">POST</span>/email/send
+          </div>
+          <p>Send a transactional or marketing email.</p>
+        </div>
+
+        <h3>Request Body</h3>
+        <table class="param-table">
+          <thead>
+            <tr>
+              <th>Parameter</th>
+              <th>Type</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>to<span class="required-tag">required</span></td>
+              <td>string or array</td>
+              <td>Recipient email address(es).</td>
+            </tr>
+            <tr>
+              <td>subject<span class="required-tag">required</span></td>
+              <td>string</td>
+              <td>Email subject line.</td>
+            </tr>
+            <tr>
+              <td>body_html<span class="required-tag">required</span></td>
+              <td>string</td>
+              <td>HTML content of the email.</td>
+            </tr>
+            <tr>
+              <td>body_text</td>
+              <td>string</td>
+              <td>Plain text fallback.</td>
+            </tr>
+            <tr>
+              <td>from_name</td>
+              <td>string</td>
+              <td>Sender display name. Defaults to your business name.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Example Request</h3>
+        <div class="code-tabs">
+          <div class="tab-bar">
+            <button
+              class="tab-btn active"
+              onclick="switchTab(this, 'email-curl')"
+            >
+              cURL
+            </button>
+            <button class="tab-btn" onclick="switchTab(this, 'email-js')">
+              JavaScript
+            </button>
+            <button class="tab-btn" onclick="switchTab(this, 'email-python')">
+              Python
+            </button>
+            <button class="tab-btn" onclick="switchTab(this, 'email-php')">
+              PHP
+            </button>
+            <button class="tab-btn" onclick="switchTab(this, 'email-json')">
+              JSON
+            </button>
+          </div>
+          <div class="tab-pane active" id="email-curl">
+            <pre><code>curl -X POST https://api.notifypro.ng/v1/email/send \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "to": "customer@example.com",
+    "subject": "Your receipt from MyBrand",
+    "body_html": "&lt;h1&gt;Thank you!&lt;/h1&gt;&lt;p&gt;Your order is confirmed.&lt;/p&gt;",
+    "from_name": "MyBrand"
+  }'</code></pre>
+          </div>
+          <div class="tab-pane" id="email-js">
+            <pre><code>const res = await fetch('https://api.notifypro.ng/v1/email/send', {
+  method: 'POST',
+  headers: {
+    'Authorization': 'Bearer YOUR_API_KEY',
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    to: 'customer@example.com',
+    subject: 'Your receipt from MyBrand',
+    body_html: '&lt;h1&gt;Thank you!&lt;/h1&gt;&lt;p&gt;Your order is confirmed.&lt;/p&gt;',
+    from_name: 'MyBrand'
+  })
+});
+const data = await res.json();
+console.log(data);</code></pre>
+          </div>
+          <div class="tab-pane" id="email-python">
+            <pre><code>import requests
+
+response = requests.post(
+    'https://api.notifypro.ng/v1/email/send',
+    headers={
+        'Authorization': 'Bearer YOUR_API_KEY',
+        'Content-Type': 'application/json'
+    },
+    json={
+        'to': 'customer@example.com',
+        'subject': 'Your receipt from MyBrand',
+        'body_html': '&lt;h1&gt;Thank you!&lt;/h1&gt;&lt;p&gt;Your order is confirmed.&lt;/p&gt;',
+        'from_name': 'MyBrand'
+    }
+)
+print(response.json())</code></pre>
+          </div>
+          <div class="tab-pane" id="email-php">
+            <pre><code>&lt;?php
+$ch = curl_init('https://api.notifypro.ng/v1/email/send');
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_POST, true);
+curl_setopt($ch, CURLOPT_HTTPHEADER, [
+    'Authorization: Bearer YOUR_API_KEY',
+    'Content-Type: application/json'
+]);
+curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode([
+    'to'        =&gt; 'customer@example.com',
+    'subject'   =&gt; 'Your receipt from MyBrand',
+    'body_html' =&gt; '&lt;h1&gt;Thank you!&lt;/h1&gt;&lt;p&gt;Your order is confirmed.&lt;/p&gt;',
+    'from_name' =&gt; 'MyBrand'
+]));
+$response = curl_exec($ch);
+curl_close($ch);
+echo $response;</code></pre>
+          </div>
+          <div class="tab-pane" id="email-json">
+            <pre><code>{
+  "to": "customer@example.com",
+  "subject": "Your receipt from MyBrand",
+  "body_html": "&lt;h1&gt;Thank you!&lt;/h1&gt;&lt;p&gt;Your order is confirmed.&lt;/p&gt;",
+  "from_name": "MyBrand"
+}</code></pre>
+          </div>
+        </div>
+
+        <!-- ── OTP SEND ── -->
+        <h2 id="otp-send">Send OTP</h2>
+        <div class="endpoint-card">
+          <div class="path">
+            <span class="badge badge-post">POST</span>/otp/send
+          </div>
+          <p>Generate and send a one-time password via SMS or email.</p>
+        </div>
+
+        <h3>Request Body</h3>
+        <table class="param-table">
+          <thead>
+            <tr>
+              <th>Parameter</th>
+              <th>Type</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>to<span class="required-tag">required</span></td>
+              <td>string</td>
+              <td>Phone number or email address of the recipient.</td>
+            </tr>
+            <tr>
+              <td>channel<span class="required-tag">required</span></td>
+              <td>string</td>
+              <td>
+                <span class="inline-code">sms</span> or
+                <span class="inline-code">email</span>
+              </td>
+            </tr>
+            <tr>
+              <td>length</td>
+              <td>integer</td>
+              <td>
+                OTP digit length. Default: <span class="inline-code">6</span>.
+                Max: <span class="inline-code">8</span>.
+              </td>
+            </tr>
+            <tr>
+              <td>expiry</td>
+              <td>integer</td>
+              <td>
+                OTP validity in minutes. Default:
+                <span class="inline-code">10</span>.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Example Request</h3>
+        <div class="code-tabs">
+          <div class="tab-bar">
+            <button
+              class="tab-btn active"
+              onclick="switchTab(this, 'otp-send-curl')"
+            >
+              cURL
+            </button>
+            <button class="tab-btn" onclick="switchTab(this, 'otp-send-js')">
+              JavaScript
+            </button>
+            <button
+              class="tab-btn"
+              onclick="switchTab(this, 'otp-send-python')"
+            >
+              Python
+            </button>
+            <button class="tab-btn" onclick="switchTab(this, 'otp-send-php')">
+              PHP
+            </button>
+            <button class="tab-btn" onclick="switchTab(this, 'otp-send-json')">
+              JSON
+            </button>
+          </div>
+          <div class="tab-pane active" id="otp-send-curl">
+            <pre><code>curl -X POST https://api.notifypro.ng/v1/otp/send \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "to": "+2348012345678",
+    "channel": "sms",
+    "length": 6,
+    "expiry": 10
+  }'</code></pre>
+          </div>
+          <div class="tab-pane" id="otp-send-js">
+            <pre><code>const res = await fetch('https://api.notifypro.ng/v1/otp/send', {
+  method: 'POST',
+  headers: {
+    'Authorization': 'Bearer YOUR_API_KEY',
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    to: '+2348012345678',
+    channel: 'sms',
+    length: 6,
+    expiry: 10
+  })
+});
+const data = await res.json();
+console.log(data);</code></pre>
+          </div>
+          <div class="tab-pane" id="otp-send-python">
+            <pre><code>import requests
+
+response = requests.post(
+    'https://api.notifypro.ng/v1/otp/send',
+    headers={
+        'Authorization': 'Bearer YOUR_API_KEY',
+        'Content-Type': 'application/json'
+    },
+    json={
+        'to': '+2348012345678',
+        'channel': 'sms',
+        'length': 6,
+        'expiry': 10
+    }
+)
+print(response.json())</code></pre>
+          </div>
+          <div class="tab-pane" id="otp-send-php">
+            <pre><code>&lt;?php
+$ch = curl_init('https://api.notifypro.ng/v1/otp/send');
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_POST, true);
+curl_setopt($ch, CURLOPT_HTTPHEADER, [
+    'Authorization: Bearer YOUR_API_KEY',
+    'Content-Type: application/json'
+]);
+curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode([
+    'to'      =&gt; '+2348012345678',
+    'channel' =&gt; 'sms',
+    'length'  =&gt; 6,
+    'expiry'  =&gt; 10
+]));
+$response = curl_exec($ch);
+curl_close($ch);
+echo $response;</code></pre>
+          </div>
+          <div class="tab-pane" id="otp-send-json">
+            <pre><code>{
+  "to": "+2348012345678",
+  "channel": "sms",
+  "length": 6,
+  "expiry": 10
+}</code></pre>
+          </div>
+        </div>
+
+        <h3>Example Response</h3>
+        <pre><code>{
+  "status": "sent",
+  "otp_id": "otp_01HXYZ789GHI",
+  "expires_at": "2026-03-27T11:00:00Z"
+}</code></pre>
+
+        <!-- ── OTP VERIFY ── -->
+        <h2 id="otp-verify">Verify OTP</h2>
+        <div class="endpoint-card">
+          <div class="path">
+            <span class="badge badge-post">POST</span>/otp/verify
+          </div>
+          <p>Verify a code entered by the user against the one you sent.</p>
+        </div>
+
+        <h3>Request Body</h3>
+        <table class="param-table">
+          <thead>
+            <tr>
+              <th>Parameter</th>
+              <th>Type</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>otp_id<span class="required-tag">required</span></td>
+              <td>string</td>
+              <td>
+                The <span class="inline-code">otp_id</span> returned from
+                /otp/send.
+              </td>
+            </tr>
+            <tr>
+              <td>code<span class="required-tag">required</span></td>
+              <td>string</td>
+              <td>The code entered by the user.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Example Request</h3>
+        <div class="code-tabs">
+          <div class="tab-bar">
+            <button
+              class="tab-btn active"
+              onclick="switchTab(this, 'otp-verify-curl')"
+            >
+              cURL
+            </button>
+            <button class="tab-btn" onclick="switchTab(this, 'otp-verify-js')">
+              JavaScript
+            </button>
+            <button
+              class="tab-btn"
+              onclick="switchTab(this, 'otp-verify-python')"
+            >
+              Python
+            </button>
+            <button class="tab-btn" onclick="switchTab(this, 'otp-verify-php')">
+              PHP
+            </button>
+            <button
+              class="tab-btn"
+              onclick="switchTab(this, 'otp-verify-json')"
+            >
+              JSON
+            </button>
+          </div>
+          <div class="tab-pane active" id="otp-verify-curl">
+            <pre><code>curl -X POST https://api.notifypro.ng/v1/otp/verify \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "otp_id": "otp_01HXYZ789GHI",
+    "code": "482910"
+  }'</code></pre>
+          </div>
+          <div class="tab-pane" id="otp-verify-js">
+            <pre><code>const res = await fetch('https://api.notifypro.ng/v1/otp/verify', {
+  method: 'POST',
+  headers: {
+    'Authorization': 'Bearer YOUR_API_KEY',
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    otp_id: 'otp_01HXYZ789GHI',
+    code: '482910'
+  })
+});
+const data = await res.json();
+console.log(data.valid); // true or false</code></pre>
+          </div>
+          <div class="tab-pane" id="otp-verify-python">
+            <pre><code>import requests
+
+response = requests.post(
+    'https://api.notifypro.ng/v1/otp/verify',
+    headers={
+        'Authorization': 'Bearer YOUR_API_KEY',
+        'Content-Type': 'application/json'
+    },
+    json={
+        'otp_id': 'otp_01HXYZ789GHI',
+        'code': '482910'
+    }
+)
+print(response.json())</code></pre>
+          </div>
+          <div class="tab-pane" id="otp-verify-php">
+            <pre><code>&lt;?php
+$ch = curl_init('https://api.notifypro.ng/v1/otp/verify');
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_POST, true);
+curl_setopt($ch, CURLOPT_HTTPHEADER, [
+    'Authorization: Bearer YOUR_API_KEY',
+    'Content-Type: application/json'
+]);
+curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode([
+    'otp_id' =&gt; 'otp_01HXYZ789GHI',
+    'code'   =&gt; '482910'
+]));
+$response = curl_exec($ch);
+curl_close($ch);
+echo $response;</code></pre>
+          </div>
+          <div class="tab-pane" id="otp-verify-json">
+            <pre><code>{
+  "otp_id": "otp_01HXYZ789GHI",
+  "code": "482910"
+}</code></pre>
+          </div>
+        </div>
+
+        <h3>Example Response</h3>
+        <pre><code>{
+  "valid": true,
+  "message": "OTP verified successfully."
+}</code></pre>
+
+        <!-- ── BALANCE ── -->
+        <h2 id="balance">Wallet Balance</h2>
+        <div class="endpoint-card">
+          <div class="path">
+            <span class="badge badge-get">GET</span>/account/balance
+          </div>
+          <p>Retrieve your current wallet balance and SMS units remaining.</p>
+        </div>
+
+        <h3>Example Request</h3>
+        <div class="code-tabs">
+          <div class="tab-bar">
+            <button
+              class="tab-btn active"
+              onclick="switchTab(this, 'balance-curl')"
+            >
+              cURL
+            </button>
+            <button class="tab-btn" onclick="switchTab(this, 'balance-js')">
+              JavaScript
+            </button>
+            <button class="tab-btn" onclick="switchTab(this, 'balance-python')">
+              Python
+            </button>
+            <button class="tab-btn" onclick="switchTab(this, 'balance-php')">
+              PHP
+            </button>
+            <button class="tab-btn" onclick="switchTab(this, 'balance-json')">
+              JSON
+            </button>
+          </div>
+          <div class="tab-pane active" id="balance-curl">
+            <pre><code>curl https://api.notifypro.ng/v1/account/balance \
+  -H "Authorization: Bearer YOUR_API_KEY"</code></pre>
+          </div>
+          <div class="tab-pane" id="balance-js">
+            <pre><code>const res = await fetch('https://api.notifypro.ng/v1/account/balance', {
+  headers: { 'Authorization': 'Bearer YOUR_API_KEY' }
+});
+const data = await res.json();
+console.log(data);</code></pre>
+          </div>
+          <div class="tab-pane" id="balance-python">
+            <pre><code>import requests
+
+response = requests.get(
+    'https://api.notifypro.ng/v1/account/balance',
+    headers={'Authorization': 'Bearer YOUR_API_KEY'}
+)
+print(response.json())</code></pre>
+          </div>
+          <div class="tab-pane" id="balance-php">
+            <pre><code>&lt;?php
+$ch = curl_init('https://api.notifypro.ng/v1/account/balance');
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_HTTPHEADER, [
+    'Authorization: Bearer YOUR_API_KEY'
+]);
+$response = curl_exec($ch);
+curl_close($ch);
+echo $response;</code></pre>
+          </div>
+          <div class="tab-pane" id="balance-json">
+            <pre><code>// GET request — no request body.
+// Only the Authorization header is required.</code></pre>
+          </div>
+        </div>
+
+        <h3>Example Response</h3>
+        <pre><code>{
+  "balance_ngn": 47500.00,
+  "sms_units_remaining": 11875,
+  "plan": "business"
+}</code></pre>
+
+        <!-- ── LOGS ── -->
+        <h2 id="logs">Delivery Logs</h2>
+        <div class="endpoint-card">
+          <div class="path"><span class="badge badge-get">GET</span>/logs</div>
+          <p>
+            Retrieve your recent message delivery logs. Returns the latest 100
+            by default.
+          </p>
+        </div>
+
+        <h3>Query Parameters</h3>
+        <table class="param-table">
+          <thead>
+            <tr>
+              <th>Parameter</th>
+              <th>Type</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>limit</td>
+              <td>integer</td>
+              <td>Number of results (max 500). Default: 100.</td>
+            </tr>
+            <tr>
+              <td>offset</td>
+              <td>integer</td>
+              <td>Pagination offset. Default: 0.</td>
+            </tr>
+            <tr>
+              <td>channel</td>
+              <td>string</td>
+              <td>
+                Filter by <span class="inline-code">sms</span>,
+                <span class="inline-code">email</span>, or
+                <span class="inline-code">otp</span>.
+              </td>
+            </tr>
+            <tr>
+              <td>status</td>
+              <td>string</td>
+              <td>
+                Filter by <span class="inline-code">delivered</span>,
+                <span class="inline-code">failed</span>, etc.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Example Request</h3>
+        <div class="code-tabs">
+          <div class="tab-bar">
+            <button
+              class="tab-btn active"
+              onclick="switchTab(this, 'logs-curl')"
+            >
+              cURL
+            </button>
+            <button class="tab-btn" onclick="switchTab(this, 'logs-js')">
+              JavaScript
+            </button>
+            <button class="tab-btn" onclick="switchTab(this, 'logs-python')">
+              Python
+            </button>
+            <button class="tab-btn" onclick="switchTab(this, 'logs-php')">
+              PHP
+            </button>
+            <button class="tab-btn" onclick="switchTab(this, 'logs-json')">
+              JSON
+            </button>
+          </div>
+          <div class="tab-pane active" id="logs-curl">
+            <pre><code>curl "https://api.notifypro.ng/v1/logs?limit=10&amp;channel=sms" \
+  -H "Authorization: Bearer YOUR_API_KEY"</code></pre>
+          </div>
+          <div class="tab-pane" id="logs-js">
+            <pre><code>const params = new URLSearchParams({ limit: 10, channel: 'sms' });
+const res = await fetch(
+  `https://api.notifypro.ng/v1/logs?${params}`,
+  { headers: { 'Authorization': 'Bearer YOUR_API_KEY' } }
+);
+const data = await res.json();
+console.log(data);</code></pre>
+          </div>
+          <div class="tab-pane" id="logs-python">
+            <pre><code>import requests
+
+response = requests.get(
+    'https://api.notifypro.ng/v1/logs',
+    headers={'Authorization': 'Bearer YOUR_API_KEY'},
+    params={'limit': 10, 'channel': 'sms'}
+)
+print(response.json())</code></pre>
+          </div>
+          <div class="tab-pane" id="logs-php">
+            <pre><code>&lt;?php
+$ch = curl_init(
+    'https://api.notifypro.ng/v1/logs?limit=10&amp;channel=sms'
+);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_HTTPHEADER, [
+    'Authorization: Bearer YOUR_API_KEY'
+]);
+$response = curl_exec($ch);
+curl_close($ch);
+echo $response;</code></pre>
+          </div>
+          <div class="tab-pane" id="logs-json">
+            <pre><code>// GET request — pass filters as query parameters:
+// ?limit=10&channel=sms&status=delivered&offset=0</code></pre>
+          </div>
+        </div>
+
+        <div
+          style="
+            margin-top: 3rem;
+            padding: 1.5rem;
+            background: rgba(0, 232, 122, 0.04);
+            border: 1px solid rgba(0, 232, 122, 0.15);
+            border-radius: var(--radius);
+          "
+        >
+          <p style="margin: 0; color: var(--text); font-size: 14px">
+            Need help? Email us at
+            <a href="mailto:support@notifypro.ng">support@notifypro.ng</a> or
+            chat on <a href="https://wa.me/2347070103007">WhatsApp</a>.
+          </p>
+        </div>
+      </main>
+    </div>
+
+    <footer>
+      <a href="index.html" class="footer-logo">Notify<span>Pro</span></a>
+      <div class="footer-links">
+        <a href="index.html#services">Services</a>
+        <a href="api-docs.html">API Docs</a>
+        <a href="index.html#pricing">Pricing</a>
+        <a href="privacy.html">Privacy</a>
+        <a href="terms.html">Terms</a>
+      </div>
+      <div class="footer-copy">© 2026 NotifyPro.ng · Made in Nigeria 🇳🇬</div>
+    </footer>
+
+    <script>
+      function switchTab(btn, paneId) {
+        const tabsContainer = btn.closest(".code-tabs");
+        tabsContainer
+          .querySelectorAll(".tab-btn")
+          .forEach((b) => b.classList.remove("active"));
+        tabsContainer
+          .querySelectorAll(".tab-pane")
+          .forEach((p) => p.classList.remove("active"));
+        btn.classList.add("active");
+        document.getElementById(paneId).classList.add("active");
+      }
+    </script>
+  </body>
+</html>

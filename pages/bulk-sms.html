@@ -1,0 +1,2374 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bulk SMS — NotifyPro</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../assets/css/dashboard.css" />
+    <style>
+      /* ── TOPBAR EXTRAS (not in dashboard.css) ── */
+      .breadcrumb {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 13px;
+        color: var(--muted);
+      }
+      .breadcrumb a {
+        color: var(--muted);
+        text-decoration: none;
+        transition: color 0.2s;
+      }
+      .breadcrumb a:hover { color: var(--text); }
+      .breadcrumb-sep { font-size: 10px; }
+      .breadcrumb-current { color: var(--text); font-weight: 500; }
+
+      .balance-pill {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        background: rgba(0, 232, 122, 0.07);
+        border: 1px solid rgba(0, 232, 122, 0.2);
+        border-radius: var(--radius-sm);
+        padding: 6px 12px;
+        cursor: pointer;
+      }
+      .balance-pill-label {
+        font-size: 11px;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        font-weight: 600;
+      }
+      .balance-pill-val {
+        font-family: var(--font-display);
+        font-size: 14px;
+        font-weight: 800;
+        color: var(--accent);
+      }
+
+      .btn-outline {
+        background: none;
+        border: 1px solid var(--card-border);
+        color: var(--muted);
+        font-family: var(--font-body);
+        font-size: 13px;
+        padding: 9px 16px;
+        border-radius: var(--radius-sm);
+        cursor: pointer;
+        transition: border-color 0.2s, color 0.2s;
+      }
+      .btn-outline:hover {
+        border-color: rgba(255, 255, 255, 0.25);
+        color: var(--text);
+      }
+
+      /* ── SMS COMPOSER LAYOUT ── */
+      .composer-grid {
+        display: grid;
+        grid-template-columns: 1fr 320px;
+        gap: 1.5rem;
+        align-items: start;
+      }
+
+      .composer-left {
+        display: flex;
+        flex-direction: column;
+        gap: 1.2rem;
+      }
+
+      /* ── CARD ── */
+      .card {
+        background: var(--bg2);
+        border: 1px solid var(--card-border);
+        border-radius: var(--radius-md);
+        padding: 1.4rem;
+      }
+      .card-title {
+        font-family: var(--font-display);
+        font-size: 15px;
+        font-weight: 700;
+        letter-spacing: -0.2px;
+        margin-bottom: 1rem;
+      }
+      .card-title-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1rem;
+      }
+
+      /* ── FORM ELEMENTS ── */
+      .field {
+        margin-bottom: 1rem;
+      }
+      .field:last-child {
+        margin-bottom: 0;
+      }
+      .field-label {
+        display: block;
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.07em;
+        color: var(--muted);
+        margin-bottom: 7px;
+      }
+      .field-hint {
+        font-size: 11px;
+        color: var(--muted);
+        margin-top: 5px;
+      }
+
+      .input,
+      .select,
+      .textarea {
+        width: 100%;
+        background: var(--bg3);
+        border: 1px solid var(--card-border);
+        border-radius: var(--radius-sm);
+        padding: 10px 14px;
+        color: var(--text);
+        font-family: var(--font-body);
+        font-size: 14px;
+        outline: none;
+        transition:
+          border-color 0.2s,
+          box-shadow 0.2s;
+      }
+      .input:focus,
+      .select:focus,
+      .textarea:focus {
+        border-color: rgba(0, 232, 122, 0.35);
+        box-shadow: 0 0 0 3px rgba(0, 232, 122, 0.06);
+      }
+      .input::placeholder,
+      .textarea::placeholder {
+        color: rgba(136, 146, 164, 0.5);
+      }
+      .select {
+        appearance: none;
+        cursor: pointer;
+        background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%238892A4' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 14px center;
+        padding-right: 36px;
+      }
+      .textarea {
+        resize: none;
+        line-height: 1.6;
+      }
+
+      /* ── MESSAGE COMPOSER ── */
+      .msg-wrap {
+        position: relative;
+      }
+      .msg-textarea {
+        width: 100%;
+        min-height: 130px;
+        background: var(--bg3);
+        border: 1px solid var(--card-border);
+        border-radius: var(--radius-sm);
+        padding: 12px 14px;
+        color: var(--text);
+        font-family: var(--font-body);
+        font-size: 14px;
+        line-height: 1.65;
+        outline: none;
+        resize: none;
+        transition:
+          border-color 0.2s,
+          box-shadow 0.2s;
+      }
+      .msg-textarea:focus {
+        border-color: rgba(0, 232, 122, 0.35);
+        box-shadow: 0 0 0 3px rgba(0, 232, 122, 0.06);
+      }
+      .msg-textarea::placeholder {
+        color: rgba(136, 146, 164, 0.45);
+      }
+
+      /* SMS Stats Bar */
+      .sms-stats-bar {
+        display: flex;
+        gap: 0;
+        margin-top: 0.6rem;
+        background: var(--bg3);
+        border: 1px solid var(--card-border);
+        border-radius: var(--radius-sm);
+        overflow: hidden;
+      }
+      .sms-stat {
+        flex: 1;
+        padding: 8px 12px;
+        text-align: center;
+        border-right: 1px solid var(--card-border);
+        transition: background 0.2s;
+      }
+      .sms-stat:last-child {
+        border-right: none;
+      }
+      .sms-stat-val {
+        font-family: var(--font-display);
+        font-size: 16px;
+        font-weight: 800;
+        line-height: 1;
+      }
+      .sms-stat-val.green {
+        color: var(--accent);
+      }
+      .sms-stat-val.amber {
+        color: var(--accent3);
+      }
+      .sms-stat-val.blue {
+        color: var(--accent2);
+      }
+      .sms-stat-val.red {
+        color: var(--accent4);
+      }
+      .sms-stat-label {
+        font-size: 10px;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        margin-top: 3px;
+      }
+
+      /* Char type warning */
+      .encoding-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 11px;
+        padding: 3px 9px;
+        border-radius: 100px;
+        font-weight: 600;
+        margin-top: 6px;
+      }
+      .encoding-badge.gsm {
+        background: rgba(0, 232, 122, 0.1);
+        color: var(--accent);
+      }
+      .encoding-badge.unicode {
+        background: rgba(255, 184, 0, 0.1);
+        color: var(--accent3);
+      }
+
+      /* Personalisation chips */
+      .personalization-chips {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        margin-top: 8px;
+      }
+      .chip {
+        padding: 4px 10px;
+        border-radius: 100px;
+        border: 1px solid var(--card-border);
+        font-size: 11px;
+        font-weight: 500;
+        color: var(--muted);
+        cursor: pointer;
+        background: none;
+        transition: all 0.2s;
+      }
+      .chip:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+        background: rgba(0, 232, 122, 0.05);
+      }
+
+      /* Unicode chars warning box */
+      .warn-box {
+        background: rgba(255, 184, 0, 0.06);
+        border: 1px solid rgba(255, 184, 0, 0.2);
+        border-radius: var(--radius-sm);
+        padding: 10px 13px;
+        font-size: 12px;
+        color: var(--accent3);
+        margin-top: 8px;
+        display: none;
+      }
+      .warn-box.show {
+        display: block;
+      }
+
+      /* ── RECIPIENTS ── */
+      .recipient-tabs {
+        display: flex;
+        gap: 4px;
+        background: var(--bg3);
+        border-radius: var(--radius-sm);
+        padding: 3px;
+        margin-bottom: 1rem;
+      }
+      .rtab {
+        flex: 1;
+        padding: 7px 10px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: 500;
+        color: var(--muted);
+        cursor: pointer;
+        border: none;
+        background: none;
+        text-align: center;
+        transition:
+          background 0.2s,
+          color 0.2s;
+      }
+      .rtab.active {
+        background: var(--bg2);
+        color: var(--text);
+      }
+
+      .rtab-panel {
+        display: none;
+      }
+      .rtab-panel.active {
+        display: block;
+      }
+
+      /* Recipient manual entry */
+      .number-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        background: var(--bg3);
+        border: 1px solid var(--card-border);
+        border-radius: var(--radius-sm);
+        padding: 10px;
+        min-height: 80px;
+        cursor: text;
+        transition: border-color 0.2s;
+      }
+      .number-tags:focus-within {
+        border-color: rgba(0, 232, 122, 0.35);
+        box-shadow: 0 0 0 3px rgba(0, 232, 122, 0.06);
+      }
+      .number-tag {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        background: rgba(0, 232, 122, 0.1);
+        border: 1px solid rgba(0, 232, 122, 0.2);
+        color: var(--accent);
+        border-radius: 100px;
+        font-size: 12px;
+        padding: 3px 10px;
+        white-space: nowrap;
+      }
+      .number-tag button {
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: var(--accent);
+        font-size: 12px;
+        line-height: 1;
+        padding: 0 0 0 2px;
+        opacity: 0.7;
+      }
+      .number-tag button:hover {
+        opacity: 1;
+      }
+      .tag-input {
+        background: none;
+        border: none;
+        outline: none;
+        color: var(--text);
+        font-family: var(--font-body);
+        font-size: 13px;
+        min-width: 150px;
+        flex: 1;
+      }
+      .tag-input::placeholder {
+        color: rgba(136, 146, 164, 0.4);
+      }
+
+      /* CSV Upload */
+      .upload-zone {
+        border: 2px dashed var(--card-border);
+        border-radius: var(--radius-md);
+        padding: 2rem;
+        text-align: center;
+        cursor: pointer;
+        transition:
+          border-color 0.2s,
+          background 0.2s;
+      }
+      .upload-zone:hover {
+        border-color: rgba(0, 232, 122, 0.3);
+        background: rgba(0, 232, 122, 0.02);
+      }
+      .upload-zone.dragover {
+        border-color: var(--accent);
+        background: rgba(0, 232, 122, 0.05);
+      }
+      .upload-icon {
+        font-size: 28px;
+        margin-bottom: 8px;
+      }
+      .upload-text {
+        font-size: 14px;
+        font-weight: 500;
+        margin-bottom: 4px;
+      }
+      .upload-sub {
+        font-size: 12px;
+        color: var(--muted);
+      }
+      .upload-sub span {
+        color: var(--accent);
+        text-decoration: underline;
+        cursor: pointer;
+      }
+
+      /* Group select */
+      .group-list {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .group-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 14px;
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--card-border);
+        cursor: pointer;
+        transition:
+          border-color 0.2s,
+          background 0.2s;
+      }
+      .group-item:hover {
+        border-color: rgba(255, 255, 255, 0.15);
+      }
+      .group-item.selected {
+        border-color: var(--accent);
+        background: rgba(0, 232, 122, 0.04);
+      }
+      .group-item-left {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .group-check {
+        width: 18px;
+        height: 18px;
+        border-radius: 4px;
+        border: 1.5px solid var(--card-border);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        transition: all 0.2s;
+      }
+      .group-item.selected .group-check {
+        background: var(--accent);
+        border-color: var(--accent);
+        color: #000;
+      }
+      .group-name {
+        font-size: 13px;
+        font-weight: 500;
+      }
+      .group-count {
+        font-size: 11px;
+        color: var(--muted);
+      }
+      .group-badge {
+        font-size: 10px;
+        font-weight: 700;
+        padding: 2px 8px;
+        border-radius: 100px;
+        background: rgba(0, 232, 122, 0.1);
+        color: var(--accent);
+        letter-spacing: 0.04em;
+      }
+
+      /* ── SENDER ID ── */
+      .sender-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+      }
+
+      /* ── SCHEDULE ── */
+      .schedule-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1rem;
+      }
+      .toggle-switch {
+        width: 40px;
+        height: 22px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 11px;
+        position: relative;
+        cursor: pointer;
+        transition: background 0.3s;
+        border: none;
+        flex-shrink: 0;
+      }
+      .toggle-switch.on {
+        background: var(--accent);
+      }
+      .toggle-switch::after {
+        content: "";
+        position: absolute;
+        width: 16px;
+        height: 16px;
+        background: #fff;
+        border-radius: 50%;
+        top: 3px;
+        left: 3px;
+        transition: transform 0.3s;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+      }
+      .toggle-switch.on::after {
+        transform: translateX(18px);
+      }
+      .schedule-fields {
+        display: none;
+      }
+      .schedule-fields.show {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+      }
+
+      /* ── COST SUMMARY ── */
+      .cost-card {
+        background: var(--bg2);
+        border: 1px solid var(--card-border);
+        border-radius: var(--radius-md);
+        padding: 1.4rem;
+        position: sticky;
+        top: 80px;
+      }
+
+      .cost-title {
+        font-family: var(--font-display);
+        font-size: 15px;
+        font-weight: 700;
+        margin-bottom: 1.2rem;
+      }
+
+      .cost-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        padding: 0.7rem 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+        font-size: 13px;
+      }
+      .cost-row:last-of-type {
+        border-bottom: none;
+      }
+      .cost-row-label {
+        color: var(--muted);
+      }
+      .cost-row-val {
+        font-weight: 500;
+        text-align: right;
+      }
+
+      .cost-total-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 0 0;
+        border-top: 1px solid var(--card-border);
+        margin-top: 0.5rem;
+      }
+      .cost-total-label {
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--muted);
+      }
+      .cost-total-val {
+        font-family: var(--font-display);
+        font-size: 24px;
+        font-weight: 800;
+        color: var(--accent);
+        letter-spacing: -0.5px;
+      }
+
+      .balance-remaining {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: rgba(0, 232, 122, 0.05);
+        border: 1px solid rgba(0, 232, 122, 0.15);
+        border-radius: var(--radius-sm);
+        padding: 10px 13px;
+        font-size: 12px;
+        margin-top: 1rem;
+      }
+      .balance-remaining-label {
+        color: var(--muted);
+      }
+      .balance-remaining-val {
+        font-weight: 700;
+        color: var(--accent);
+        font-family: var(--font-display);
+      }
+
+      .low-balance-warn {
+        display: none;
+        background: rgba(255, 77, 109, 0.06);
+        border: 1px solid rgba(255, 77, 109, 0.2);
+        border-radius: var(--radius-sm);
+        padding: 10px 13px;
+        font-size: 12px;
+        color: var(--accent4);
+        margin-top: 0.6rem;
+      }
+      .low-balance-warn.show {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .send-btn {
+        width: 100%;
+        background: var(--accent);
+        color: #000;
+        font-family: var(--font-display);
+        font-weight: 800;
+        font-size: 15px;
+        padding: 14px;
+        border-radius: var(--radius-sm);
+        border: none;
+        cursor: pointer;
+        margin-top: 1rem;
+        transition:
+          transform 0.2s,
+          box-shadow 0.2s;
+        letter-spacing: 0.01em;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+      }
+      .send-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 40px rgba(0, 232, 122, 0.3);
+      }
+      .send-btn:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+      }
+
+      .save-draft-btn {
+        width: 100%;
+        background: none;
+        color: var(--muted);
+        font-family: var(--font-body);
+        font-size: 13px;
+        padding: 10px;
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--card-border);
+        cursor: pointer;
+        margin-top: 8px;
+        transition:
+          border-color 0.2s,
+          color 0.2s;
+      }
+      .save-draft-btn:hover {
+        border-color: rgba(255, 255, 255, 0.2);
+        color: var(--text);
+      }
+
+      /* ── MOBILE PREVIEW ── */
+      .preview-label {
+        font-family: var(--font-display);
+        font-size: 13px;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .preview-label span {
+        font-size: 11px;
+        color: var(--muted);
+        font-family: var(--font-body);
+        font-weight: 400;
+      }
+
+      /* ── iPhone 15 Frame ── */
+      .phone-frame {
+        width: 218px;
+        margin: 0 auto;
+        background: linear-gradient(160deg, #2a2a2c 0%, #1c1c1e 40%, #2a2a2c 100%);
+        border-radius: 50px;
+        padding: 12px 8px 10px;
+        box-shadow:
+          0 0 0 1px rgba(255,255,255,0.18),
+          0 0 0 2.5px #1a1a1c,
+          0 0 0 3.5px rgba(255,255,255,0.08),
+          0 24px 64px rgba(0,0,0,0.7),
+          inset 0 1px 0 rgba(255,255,255,0.12);
+        position: relative;
+      }
+      /* Volume buttons — left side */
+      .phone-frame::before {
+        content: '';
+        position: absolute;
+        left: -3.5px;
+        top: 88px;
+        width: 3px;
+        height: 28px;
+        background: #2a2a2c;
+        border-radius: 2px 0 0 2px;
+        box-shadow: 0 36px 0 #2a2a2c, 0 -2px 0 rgba(255,255,255,0.1);
+      }
+      /* Power button — right side */
+      .phone-frame::after {
+        content: '';
+        position: absolute;
+        right: -3.5px;
+        top: 110px;
+        width: 3px;
+        height: 40px;
+        background: #2a2a2c;
+        border-radius: 0 2px 2px 0;
+        box-shadow: 0 -2px 0 rgba(255,255,255,0.1);
+      }
+      .phone-screen {
+        background: #f2f2f7;
+        border-radius: 40px;
+        overflow: hidden;
+        min-height: 320px;
+        display: flex;
+        flex-direction: column;
+      }
+      /* Dynamic Island */
+      .phone-dynamic-island {
+        width: 72px;
+        height: 22px;
+        background: #000;
+        border-radius: 20px;
+        margin: 10px auto 0;
+        position: relative;
+        z-index: 2;
+      }
+      .phone-status-bar {
+        background: #f2f2f7;
+        padding: 4px 16px 2px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 8.5px;
+        color: #111;
+        font-weight: 600;
+        font-family: -apple-system, sans-serif;
+      }
+      .phone-status-right {
+        display: flex;
+        align-items: center;
+        gap: 3px;
+      }
+      /* Battery icon */
+      .battery-icon {
+        width: 16px;
+        height: 8px;
+        border: 1.2px solid #111;
+        border-radius: 2px;
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        padding: 1px;
+      }
+      .battery-icon::after {
+        content: '';
+        position: absolute;
+        right: -4px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 2px;
+        height: 4px;
+        background: #111;
+        border-radius: 0 1px 1px 0;
+      }
+      .battery-fill {
+        width: 70%;
+        height: 100%;
+        background: #111;
+        border-radius: 1px;
+      }
+      .phone-sms-header {
+        background: #f2f2f7;
+        padding: 6px 12px 8px;
+        border-bottom: 1px solid rgba(0,0,0,0.08);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-family: -apple-system, sans-serif;
+      }
+      .phone-sms-back {
+        color: #007aff;
+        font-size: 10px;
+        font-weight: 500;
+      }
+      .sender-avatar-preview {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #00e87a, #00bfff);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 10px;
+        font-weight: 800;
+        color: #000;
+        flex-shrink: 0;
+      }
+      .sms-header-name {
+        font-weight: 600;
+        color: #111;
+        font-size: 11px;
+        font-family: -apple-system, sans-serif;
+      }
+      .sms-header-sub {
+        font-size: 9px;
+        color: #8e8e93;
+        font-family: -apple-system, sans-serif;
+      }
+      .phone-body {
+        flex: 1;
+        padding: 10px 10px;
+        background: #f2f2f7;
+      }
+      .sms-bubble-wrap {
+        display: flex;
+        justify-content: flex-end;
+        margin-bottom: 6px;
+      }
+      .sms-bubble-wrap.received {
+        justify-content: flex-start;
+      }
+      .sms-bubble {
+        background: #e5e5ea;
+        color: #111;
+        border-radius: 16px 16px 16px 4px;
+        padding: 8px 11px;
+        font-size: 11px;
+        line-height: 1.45;
+        max-width: 82%;
+        word-break: break-word;
+        font-family: -apple-system, sans-serif;
+      }
+      .sms-bubble.sent {
+        background: #007aff;
+        color: #fff;
+        border-radius: 16px 16px 4px 16px;
+      }
+      .sms-time {
+        font-size: 9px;
+        color: #8e8e93;
+        margin-top: 3px;
+        padding-left: 4px;
+        font-family: -apple-system, sans-serif;
+      }
+      .phone-input-bar {
+        background: #f2f2f7;
+        border-top: 1px solid rgba(0,0,0,0.1);
+        padding: 6px 10px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .phone-input-pill {
+        flex: 1;
+        height: 22px;
+        background: #fff;
+        border: 1px solid #d1d1d6;
+        border-radius: 14px;
+      }
+      .phone-input-send {
+        width: 22px;
+        height: 22px;
+        background: #007aff;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 10px;
+        color: #fff;
+        flex-shrink: 0;
+      }
+      .phone-home-bar {
+        width: 80px;
+        height: 4px;
+        background: rgba(0,0,0,0.18);
+        border-radius: 3px;
+        margin: 6px auto 4px;
+      }
+
+      /* Delivered badge */
+      .delivered-badge {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 9px;
+        color: #888;
+        justify-content: flex-end;
+        margin-top: 2px;
+        padding-right: 2px;
+      }
+
+      /* Preview char ruler */
+      .preview-ruler {
+        background: var(--bg3);
+        border: 1px solid var(--card-border);
+        border-radius: var(--radius-sm);
+        padding: 10px 12px;
+        margin-top: 1rem;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .ruler-row {
+        display: flex;
+        justify-content: space-between;
+        font-size: 11px;
+      }
+      .ruler-label {
+        color: var(--muted);
+      }
+      .ruler-val {
+        font-weight: 600;
+      }
+
+      /* SMS part segments visualizer */
+      .segment-viz {
+        margin-top: 8px;
+      }
+      .segment-track {
+        height: 6px;
+        background: rgba(255, 255, 255, 0.06);
+        border-radius: 3px;
+        overflow: hidden;
+        margin-bottom: 4px;
+      }
+      .segment-fill {
+        height: 100%;
+        border-radius: 3px;
+        background: var(--accent);
+        transition: width 0.3s ease;
+      }
+      .segment-fill.warn {
+        background: var(--accent3);
+      }
+      .segment-fill.danger {
+        background: var(--accent4);
+      }
+      .segment-labels {
+        display: flex;
+        justify-content: space-between;
+        font-size: 10px;
+        color: var(--muted);
+      }
+
+      /* ── SUCCESS MODAL ── */
+      .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.7);
+        backdrop-filter: blur(8px);
+        z-index: 200;
+        display: none;
+        align-items: center;
+        justify-content: center;
+      }
+      .modal-overlay.show {
+        display: flex;
+      }
+      .modal {
+        background: var(--bg2);
+        border: 1px solid var(--card-border);
+        border-radius: var(--radius-xl);
+        padding: 2.5rem;
+        max-width: 420px;
+        width: 90%;
+        text-align: center;
+        animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+        position: relative;
+        overflow: hidden;
+      }
+      .modal::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(0, 232, 122, 0.4),
+          transparent
+        );
+      }
+      .modal-icon {
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        background: rgba(0, 232, 122, 0.1);
+        border: 1px solid rgba(0, 232, 122, 0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 28px;
+        margin: 0 auto 1.5rem;
+      }
+      .modal h2 {
+        font-family: var(--font-display);
+        font-size: 22px;
+        font-weight: 800;
+        margin-bottom: 0.5rem;
+      }
+      .modal p {
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1.6;
+        margin-bottom: 1.5rem;
+      }
+      .modal-actions {
+        display: flex;
+        gap: 8px;
+      }
+      .modal-actions .btn-primary {
+        flex: 1;
+        padding: 12px;
+      }
+      .modal-actions .btn-outline {
+        flex: 1;
+        padding: 12px;
+      }
+
+      /* ── TABS (top of page) ── */
+      .page-tabs {
+        display: flex;
+        gap: 4px;
+        background: var(--bg3);
+        border: 1px solid var(--card-border);
+        border-radius: var(--radius-sm);
+        padding: 3px;
+        margin-bottom: 1.5rem;
+        width: fit-content;
+      }
+      .ptab {
+        padding: 7px 16px;
+        border-radius: 4px;
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--muted);
+        cursor: pointer;
+        border: none;
+        background: none;
+        transition:
+          background 0.2s,
+          color 0.2s;
+      }
+      .ptab.active {
+        background: var(--bg2);
+        color: var(--text);
+      }
+
+      /* ── HISTORY TABLE (campaigns tab) ── */
+      .history-table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      .history-table th {
+        text-align: left;
+        padding: 0 0 0.6rem;
+        font-size: 10px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--muted);
+        border-bottom: 1px solid var(--card-border);
+      }
+      .history-table td {
+        padding: 0.75rem 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+        font-size: 13px;
+        vertical-align: middle;
+      }
+      .history-table tr:last-child td {
+        border-bottom: none;
+      }
+      .history-table tr:hover td {
+        background: rgba(255, 255, 255, 0.01);
+      }
+
+      .status-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 11px;
+        font-weight: 600;
+        padding: 3px 9px;
+        border-radius: 100px;
+        white-space: nowrap;
+      }
+      .status-pill::before {
+        content: "";
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+      }
+      .status-pill.sent {
+        background: rgba(0, 232, 122, 0.1);
+        color: var(--accent);
+      }
+      .status-pill.sent::before {
+        background: var(--accent);
+      }
+      .status-pill.sending {
+        background: rgba(0, 191, 255, 0.1);
+        color: var(--accent2);
+      }
+      .status-pill.sending::before {
+        background: var(--accent2);
+        animation: blink 1s infinite;
+      }
+      .status-pill.scheduled {
+        background: rgba(255, 184, 0, 0.1);
+        color: var(--accent3);
+      }
+      .status-pill.scheduled::before {
+        background: var(--accent3);
+      }
+      .status-pill.failed {
+        background: rgba(255, 77, 109, 0.1);
+        color: var(--accent4);
+      }
+      .status-pill.failed::before {
+        background: var(--accent4);
+      }
+
+      @keyframes blink {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.3;
+        }
+      }
+
+      .delivery-bar {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .delivery-bar-track {
+        flex: 1;
+        height: 5px;
+        background: rgba(255, 255, 255, 0.06);
+        border-radius: 3px;
+        overflow: hidden;
+      }
+      .delivery-bar-fill {
+        height: 100%;
+        border-radius: 3px;
+        background: var(--accent);
+      }
+      .delivery-bar-pct {
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--accent);
+        min-width: 34px;
+        text-align: right;
+      }
+
+      /* ── ANIMATIONS ── */
+      @keyframes fadeUp {
+        from {
+          opacity: 0;
+          transform: translateY(16px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+          transform: scale(1);
+        }
+        50% {
+          opacity: 0.4;
+          transform: scale(0.8);
+        }
+      }
+      @keyframes popIn {
+        from {
+          opacity: 0;
+          transform: scale(0.85);
+        }
+        to {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
+
+      ::-webkit-scrollbar {
+        width: 6px;
+      }
+      ::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 3px;
+      }
+
+      /* ── RESPONSIVE ── */
+      @media (max-width: 1100px) {
+        .composer-grid {
+          grid-template-columns: 1fr;
+        }
+        .cost-card {
+          position: static;
+        }
+      }
+      @media (max-width: 900px) {
+        .sidebar {
+          transform: translateX(-100%);
+        }
+        .sidebar.open {
+          transform: translateX(0);
+        }
+        .main {
+          margin-left: 0;
+        }
+        .menu-toggle {
+          display: flex;
+        }
+      }
+      @media (max-width: 640px) {
+        .sender-grid {
+          grid-template-columns: 1fr;
+        }
+        .schedule-fields.show {
+          grid-template-columns: 1fr;
+        }
+        .page-content {
+          padding: 1rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="dash-layout">
+
+      <!-- MAIN -->
+      <div class="main">
+        <!-- TOPBAR -->
+        <header class="topbar">
+          <div class="topbar-left">
+            <button class="menu-toggle" id="menuToggle">
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <line x1="3" y1="6" x2="21" y2="6" />
+                <line x1="3" y1="12" x2="21" y2="12" />
+                <line x1="3" y1="18" x2="21" y2="18" />
+              </svg>
+            </button>
+            <div class="breadcrumb">
+              <a href="dashboard.html">Dashboard</a>
+              <span class="breadcrumb-sep">›</span>
+              <span class="breadcrumb-current">Bulk SMS</span>
+            </div>
+          </div>
+          <div class="topbar-right">
+            <div class="balance-pill">
+              <span class="balance-pill-label">Balance</span>
+              <span class="balance-pill-val">₦34,750</span>
+            </div>
+            <button class="icon-btn">🔔<span class="notif-dot"></span></button>
+          </div>
+        </header>
+
+        <!-- PAGE CONTENT -->
+        <main class="page-content">
+          <!-- Page Header -->
+          <div class="page-header">
+            <div>
+              <h1>💬 Bulk SMS</h1>
+              <p>
+                Compose, preview and send SMS campaigns across all Nigerian
+                networks.
+              </p>
+            </div>
+            <div class="header-actions">
+              <button class="btn-outline">📋 Templates</button>
+              <button class="btn-outline">📁 Load Draft</button>
+            </div>
+          </div>
+
+          <!-- Page Tabs -->
+          <div class="page-tabs">
+            <button
+              class="ptab active"
+              onclick="switchPageTab(this, 'compose')"
+            >
+              ✏️ Compose
+            </button>
+            <button class="ptab" onclick="switchPageTab(this, 'history')">
+              📊 Campaign History
+            </button>
+          </div>
+
+          <!-- ===== COMPOSE TAB ===== -->
+          <div id="tab-compose">
+            <div class="composer-grid">
+              <!-- LEFT: Composer -->
+              <div class="composer-left">
+                <!-- 1. Sender ID -->
+                <div class="card">
+                  <div class="card-title">1 · Sender Details</div>
+                  <div class="sender-grid">
+                    <div class="field">
+                      <label class="field-label">Sender ID</label>
+                      <input
+                        class="input"
+                        id="senderId"
+                        type="text"
+                        value="NotifyPro"
+                        maxlength="11"
+                        placeholder="Max 11 chars"
+                        oninput="updatePreview()"
+                      />
+                      <div class="field-hint">
+                        Max 11 characters. Alphanumeric only.
+                      </div>
+                    </div>
+                    <div class="field">
+                      <label class="field-label">Campaign Name</label>
+                      <input
+                        class="input"
+                        id="campaignName"
+                        type="text"
+                        placeholder="e.g. Ramadan Promo 2025"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 2. Recipients -->
+                <div class="card">
+                  <div class="card-title">2 · Recipients</div>
+                  <div class="recipient-tabs">
+                    <button
+                      class="rtab active"
+                      onclick="switchRTab(this, 'manual')"
+                    >
+                      ✏️ Manual Entry
+                    </button>
+                    <button class="rtab" onclick="switchRTab(this, 'csv')">
+                      📄 CSV Upload
+                    </button>
+                    <button class="rtab" onclick="switchRTab(this, 'groups')">
+                      👥 Contact Groups
+                    </button>
+                  </div>
+
+                  <!-- Manual Entry -->
+                  <div class="rtab-panel active" id="rpanel-manual">
+                    <div
+                      class="number-tags"
+                      id="tagContainer"
+                      onclick="document.getElementById('tagInput').focus()"
+                    >
+                      <input
+                        class="tag-input"
+                        id="tagInput"
+                        type="text"
+                        placeholder="Type number then press Enter or comma… e.g. +2348031234567"
+                      />
+                    </div>
+                    <div class="field-hint" style="margin-top: 6px">
+                      Enter numbers separated by Enter or comma.
+                      <strong id="recipientCount" style="color: var(--text)"
+                        >0</strong
+                      >
+                      recipient(s) added.
+                    </div>
+                  </div>
+
+                  <!-- CSV Upload -->
+                  <div class="rtab-panel" id="rpanel-csv">
+                    <div class="upload-zone" id="uploadZone">
+                      <div class="upload-icon">📊</div>
+                      <div class="upload-text">Drop your CSV file here</div>
+                      <div class="upload-sub">
+                        or
+                        <span
+                          onclick="document.getElementById('csvFile').click()"
+                          >browse to upload</span
+                        >
+                        — phone numbers in column A
+                      </div>
+                      <input
+                        type="file"
+                        id="csvFile"
+                        accept=".csv"
+                        style="display: none"
+                        onchange="handleCsvUpload(this)"
+                      />
+                    </div>
+                    <div class="field-hint" style="margin-top: 8px">
+                      Supports up to 500,000 numbers per upload.
+                      <a href="#" style="color: var(--accent)"
+                        >Download template →</a
+                      >
+                    </div>
+                  </div>
+
+                  <!-- Groups -->
+                  <div class="rtab-panel" id="rpanel-groups">
+                    <div class="group-list">
+                      <div
+                        class="group-item selected"
+                        onclick="toggleGroup(this)"
+                      >
+                        <div class="group-item-left">
+                          <div class="group-check">✓</div>
+                          <div>
+                            <div class="group-name">All Customers</div>
+                            <div class="group-count">24,810 contacts</div>
+                          </div>
+                        </div>
+                        <span class="group-badge">MTN · Airtel</span>
+                      </div>
+                      <div class="group-item" onclick="toggleGroup(this)">
+                        <div class="group-item-left">
+                          <div class="group-check"></div>
+                          <div>
+                            <div class="group-name">VIP Members</div>
+                            <div class="group-count">3,204 contacts</div>
+                          </div>
+                        </div>
+                        <span class="group-badge">All networks</span>
+                      </div>
+                      <div class="group-item" onclick="toggleGroup(this)">
+                        <div class="group-item-left">
+                          <div class="group-check"></div>
+                          <div>
+                            <div class="group-name">Lagos Region</div>
+                            <div class="group-count">9,440 contacts</div>
+                          </div>
+                        </div>
+                        <span class="group-badge">Glo · 9mobile</span>
+                      </div>
+                      <div class="group-item" onclick="toggleGroup(this)">
+                        <div class="group-item-left">
+                          <div class="group-check"></div>
+                          <div>
+                            <div class="group-name">Inactive Users (90d)</div>
+                            <div class="group-count">1,876 contacts</div>
+                          </div>
+                        </div>
+                        <span class="group-badge">Re-engagement</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 3. Message -->
+                <div class="card">
+                  <div class="card-title-row">
+                    <div class="card-title">3 · Message</div>
+                    <span class="encoding-badge gsm" id="encodingBadge"
+                      >GSM-7 · Standard</span
+                    >
+                  </div>
+
+                  <div class="field">
+                    <label class="field-label">Personalisation Tags</label>
+                    <div class="personalization-chips">
+                      <button class="chip" onclick="insertTag('{FirstName}')">
+                        👤 First Name
+                      </button>
+                      <button class="chip" onclick="insertTag('{LastName}')">
+                        👤 Last Name
+                      </button>
+                      <button
+                        class="chip"
+                        onclick="insertTag('{BusinessName}')"
+                      >
+                        🏢 Business
+                      </button>
+                      <button class="chip" onclick="insertTag('{Amount}')">
+                        ₦ Amount
+                      </button>
+                      <button class="chip" onclick="insertTag('{OTP}')">
+                        🔐 OTP
+                      </button>
+                      <button class="chip" onclick="insertTag('{Link}')">
+                        🔗 Link
+                      </button>
+                    </div>
+                  </div>
+
+                  <div class="field">
+                    <label class="field-label">Message Body</label>
+                    <div class="msg-wrap">
+                      <textarea
+                        class="msg-textarea"
+                        id="msgBody"
+                        placeholder="Type your SMS message here…&#10;&#10;Use tags like {FirstName} for personalisation."
+                        oninput="updateMessage(this)"
+                      ></textarea>
+                    </div>
+                    <div class="warn-box" id="unicodeWarn">
+                      ⚠️ Your message contains special characters (unicode).
+                      This reduces max chars per SMS from 160 to 70, increasing
+                      your SMS parts and cost.
+                    </div>
+                  </div>
+
+                  <!-- SMS Stats Bar -->
+                  <div class="sms-stats-bar">
+                    <div class="sms-stat">
+                      <div class="sms-stat-val green" id="charCount">0</div>
+                      <div class="sms-stat-label">Characters</div>
+                    </div>
+                    <div class="sms-stat">
+                      <div class="sms-stat-val blue" id="smsLimit">160</div>
+                      <div class="sms-stat-label">Max / SMS</div>
+                    </div>
+                    <div class="sms-stat">
+                      <div class="sms-stat-val amber" id="smsParts">1</div>
+                      <div class="sms-stat-label">SMS Parts</div>
+                    </div>
+                    <div class="sms-stat">
+                      <div
+                        class="sms-stat-val"
+                        id="charsLeft"
+                        style="color: var(--accent)"
+                      >
+                        160
+                      </div>
+                      <div class="sms-stat-label">Remaining</div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 4. Schedule -->
+                <div class="card">
+                  <div class="card-title">4 · Scheduling</div>
+                  <div class="schedule-toggle">
+                    <div>
+                      <div style="font-size: 14px; font-weight: 500">
+                        Schedule for later
+                      </div>
+                      <div
+                        style="
+                          font-size: 12px;
+                          color: var(--muted);
+                          margin-top: 2px;
+                        "
+                      >
+                        Pick a date and time to send automatically
+                      </div>
+                    </div>
+                    <button
+                      class="toggle-switch"
+                      id="schedToggle"
+                      onclick="toggleSchedule()"
+                    ></button>
+                  </div>
+                  <div class="schedule-fields" id="schedFields">
+                    <div class="field">
+                      <label class="field-label">Date</label>
+                      <input class="input" type="date" id="schedDate" />
+                    </div>
+                    <div class="field">
+                      <label class="field-label">Time (WAT)</label>
+                      <input class="input" type="time" id="schedTime" />
+                    </div>
+                    <div class="field" style="grid-column: 1/-1">
+                      <label class="field-label">Timezone</label>
+                      <select class="select">
+                        <option selected>West Africa Time (WAT) — UTC+1</option>
+                        <option>Greenwich Mean Time (GMT) — UTC+0</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div
+                    id="sendNowLabel"
+                    style="
+                      font-size: 13px;
+                      color: var(--muted);
+                      margin-top: 4px;
+                    "
+                  >
+                    Messages will be sent immediately upon confirmation.
+                  </div>
+                </div>
+              </div>
+              <!-- /composer-left -->
+
+              <!-- RIGHT: Preview + Cost -->
+              <div>
+                <!-- Mobile Preview -->
+                <div class="card" style="margin-bottom: 1.2rem">
+                  <div class="preview-label">
+                    📱 Mobile Preview
+                    <span>Live as you type</span>
+                  </div>
+
+                  <div class="phone-frame">
+                    <div class="phone-screen">
+                      <!-- Dynamic Island -->
+                      <div class="phone-dynamic-island"></div>
+                      <!-- Status bar -->
+                      <div class="phone-status-bar">
+                        <span>9:41</span>
+                        <div class="phone-status-right">
+                          <svg width="11" height="8" viewBox="0 0 11 8" fill="none"><rect x="0" y="3" width="2" height="5" rx="0.5" fill="#111"/><rect x="3" y="2" width="2" height="6" rx="0.5" fill="#111"/><rect x="6" y="1" width="2" height="7" rx="0.5" fill="#111"/><rect x="9" y="0" width="2" height="8" rx="0.5" fill="#111" opacity=".3"/></svg>
+                          <span>4G</span>
+                          <div class="battery-icon"><div class="battery-fill"></div></div>
+                        </div>
+                      </div>
+                      <!-- Messages header -->
+                      <div class="phone-sms-header">
+                        <span class="phone-sms-back">‹</span>
+                        <div class="sender-avatar-preview" id="previewAvatar">NP</div>
+                        <div style="flex:1">
+                          <div class="sms-header-name" id="previewSender">NotifyPro</div>
+                          <div class="sms-header-sub">text message</div>
+                        </div>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#007aff" stroke-width="2.5"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+                      </div>
+                      <!-- Message bubbles -->
+                      <div class="phone-body">
+                        <div class="sms-bubble-wrap received">
+                          <div class="sms-bubble" id="previewBubble">
+                            Your message will appear here as you type…
+                          </div>
+                        </div>
+                        <div class="delivered-badge">✓✓ Delivered</div>
+                        <div
+                          class="sms-time"
+                          style="
+                            text-align: left;
+                            padding-left: 2px;
+                            margin-top: 4px;
+                          "
+                          id="previewTime"
+                        >
+                          Now
+                        </div>
+                      </div>
+                      <!-- iMessage input bar -->
+                      <div class="phone-input-bar">
+                        <div class="phone-input-pill"></div>
+                        <div class="phone-input-send">↑</div>
+                      </div>
+                      <!-- Home indicator -->
+                      <div class="phone-home-bar"></div>
+                    </div>
+                  </div>
+
+                  <!-- Char ruler -->
+                  <div class="preview-ruler">
+                    <div class="ruler-row">
+                      <span class="ruler-label">Encoding</span>
+                      <span class="ruler-val" id="rulerEncoding">GSM-7</span>
+                    </div>
+                    <div class="ruler-row">
+                      <span class="ruler-label">Characters used</span>
+                      <span class="ruler-val" id="rulerChars">0 / 160</span>
+                    </div>
+                    <div class="ruler-row">
+                      <span class="ruler-label">SMS parts</span>
+                      <span class="ruler-val" id="rulerParts">1 part</span>
+                    </div>
+                    <div class="segment-viz">
+                      <div class="segment-track">
+                        <div
+                          class="segment-fill"
+                          id="segFill"
+                          style="width: 0%"
+                        ></div>
+                      </div>
+                      <div class="segment-labels">
+                        <span>0</span>
+                        <span id="segMax">160</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Cost Estimator -->
+                <div class="cost-card">
+                  <div class="cost-title">💰 Cost Estimator</div>
+
+                  <div class="cost-row">
+                    <span class="cost-row-label">Recipients</span>
+                    <span class="cost-row-val" id="costRecipients">0</span>
+                  </div>
+                  <div class="cost-row">
+                    <span class="cost-row-label">SMS parts / message</span>
+                    <span class="cost-row-val" id="costParts">1</span>
+                  </div>
+                  <div class="cost-row">
+                    <span class="cost-row-label">Total SMS units</span>
+                    <span class="cost-row-val" id="costUnits">0</span>
+                  </div>
+                  <div class="cost-row">
+                    <span class="cost-row-label">Rate per unit</span>
+                    <span class="cost-row-val">₦4.00</span>
+                  </div>
+
+                  <div class="cost-total-row">
+                    <span class="cost-total-label">Estimated Cost</span>
+                    <span class="cost-total-val" id="costTotal">₦0</span>
+                  </div>
+
+                  <div class="balance-remaining">
+                    <span class="balance-remaining-label"
+                      >Wallet after send</span
+                    >
+                    <span class="balance-remaining-val" id="balanceAfter"
+                      >₦34,750</span
+                    >
+                  </div>
+
+                  <div class="low-balance-warn" id="lowWarn">
+                    ⚠️ Insufficient balance. Please top up your wallet.
+                  </div>
+
+                  <button class="send-btn" id="sendBtn" onclick="confirmSend()">
+                    🚀 Send Campaign
+                  </button>
+                  <button class="save-draft-btn" onclick="saveDraft()">
+                    💾 Save as Draft
+                  </button>
+                </div>
+              </div>
+              <!-- /right -->
+            </div>
+            <!-- /composer-grid -->
+          </div>
+          <!-- /tab-compose -->
+
+          <!-- ===== HISTORY TAB ===== -->
+          <div id="tab-history" style="display: none">
+            <div class="card">
+              <div class="card-title-row">
+                <div class="card-title">SMS Campaign History</div>
+                <button
+                  class="btn-outline"
+                  style="font-size: 12px; padding: 7px 14px"
+                >
+                  ⬇ Export CSV
+                </button>
+              </div>
+              <table class="history-table">
+                <thead>
+                  <tr>
+                    <th>Campaign</th>
+                    <th>Sent</th>
+                    <th>Recipients</th>
+                    <th>Delivery</th>
+                    <th>Cost</th>
+                    <th>Status</th>
+                    <th>Date</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>
+                      <strong>Ramadan Promo Blast</strong><br /><span
+                        style="color: var(--muted); font-size: 11px"
+                        >Bulk SMS · NotifyPro</span
+                      >
+                    </td>
+                    <td>24,000</td>
+                    <td>24,000</td>
+                    <td>
+                      <div class="delivery-bar">
+                        <div class="delivery-bar-track">
+                          <div
+                            class="delivery-bar-fill"
+                            style="width: 98.2%"
+                          ></div>
+                        </div>
+                        <span class="delivery-bar-pct">98.2%</span>
+                      </div>
+                    </td>
+                    <td>₦96,000</td>
+                    <td><span class="status-pill sent">Sent</span></td>
+                    <td style="color: var(--muted); font-size: 12px">
+                      25 Mar 2026
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <strong>Flash Sale Alert</strong><br /><span
+                        style="color: var(--muted); font-size: 11px"
+                        >Bulk SMS · ShopAlert</span
+                      >
+                    </td>
+                    <td>15,000</td>
+                    <td>15,000</td>
+                    <td>
+                      <div class="delivery-bar">
+                        <div class="delivery-bar-track">
+                          <div
+                            class="delivery-bar-fill"
+                            style="width: 97.5%"
+                          ></div>
+                        </div>
+                        <span class="delivery-bar-pct">97.5%</span>
+                      </div>
+                    </td>
+                    <td>₦60,000</td>
+                    <td><span class="status-pill sent">Sent</span></td>
+                    <td style="color: var(--muted); font-size: 12px">
+                      22 Mar 2026
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <strong>Easter Campaign</strong><br /><span
+                        style="color: var(--muted); font-size: 11px"
+                        >Bulk SMS · NotifyPro</span
+                      >
+                    </td>
+                    <td>—</td>
+                    <td>30,000</td>
+                    <td>—</td>
+                    <td>₦120,000 est.</td>
+                    <td>
+                      <span class="status-pill scheduled">Scheduled</span>
+                    </td>
+                    <td style="color: var(--muted); font-size: 12px">
+                      31 Mar 2026
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <strong>OTP Blast (Test)</strong><br /><span
+                        style="color: var(--muted); font-size: 11px"
+                        >OTP · AuthService</span
+                      >
+                    </td>
+                    <td>250</td>
+                    <td>250</td>
+                    <td>
+                      <div class="delivery-bar">
+                        <div class="delivery-bar-track">
+                          <div
+                            class="delivery-bar-fill"
+                            style="width: 72%; background: var(--accent4)"
+                          ></div>
+                        </div>
+                        <span
+                          class="delivery-bar-pct"
+                          style="color: var(--accent4)"
+                          >72%</span
+                        >
+                      </div>
+                    </td>
+                    <td>₦1,000</td>
+                    <td>
+                      <span class="status-pill failed">Partial Fail</span>
+                    </td>
+                    <td style="color: var(--muted); font-size: 12px">
+                      18 Mar 2026
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <strong>Account Alerts</strong><br /><span
+                        style="color: var(--muted); font-size: 11px"
+                        >Transactional · BankAlert</span
+                      >
+                    </td>
+                    <td style="color: var(--accent2)">Sending…</td>
+                    <td>8,500</td>
+                    <td>
+                      <div class="delivery-bar">
+                        <div class="delivery-bar-track">
+                          <div
+                            class="delivery-bar-fill"
+                            style="width: 61%; background: var(--accent2)"
+                          ></div>
+                        </div>
+                        <span
+                          class="delivery-bar-pct"
+                          style="color: var(--accent2)"
+                          >61%</span
+                        >
+                      </div>
+                    </td>
+                    <td>₦34,000</td>
+                    <td><span class="status-pill sending">Sending</span></td>
+                    <td style="color: var(--muted); font-size: 12px">
+                      26 Mar 2026
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <!-- /tab-history -->
+        </main>
+      </div>
+    </div>
+
+    <!-- SUCCESS MODAL -->
+    <div class="modal-overlay" id="successModal">
+      <div class="modal">
+        <div class="modal-icon">🚀</div>
+        <h2>Campaign Launched!</h2>
+        <p id="modalMsg">
+          Your SMS campaign is queued and will be delivered shortly across all
+          Nigerian networks.
+        </p>
+        <div class="modal-actions">
+          <button
+            class="btn-primary"
+            onclick="
+              document.getElementById('successModal').classList.remove('show')
+            "
+          >
+            View Dashboard
+          </button>
+          <button
+            class="btn-outline"
+            onclick="
+              document.getElementById('successModal').classList.remove('show');
+              clearComposer();
+            "
+          >
+            New Campaign
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // ── STATE ──
+      let tags = [];
+      let walletBalance = 34750;
+      let smsRatePerUnit = 4;
+      let isUnicode = false;
+      let smsParts = 1;
+      let maxCharsPerPart = 160;
+
+      // ── MOBILE MENU ──
+      document.getElementById("menuToggle").addEventListener("click", () => {
+        document.getElementById("sidebar").classList.toggle("open");
+      });
+
+      // ── PAGE TABS ──
+      function switchPageTab(btn, tab) {
+        document
+          .querySelectorAll(".ptab")
+          .forEach((t) => t.classList.remove("active"));
+        btn.classList.add("active");
+        document.getElementById("tab-compose").style.display =
+          tab === "compose" ? "block" : "none";
+        document.getElementById("tab-history").style.display =
+          tab === "history" ? "block" : "none";
+      }
+
+      // ── RECIPIENT TABS ──
+      function switchRTab(btn, panel) {
+        document
+          .querySelectorAll(".rtab")
+          .forEach((t) => t.classList.remove("active"));
+        document
+          .querySelectorAll(".rtab-panel")
+          .forEach((p) => p.classList.remove("active"));
+        btn.classList.add("active");
+        document.getElementById("rpanel-" + panel).classList.add("active");
+        updateCost();
+      }
+
+      // ── NUMBER TAGS ──
+      const tagInput = document.getElementById("tagInput");
+      tagInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === ",") {
+          e.preventDefault();
+          addTag(tagInput.value);
+        }
+        if (e.key === "Backspace" && !tagInput.value && tags.length) {
+          removeTag(tags[tags.length - 1]);
+        }
+      });
+      tagInput.addEventListener("blur", () => {
+        if (tagInput.value.trim()) addTag(tagInput.value);
+      });
+
+      function addTag(val) {
+        const num = val.trim().replace(/,$/, "");
+        if (!num) return;
+        if (tags.includes(num)) {
+          tagInput.value = "";
+          return;
+        }
+        tags.push(num);
+        tagInput.value = "";
+        renderTags();
+        updateCost();
+      }
+
+      function removeTag(num) {
+        tags = tags.filter((t) => t !== num);
+        renderTags();
+        updateCost();
+      }
+
+      function renderTags() {
+        const container = document.getElementById("tagContainer");
+        container.innerHTML = "";
+        tags.forEach((num) => {
+          const tag = document.createElement("div");
+          tag.className = "number-tag";
+          tag.innerHTML = `${num} <button onclick="removeTag('${num}')">×</button>`;
+          container.appendChild(tag);
+        });
+        container.appendChild(tagInput);
+        document.getElementById("recipientCount").textContent = tags.length;
+        tagInput.focus();
+      }
+
+      // ── GROUP TOGGLE ──
+      function toggleGroup(el) {
+        el.classList.toggle("selected");
+        const check = el.querySelector(".group-check");
+        check.textContent = el.classList.contains("selected") ? "✓" : "";
+        updateCost();
+      }
+
+      // ── CSV ──
+      const uploadZone = document.getElementById("uploadZone");
+      uploadZone.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        uploadZone.classList.add("dragover");
+      });
+      uploadZone.addEventListener("dragleave", () =>
+        uploadZone.classList.remove("dragover"),
+      );
+      uploadZone.addEventListener("drop", (e) => {
+        e.preventDefault();
+        uploadZone.classList.remove("dragover");
+        const file = e.dataTransfer.files[0];
+        if (file) processCsvFile(file);
+      });
+
+      function handleCsvUpload(input) {
+        if (input.files[0]) processCsvFile(input.files[0]);
+      }
+
+      function processCsvFile(file) {
+        uploadZone.innerHTML = `<div class="upload-icon">✅</div><div class="upload-text">${file.name}</div><div class="upload-sub">Processing…</div>`;
+        setTimeout(() => {
+          const fakeCount = Math.floor(Math.random() * 4000) + 1000;
+          uploadZone.innerHTML = `<div class="upload-icon">✅</div><div class="upload-text">${file.name}</div><div class="upload-sub" style="color:var(--accent)">${fakeCount.toLocaleString()} valid numbers loaded</div>`;
+          updateCost(fakeCount);
+        }, 800);
+      }
+
+      // ── MESSAGE ANALYSIS ──
+      function detectEncoding(text) {
+        const gsm7 =
+          /^[@£$¥èéùìòÇ\nØø\rÅåΔ_ΦΓΛΩΠΨΣΘΞ\x1BÆæßÉ !"#¤%&'()*+,\-.\/0-9:;<=>?¡A-ZÄÖÑÜ§¿a-zäöñüà]*$/;
+        return gsm7.test(text);
+      }
+
+      function calcParts(len, unicode) {
+        if (unicode) {
+          if (len <= 70) return 1;
+          return Math.ceil(len / 67);
+        } else {
+          if (len <= 160) return 1;
+          return Math.ceil(len / 153);
+        }
+      }
+
+      function updateMessage(el) {
+        const text = el.value;
+        const len = text.length;
+        isUnicode = !detectEncoding(text);
+        const maxPerPart = isUnicode ? 70 : 160;
+        maxCharsPerPart = maxPerPart;
+        smsParts = calcParts(len, isUnicode);
+        const limit = smsParts === 1 ? maxPerPart : isUnicode ? 67 : 153;
+        const singleLimit = maxPerPart;
+        const charsLeft =
+          smsParts * (smsParts === 1 ? maxPerPart : isUnicode ? 67 : 153) - len;
+
+        document.getElementById("charCount").textContent = len;
+        document.getElementById("smsLimit").textContent = maxPerPart;
+        document.getElementById("smsParts").textContent = smsParts;
+        document.getElementById("charsLeft").textContent = charsLeft;
+
+        // Color charsLeft
+        const cl = document.getElementById("charsLeft");
+        cl.style.color =
+          charsLeft < 10
+            ? "var(--accent4)"
+            : charsLeft < 30
+              ? "var(--accent3)"
+              : "var(--accent)";
+
+        // Encoding badge
+        const badge = document.getElementById("encodingBadge");
+        badge.className = "encoding-badge " + (isUnicode ? "unicode" : "gsm");
+        badge.textContent = isUnicode
+          ? "Unicode · 70 chars/SMS"
+          : "GSM-7 · Standard";
+
+        // Unicode warning
+        document
+          .getElementById("unicodeWarn")
+          .classList.toggle("show", isUnicode);
+
+        // Ruler
+        document.getElementById("rulerEncoding").textContent = isUnicode
+          ? "Unicode (UCS-2)"
+          : "GSM-7";
+        document.getElementById("rulerChars").textContent =
+          `${len} / ${maxPerPart}`;
+        document.getElementById("rulerParts").textContent =
+          `${smsParts} part${smsParts > 1 ? "s" : ""}`;
+
+        // Segment fill
+        const segFill = document.getElementById("segFill");
+        const pct = Math.min(
+          (len /
+            (smsParts * (smsParts === 1 ? maxPerPart : isUnicode ? 67 : 153))) *
+            100,
+          100,
+        );
+        segFill.style.width = pct + "%";
+        segFill.className =
+          "segment-fill" + (pct > 90 ? " danger" : pct > 70 ? " warn" : "");
+        document.getElementById("segMax").textContent =
+          smsParts * (smsParts === 1 ? maxPerPart : isUnicode ? 67 : 153);
+
+        updatePreview();
+        updateCost();
+      }
+
+      // ── INSERT PERSONALISATION TAG ──
+      function insertTag(tag) {
+        const ta = document.getElementById("msgBody");
+        const start = ta.selectionStart;
+        const end = ta.selectionEnd;
+        ta.value = ta.value.substring(0, start) + tag + ta.value.substring(end);
+        ta.selectionStart = ta.selectionEnd = start + tag.length;
+        ta.focus();
+        updateMessage(ta);
+      }
+
+      // ── PREVIEW UPDATE ──
+      function updatePreview() {
+        const sender = document.getElementById("senderId").value || "NotifyPro";
+        const msg =
+          document.getElementById("msgBody").value ||
+          "Your message will appear here as you type…";
+        const initials = sender.substring(0, 2).toUpperCase();
+        const now = new Date();
+        const timeStr = now.toLocaleTimeString("en-NG", {
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+
+        document.getElementById("previewSender").textContent = sender;
+        document.getElementById("previewAvatar").textContent = initials;
+        document.getElementById("previewBubble").textContent = msg
+          .replace(/{FirstName}/g, "Emeka")
+          .replace(/{LastName}/g, "Okafor")
+          .replace(/{BusinessName}/g, "Your Business")
+          .replace(/{Amount}/g, "₦5,000")
+          .replace(/{OTP}/g, "847392")
+          .replace(/{Link}/g, "https://bit.ly/nfypro");
+        document.getElementById("previewTime").textContent = timeStr;
+      }
+
+      document
+        .getElementById("senderId")
+        .addEventListener("input", updatePreview);
+
+      // ── RECIPIENT COUNT ──
+      function getRecipientCount() {
+        const activePanel = document.querySelector(".rtab-panel.active");
+        if (activePanel.id === "rpanel-manual") return tags.length;
+        if (activePanel.id === "rpanel-csv") {
+          const sub = document.querySelector("#uploadZone .upload-sub");
+          if (sub && sub.style.color === "var(--accent)") {
+            const match = sub.textContent.match(/[\d,]+/);
+            return match ? parseInt(match[0].replace(/,/g, "")) : 0;
+          }
+          return 0;
+        }
+        if (activePanel.id === "rpanel-groups") {
+          let total = 0;
+          document
+            .querySelectorAll(".group-item.selected .group-count")
+            .forEach((el) => {
+              const n = parseInt(
+                el.textContent.replace(/,/g, "").replace(" contacts", ""),
+              );
+              if (!isNaN(n)) total += n;
+            });
+          return total;
+        }
+        return 0;
+      }
+
+      // ── COST CALCULATION ──
+      function updateCost(forceCount) {
+        const recipients =
+          forceCount !== undefined ? forceCount : getRecipientCount();
+        const units = recipients * smsParts;
+        const cost = units * smsRatePerUnit;
+        const remaining = walletBalance - cost;
+
+        document.getElementById("costRecipients").textContent =
+          recipients.toLocaleString("en-NG");
+        document.getElementById("costParts").textContent = smsParts;
+        document.getElementById("costUnits").textContent =
+          units.toLocaleString("en-NG");
+        document.getElementById("costTotal").textContent =
+          "₦" + cost.toLocaleString("en-NG");
+        document.getElementById("balanceAfter").textContent =
+          remaining < 0 ? "—" : "₦" + remaining.toLocaleString("en-NG");
+        document.getElementById("balanceAfter").style.color =
+          remaining < 0 ? "var(--accent4)" : "var(--accent)";
+
+        const lowWarn = document.getElementById("lowWarn");
+        const sendBtn = document.getElementById("sendBtn");
+        if (remaining < 0 && recipients > 0) {
+          lowWarn.classList.add("show");
+          sendBtn.disabled = true;
+        } else {
+          lowWarn.classList.remove("show");
+          sendBtn.disabled = false;
+        }
+      }
+
+      // ── SCHEDULE TOGGLE ──
+      function toggleSchedule() {
+        const btn = document.getElementById("schedToggle");
+        const fields = document.getElementById("schedFields");
+        const label = document.getElementById("sendNowLabel");
+        btn.classList.toggle("on");
+        const isOn = btn.classList.contains("on");
+        fields.classList.toggle("show", isOn);
+        label.style.display = isOn ? "none" : "block";
+        if (isOn) {
+          const d = new Date();
+          d.setDate(d.getDate() + 1);
+          document.getElementById("schedDate").value = d
+            .toISOString()
+            .split("T")[0];
+          document.getElementById("schedTime").value = "09:00";
+        }
+      }
+
+      // ── SEND ──
+      function confirmSend() {
+        const msg = document.getElementById("msgBody").value.trim();
+        if (!msg) {
+          alert("Please write a message first.");
+          return;
+        }
+        const recipients = getRecipientCount();
+        if (recipients === 0) {
+          alert("Please add at least one recipient.");
+          return;
+        }
+
+        const isScheduled = document
+          .getElementById("schedToggle")
+          .classList.contains("on");
+        const date = isScheduled
+          ? document.getElementById("schedDate").value
+          : null;
+        const time = isScheduled
+          ? document.getElementById("schedTime").value
+          : null;
+
+        const cost = recipients * smsParts * smsRatePerUnit;
+        walletBalance -= cost;
+
+        let modalMsg = `Your SMS campaign to ${recipients.toLocaleString()} recipient${recipients > 1 ? "s" : ""} (${(recipients * smsParts).toLocaleString()} units) `;
+        if (isScheduled && date) {
+          modalMsg += `is scheduled for ${new Date(date).toLocaleDateString("en-NG", { day: "numeric", month: "long", year: "numeric" })} at ${time} WAT.`;
+        } else {
+          modalMsg += `is queued and will be delivered shortly across all Nigerian networks.`;
+        }
+        document.getElementById("modalMsg").textContent = modalMsg;
+        document.getElementById("successModal").classList.add("show");
+      }
+
+      function saveDraft() {
+        const name =
+          document.getElementById("campaignName").value || "Untitled Campaign";
+        const btn = event.target;
+        btn.textContent = "✓ Draft Saved!";
+        btn.style.color = "var(--accent)";
+        btn.style.borderColor = "rgba(0,232,122,0.3)";
+        setTimeout(() => {
+          btn.textContent = "💾 Save as Draft";
+          btn.style.color = "";
+          btn.style.borderColor = "";
+        }, 2000);
+      }
+
+      function clearComposer() {
+        document.getElementById("msgBody").value = "";
+        document.getElementById("campaignName").value = "";
+        tags = [];
+        renderTags();
+        updateMessage(document.getElementById("msgBody"));
+        updatePreview();
+      }
+
+      // ── INIT ──
+      updatePreview();
+      updateCost();
+    </script>
+    <script>window.NP_PAGE = 'bulk-sms';</script>
+    <script src="../assets/js/sidebar.js"></script>
+    <script type="module" src="../assets/js/auth-guard.js"></script>
+  </body>
+</html>

@@ -1,0 +1,838 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NotifyPro — Nigeria's #1 Notification Platform</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="assets/css/style.css" />
+  </head>
+  <body>
+    <!-- NAV -->
+    <nav>
+      <a href="#" class="logo">Notify<span>Pro</span></a>
+      <ul class="nav-links">
+        <li><a href="#services">Services</a></li>
+        <li><a href="#why">Why Us</a></li>
+        <li><a href="#pricing">Pricing</a></li>
+        <li><a href="#contact">Contact</a></li>
+        <li><a href="who-we-are.html">About</a></li>
+      </ul>
+      <a href="login.html" class="nav-login">Log in</a>
+      <a href="signup.html" class="nav-cta">Get Started →</a>
+    </nav>
+
+    <!-- HERO -->
+    <section class="hero">
+      <div class="blob blob-1"></div>
+      <div class="blob blob-2"></div>
+
+      <div class="hero-badge">Nigeria's Notification Leader</div>
+
+      <h1>
+        <span class="line-green">Reach Millions.</span><br />
+        Instantly.<br />
+        <span
+          style="
+            color: var(--muted);
+            font-weight: 600;
+            font-size: 0.65em;
+            letter-spacing: -0.5px;
+          "
+          >Anywhere in Nigeria.</span
+        >
+      </h1>
+
+      <p class="hero-sub">
+        Bulk SMS, Email Campaigns, OTP Verification and more —<br />
+        <strong>built for Nigerian businesses that think wide.</strong>
+      </p>
+
+      <div class="hero-actions">
+        <a href="signup.html" class="btn-primary">Start Sending Free →</a>
+        <button class="btn-ghost" onclick="openDemo()" style="cursor:pointer;border:none;font-family:var(--font-body)">🎯 Try a Live Demo — No Sign Up</button>
+      </div>
+
+      <div class="stats-bar">
+        <div class="stat-item">
+          <div class="stat-num">50<span>M+</span></div>
+          <div class="stat-label">Messages Sent</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num">12<span>K+</span></div>
+          <div class="stat-label">Active Businesses</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num">99<span>.9%</span></div>
+          <div class="stat-label">Uptime SLA</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num">&lt;<span>3s</span></div>
+          <div class="stat-label">Avg Delivery</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MARQUEE -->
+    <div class="marquee-wrap">
+      <div class="marquee-track">
+        <div class="marquee-item">Bulk SMS</div>
+        <div class="marquee-item">Email Campaigns</div>
+        <div class="marquee-item">OTP Service</div>
+        <div class="marquee-item">2FA Verification</div>
+        <div class="marquee-item">Transactional SMS</div>
+        <div class="marquee-item">Developer API</div>
+        <div class="marquee-item">Real-time Delivery Reports</div>
+        <div class="marquee-item">Nigerian Networks</div>
+        <div class="marquee-item">MTN · Airtel · Glo · 9mobile</div>
+        <!-- duplicate for seamless loop -->
+        <div class="marquee-item">Bulk SMS</div>
+        <div class="marquee-item">Email Campaigns</div>
+        <div class="marquee-item">OTP Service</div>
+        <div class="marquee-item">2FA Verification</div>
+        <div class="marquee-item">Transactional SMS</div>
+        <div class="marquee-item">Developer API</div>
+        <div class="marquee-item">Real-time Delivery Reports</div>
+        <div class="marquee-item">Nigerian Networks</div>
+        <div class="marquee-item">MTN · Airtel · Glo · 9mobile</div>
+      </div>
+    </div>
+
+    <!-- SERVICES -->
+    <section id="services">
+      <div class="section-label">What We Offer</div>
+      <h2 class="section-title">Every channel.<br />One platform.</h2>
+      <p class="section-sub">
+        From a single OTP to a nationwide campaign — NotifyPro handles it at
+        scale.
+      </p>
+
+      <div class="services-grid reveal">
+        <div class="service-card">
+          <div class="service-icon icon-green">💬</div>
+          <h3>Bulk SMS</h3>
+          <p>
+            Send millions of messages instantly across all Nigerian networks.
+            Custom sender IDs, scheduling, and real-time delivery tracking built
+            in.
+          </p>
+          <span class="service-tag">MTN · Airtel · Glo · 9mobile</span>
+        </div>
+        <div class="service-card">
+          <div class="service-icon icon-blue">📧</div>
+          <h3>Email Campaigns</h3>
+          <p>
+            Design, send, and track professional email campaigns. Beautiful
+            templates, audience segmentation, and detailed open/click analytics.
+          </p>
+          <span class="service-tag">High Deliverability</span>
+        </div>
+        <div class="service-card">
+          <div class="service-icon icon-purple">🔐</div>
+          <h3>OTP & Verification</h3>
+          <p>
+            Secure your users with one-time passwords via SMS or Email.
+            Lightning-fast delivery for seamless login, signup, and transaction
+            flows.
+          </p>
+          <span class="service-tag">Sub 3s Delivery</span>
+        </div>
+        <div class="service-card">
+          <div class="service-icon icon-orange">🛡️</div>
+          <h3>2FA Authentication</h3>
+          <p>
+            Add an extra layer of security to any application. Our verification
+            API integrates in minutes with any stack — Node, PHP, Python, and
+            more.
+          </p>
+          <span class="service-tag">Developer API</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- WHY NOTIFYPRO -->
+    <section id="why" class="why-section">
+      <div class="section-label">Why NotifyPro</div>
+      <div class="why-grid">
+        <div>
+          <h2 class="section-title">Built for Nigeria.<br />Built to scale.</h2>
+          <p class="section-sub">
+            We're not a generic global platform. We're local experts with direct
+            carrier integrations.
+          </p>
+          <ul class="why-list" style="margin-top: 2rem">
+            <li class="why-item reveal">
+              <div class="why-icon">⚡</div>
+              <div>
+                <h4>Direct Carrier Routes</h4>
+                <p>
+                  We connect directly to MTN, Airtel, Glo, and 9mobile — no
+                  middlemen, faster delivery, better rates.
+                </p>
+              </div>
+            </li>
+            <li class="why-item reveal">
+              <div class="why-icon">🇳🇬</div>
+              <div>
+                <h4>Naira Pricing</h4>
+                <p>
+                  Pay in ₦, get invoiced in ₦. No currency surprises. Simple,
+                  transparent pricing for Nigerian businesses.
+                </p>
+              </div>
+            </li>
+            <li class="why-item reveal">
+              <div class="why-icon">📊</div>
+              <div>
+                <h4>Real-time Dashboard</h4>
+                <p>
+                  Track every delivery, open, click, and conversion in real
+                  time. Know exactly what's working.
+                </p>
+              </div>
+            </li>
+            <li class="why-item reveal">
+              <div class="why-icon">🔌</div>
+              <div>
+                <h4>Simple REST API</h4>
+                <p>
+                  Integrate in under 10 minutes. SDKs for Node.js, PHP, Python,
+                  and Java. Full Postman collection included.
+                </p>
+              </div>
+            </li>
+          </ul>
+        </div>
+        <div class="why-visual reveal">
+          <div class="dashboard-mock">
+            <div
+              style="
+                font-size: 11px;
+                color: var(--muted);
+                letter-spacing: 0.06em;
+                text-transform: uppercase;
+                margin-bottom: 1rem;
+              "
+            >
+              Live Campaign Dashboard
+            </div>
+            <div class="dash-row">
+              <div class="dash-metric">
+                <div class="dash-metric-label">SMS Sent Today</div>
+                <div class="dash-metric-val green">842,310</div>
+              </div>
+              <div class="dash-metric">
+                <div class="dash-metric-label">Delivered</div>
+                <div class="dash-metric-val blue">99.2%</div>
+              </div>
+            </div>
+            <div class="dash-metric" style="margin-bottom: 1rem">
+              <div class="dash-metric-label">OTPs Processed</div>
+              <div class="dash-metric-val" style="color: #ffb800">12,481</div>
+            </div>
+            <div class="dash-bar-wrap">
+              <div class="dash-bar-label">
+                <span>SMS Delivery</span><span>82%</span>
+              </div>
+              <div class="dash-bar-track">
+                <div class="dash-bar-fill fill-green"></div>
+              </div>
+            </div>
+            <div class="dash-bar-wrap" style="margin-top: 12px">
+              <div class="dash-bar-label">
+                <span>Email Open Rate</span><span>64%</span>
+              </div>
+              <div class="dash-bar-track">
+                <div class="dash-bar-fill fill-blue"></div>
+              </div>
+            </div>
+            <div class="dash-bar-wrap" style="margin-top: 12px">
+              <div class="dash-bar-label">
+                <span>OTP Success Rate</span><span>91%</span>
+              </div>
+              <div class="dash-bar-track">
+                <div class="dash-bar-fill fill-amber"></div>
+              </div>
+            </div>
+          </div>
+          <div style="display: flex; gap: 8px; margin-top: 1rem">
+            <div
+              style="
+                flex: 1;
+                background: rgba(0, 232, 122, 0.06);
+                border: 1px solid rgba(0, 232, 122, 0.15);
+                border-radius: 10px;
+                padding: 12px;
+                text-align: center;
+              "
+            >
+              <div
+                style="
+                  font-size: 10px;
+                  color: var(--muted);
+                  text-transform: uppercase;
+                  letter-spacing: 0.05em;
+                "
+              >
+                Uptime
+              </div>
+              <div
+                style="
+                  font-family: var(--font-display);
+                  font-size: 18px;
+                  font-weight: 800;
+                  color: var(--accent);
+                  margin-top: 2px;
+                "
+              >
+                99.9%
+              </div>
+            </div>
+            <div
+              style="
+                flex: 1;
+                background: rgba(0, 191, 255, 0.06);
+                border: 1px solid rgba(0, 191, 255, 0.15);
+                border-radius: 10px;
+                padding: 12px;
+                text-align: center;
+              "
+            >
+              <div
+                style="
+                  font-size: 10px;
+                  color: var(--muted);
+                  text-transform: uppercase;
+                  letter-spacing: 0.05em;
+                "
+              >
+                Avg Speed
+              </div>
+              <div
+                style="
+                  font-family: var(--font-display);
+                  font-size: 18px;
+                  font-weight: 800;
+                  color: var(--accent2);
+                  margin-top: 2px;
+                "
+              >
+                &lt; 3s
+              </div>
+            </div>
+            <div
+              style="
+                flex: 1;
+                background: rgba(255, 184, 0, 0.06);
+                border: 1px solid rgba(255, 184, 0, 0.15);
+                border-radius: 10px;
+                padding: 12px;
+                text-align: center;
+              "
+            >
+              <div
+                style="
+                  font-size: 10px;
+                  color: var(--muted);
+                  text-transform: uppercase;
+                  letter-spacing: 0.05em;
+                "
+              >
+                Support
+              </div>
+              <div
+                style="
+                  font-family: var(--font-display);
+                  font-size: 18px;
+                  font-weight: 800;
+                  color: #ffb800;
+                  margin-top: 2px;
+                "
+              >
+                24/7
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PRICING -->
+    <section id="pricing">
+      <div class="section-label">Pricing</div>
+      <h2 class="section-title">Simple.<br />No surprises.</h2>
+      <p class="section-sub">
+        Naira pricing, pay-as-you-go or monthly plans. Scale when you're ready.
+      </p>
+
+      <div class="pricing-grid reveal">
+        <div class="price-card">
+          <div class="price-plan">Starter</div>
+          <div class="price-amount"><span class="currency">₦</span>5,000</div>
+          <div class="price-sub">per month · up to 5,000 SMS units</div>
+          <ul class="price-features">
+            <li>5,000 SMS per month</li>
+            <li>Unlimited email campaigns</li>
+            <li>OTP service included</li>
+            <li>Basic analytics</li>
+            <li>Email support</li>
+          </ul>
+          <a href="signup.html" class="price-btn price-btn-outline">Get Started</a>
+        </div>
+        <div class="price-card featured">
+          <div
+            style="
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+              margin-bottom: 0.5rem;
+            "
+          >
+            <div class="price-plan">Business</div>
+            <span
+              style="
+                background: var(--accent);
+                color: #000;
+                font-size: 10px;
+                font-weight: 700;
+                padding: 2px 10px;
+                border-radius: 100px;
+                letter-spacing: 0.06em;
+              "
+              >POPULAR</span
+            >
+          </div>
+          <div class="price-amount"><span class="currency">₦</span>25,000</div>
+          <div class="price-sub">per month · up to 30,000 SMS units</div>
+          <ul class="price-features">
+            <li>30,000 SMS per month</li>
+            <li>Unlimited email campaigns</li>
+            <li>OTP + 2FA included</li>
+            <li>Custom sender ID</li>
+            <li>Full analytics & reports</li>
+            <li>Priority support (24/7)</li>
+          </ul>
+          <a href="signup.html" class="price-btn price-btn-fill">Start Free Trial</a>
+        </div>
+        <div class="price-card">
+          <div class="price-plan">Enterprise</div>
+          <div class="price-amount" style="font-size: 28px; padding-top: 6px">
+            Custom
+          </div>
+          <div class="price-sub">Unlimited volume · dedicated routing</div>
+          <ul class="price-features">
+            <li>Unlimited SMS volume</li>
+            <li>Dedicated carrier routes</li>
+            <li>SLA guarantee (99.9%)</li>
+            <li>Custom integrations</li>
+            <li>Dedicated account manager</li>
+            <li>On-premise option available</li>
+          </ul>
+          <a href="https://wa.me/2347070103007?text=Hi%20NotifyPro%2C%20I%27m%20interested%20in%20your%20Enterprise%20plan" target="_blank" class="price-btn price-btn-outline">Talk to Sales</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section id="contact" style="padding: 2rem 6% 6rem">
+      <div class="cta-inner reveal">
+        <h2>
+          Think Wide.<br /><span style="color: var(--accent)">Send Wider.</span>
+        </h2>
+        <p>
+          Join thousands of Nigerian businesses already running on NotifyPro.
+          Start for free, no credit card required.
+        </p>
+        <div
+          style="
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+          "
+        >
+          <a
+            href="signup.html"
+            class="btn-primary"
+            style="font-size: 16px; padding: 16px 40px"
+            >Create Free Account →</a
+          >
+          <a
+            href="https://wa.me/2347070103007?text=Hi%20NotifyPro%2C%20I%27d%20like%20to%20speak%20with%20an%20expert"
+            target="_blank"
+            class="btn-ghost"
+            style="font-size: 16px; padding: 16px 32px"
+            >💬 Talk to an Expert</a
+          >
+        </div>
+        <p style="margin-top: 1.5rem; font-size: 13px; color: var(--muted)">
+          📍 Gbagada, Lagos, Nigeria &nbsp;·&nbsp;
+          hello@notifypro.ng
+        </p>
+      </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+      <a href="#" class="footer-logo">Notify<span>Pro</span></a>
+      <div class="footer-links">
+        <a href="#services">Services</a>
+        <a href="api-docs.html">API Docs</a>
+        <a href="#pricing">Pricing</a>
+        <a href="who-we-are.html">About</a>
+        <a href="privacy.html">Privacy</a>
+        <a href="terms.html">Terms</a>
+      </div>
+      <div class="footer-copy">© 2026 NotifyPro.ng · Made in Nigeria 🇳🇬</div>
+    </footer>
+
+    <!-- ── DEMO MODAL ── -->
+    <div id="demoOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);backdrop-filter:blur(6px);z-index:1000;align-items:center;justify-content:center;padding:1rem">
+      <div style="background:#0D1117;border:1px solid rgba(255,255,255,0.1);border-radius:20px;width:100%;max-width:480px;max-height:92vh;overflow-y:auto;position:relative">
+
+        <!-- Close -->
+        <button onclick="closeDemo()" style="position:absolute;top:14px;right:14px;width:30px;height:30px;border-radius:6px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:#8892A4;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;z-index:1">✕</button>
+
+        <div id="demoContent" style="padding:2rem"></div>
+      </div>
+    </div>
+
+    <style>
+      /* Demo modal shared styles */
+      .demo-badge { display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--accent);background:rgba(0,232,122,0.08);border:1px solid rgba(0,232,122,0.2);border-radius:100px;padding:4px 12px;margin-bottom:1rem; }
+      .demo-h { font-family:var(--font-display);font-size:1.5rem;font-weight:800;margin-bottom:.5rem;line-height:1.2; }
+      .demo-sub { font-size:13px;color:#8892A4;margin-bottom:1.6rem;line-height:1.6; }
+      .demo-label { display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#8892A4;margin-bottom:6px; }
+      .demo-input { width:100%;background:#111820;border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:11px 14px;color:#F0F4FF;font-family:var(--font-body);font-size:14px;outline:none;transition:border-color .2s;margin-bottom:1rem; }
+      .demo-input:focus { border-color:rgba(0,232,122,.35); }
+      .demo-btn { width:100%;padding:13px;background:#00E87A;color:#000;border:none;border-radius:10px;font-family:var(--font-display);font-size:14px;font-weight:800;cursor:pointer;transition:opacity .2s;margin-top:.4rem; }
+      .demo-btn:hover { opacity:.88; }
+      .demo-btn-ghost { width:100%;padding:11px;background:none;color:#8892A4;border:1px solid rgba(255,255,255,0.1);border-radius:10px;font-family:var(--font-body);font-size:13px;cursor:pointer;transition:all .2s;margin-top:.5rem; }
+      .demo-btn-ghost:hover { border-color:rgba(255,255,255,.2);color:#F0F4FF; }
+      .channel-grid { display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1.4rem; }
+      .channel-card { background:#111820;border:2px solid rgba(255,255,255,0.08);border-radius:12px;padding:1.2rem 1rem;text-align:center;cursor:pointer;transition:all .2s; }
+      .channel-card:hover { border-color:rgba(0,232,122,.3);background:rgba(0,232,122,.04); }
+      .channel-card.selected { border-color:#00E87A;background:rgba(0,232,122,.08); }
+      .channel-icon { font-size:26px;margin-bottom:.5rem; }
+      .channel-name { font-family:var(--font-display);font-size:13px;font-weight:700;margin-bottom:2px; }
+      .channel-desc { font-size:11px;color:#8892A4; }
+      .abuse-check { display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.06);font-size:13px; }
+      .abuse-check:last-child { border-bottom:none; }
+      .abuse-icon { width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0; }
+      .abuse-icon.checking { background:rgba(255,184,0,.15);color:#FFB800;animation:spin .8s linear infinite; }
+      .abuse-icon.pass { background:rgba(0,232,122,.15);color:#00E87A; }
+      .abuse-icon.fail { background:rgba(239,68,68,.15);color:#ef4444; }
+      .otp-inputs { display:flex;gap:8px;justify-content:center;margin:1.4rem 0; }
+      .otp-digit { width:44px;height:52px;background:#111820;border:2px solid rgba(255,255,255,0.1);border-radius:10px;color:#F0F4FF;font-family:var(--font-display);font-size:20px;font-weight:800;text-align:center;outline:none;transition:border-color .2s; }
+      .otp-digit:focus { border-color:#00E87A; }
+      .success-ring { width:72px;height:72px;border-radius:50%;background:rgba(0,232,122,.12);border:2px solid rgba(0,232,122,.3);display:flex;align-items:center;justify-content:center;font-size:32px;margin:0 auto 1.2rem;animation:pulse 1.5s ease infinite; }
+      .locked-channels { display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:1rem 0; }
+      .locked-card { background:#111820;border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:.9rem;text-align:center;opacity:.45;position:relative;overflow:hidden; }
+      .locked-card::after { content:'🔒';position:absolute;top:6px;right:8px;font-size:11px; }
+      .locked-name { font-family:var(--font-display);font-size:12px;font-weight:700;margin-top:4px;color:#8892A4; }
+      .progress-steps { display:flex;align-items:center;justify-content:center;gap:4px;margin-bottom:1.6rem; }
+      .ps-dot { width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.15);transition:all .3s; }
+      .ps-dot.active { width:20px;border-radius:3px;background:#00E87A; }
+      .ps-dot.done { background:rgba(0,232,122,.4); }
+      @keyframes spin { to { transform:rotate(360deg); } }
+      @keyframes pulse { 0%,100%{box-shadow:0 0 0 0 rgba(0,232,122,.3)} 50%{box-shadow:0 0 0 10px rgba(0,232,122,0)} }
+    </style>
+
+    <script>
+      // ── Demo flow state ──
+      let demoStep = 1;
+      let demoChannel = null;
+      let demoContact = '';
+      let demoOTP = '';
+
+      const DEMO_KEY = 'np_demo_used';
+
+      function openDemo() {
+        const overlay = document.getElementById('demoOverlay');
+        overlay.style.display = 'flex';
+        demoStep = 1; demoChannel = null; demoContact = '';
+        renderDemo();
+      }
+      function closeDemo() {
+        document.getElementById('demoOverlay').style.display = 'none';
+      }
+      document.getElementById('demoOverlay').addEventListener('click', e => {
+        if (e.target === document.getElementById('demoOverlay')) closeDemo();
+      });
+
+      function renderDemo() {
+        const el = document.getElementById('demoContent');
+        el.innerHTML = stepDots() + demoStepContent();
+      }
+
+      function stepDots() {
+        const total = 6;
+        return `<div class="progress-steps">${Array.from({length:total},(_,i)=>`<div class="ps-dot ${i+1===demoStep?'active':i+1<demoStep?'done':''}"></div>`).join('')}</div>`;
+      }
+
+      // ── Step renderers ──
+      function demoStepContent() {
+        if (demoStep === 1) return step1();
+        if (demoStep === 2) return step2();
+        if (demoStep === 3) return step3();
+        if (demoStep === 4) return step4();
+        if (demoStep === 5) return step5();
+        if (demoStep === 6) return step6();
+        return '';
+      }
+
+      function step1() {
+        return `
+          <div class="demo-badge">🎯 Live Demo — No Account Needed</div>
+          <div class="demo-h">Send a real message to yourself</div>
+          <div class="demo-sub">This is a live demo of NotifyPro. Pick a channel, verify your number or email, and receive an actual test message — free, right now.</div>
+          <div class="channel-grid">
+            <div class="channel-card ${demoChannel==='sms'?'selected':''}" onclick="selectChannel('sms')">
+              <div class="channel-icon">💬</div>
+              <div class="channel-name">Bulk SMS</div>
+              <div class="channel-desc">To your phone</div>
+            </div>
+            <div class="channel-card ${demoChannel==='otp'?'selected':''}" onclick="selectChannel('otp')">
+              <div class="channel-icon">🔐</div>
+              <div class="channel-name">OTP</div>
+              <div class="channel-desc">Verification code</div>
+            </div>
+            <div class="channel-card ${demoChannel==='email'?'selected':''}" onclick="selectChannel('email')">
+              <div class="channel-icon">📧</div>
+              <div class="channel-name">Email</div>
+              <div class="channel-desc">To your inbox</div>
+            </div>
+            <div class="channel-card" style="opacity:.45;cursor:not-allowed;position:relative" title="Coming soon">
+              <div style="position:absolute;top:6px;right:8px;font-size:10px;color:#8892A4">Soon</div>
+              <div class="channel-icon">💚</div>
+              <div class="channel-name">WhatsApp</div>
+              <div class="channel-desc">Coming soon</div>
+            </div>
+          </div>
+          <button class="demo-btn" onclick="demoNext()" ${!demoChannel?'style="opacity:.4;cursor:not-allowed"':''}>Continue →</button>`;
+      }
+
+      function selectChannel(ch) {
+        demoChannel = ch;
+        renderDemo();
+      }
+
+      function step2() {
+        const isEmail = demoChannel === 'email';
+        return `
+          <div class="demo-badge">${demoChannel === 'sms' ? '💬 SMS' : demoChannel === 'otp' ? '🔐 OTP' : '📧 Email'}</div>
+          <div class="demo-h">Enter your ${isEmail ? 'email address' : 'phone number'}</div>
+          <div class="demo-sub">We'll send your free test message directly to you. We don't share or store your details.</div>
+          <label class="demo-label">${isEmail ? 'Email address' : 'Phone number'}</label>
+          <input class="demo-input" id="demoContactInput" type="${isEmail?'email':'tel'}"
+            placeholder="${isEmail ? 'you@example.com' : '080XXXXXXXX'}"
+            value="${demoContact}"
+            oninput="demoContact=this.value" />
+          <div style="font-size:11px;color:#8892A4;margin-bottom:1rem">🔒 Used only to deliver your test message. We don't spam.</div>
+          <button class="demo-btn" onclick="submitContact()">Continue →</button>
+          <button class="demo-btn-ghost" onclick="demoStep=1;renderDemo()">← Back</button>`;
+      }
+
+      function submitContact() {
+        const input = document.getElementById('demoContactInput');
+        const val = input?.value?.trim() || demoContact.trim();
+        demoContact = val;
+        if (!val) { input.style.borderColor='rgba(239,68,68,.5)'; return; }
+        const isEmail = demoChannel === 'email';
+        if (isEmail && !val.includes('@')) { input.style.borderColor='rgba(239,68,68,.5)'; return; }
+        if (!isEmail && val.length < 10) { input.style.borderColor='rgba(239,68,68,.5)'; return; }
+        demoStep = 3;
+        renderDemo();
+        runAbuseChecks();
+      }
+
+      function step3() {
+        return `
+          <div class="demo-badge">🛡️ Security Check</div>
+          <div class="demo-h">Verifying your details</div>
+          <div class="demo-sub">Quick checks to keep the platform safe and fair for everyone.</div>
+          <div id="abuseChecks">
+            <div class="abuse-check"><div class="abuse-icon checking" id="ck1">↻</div><span>Checking device usage…</span></div>
+            <div class="abuse-check"><div class="abuse-icon checking" id="ck2">↻</div><span>Checking ${demoChannel==='email'?'email':'phone'} history…</span></div>
+            <div class="abuse-check"><div class="abuse-icon checking" id="ck3">↻</div><span>Verifying IP address…</span></div>
+            <div class="abuse-check"><div class="abuse-icon checking" id="ck4">↻</div><span>Rate limit check…</span></div>
+          </div>`;
+      }
+
+      function runAbuseChecks() {
+        const used = JSON.parse(localStorage.getItem(DEMO_KEY) || '{}');
+        const deviceUsed   = !!used.device;
+        const contactUsed  = !!(used.contacts || []).includes(demoContact.toLowerCase());
+
+        const checks = [deviceUsed, contactUsed, false, false];
+        const delays = [600, 1100, 1600, 2000];
+
+        delays.forEach((d, i) => {
+          setTimeout(() => {
+            const el = document.getElementById(`ck${i+1}`);
+            if (!el) return;
+            el.classList.remove('checking');
+            el.style.animation = 'none';
+            if (checks[i]) {
+              el.classList.add('fail'); el.textContent = '✕';
+            } else {
+              el.classList.add('pass'); el.textContent = '✓';
+            }
+          }, d);
+        });
+
+        setTimeout(() => {
+          const anyFail = checks.some(Boolean);
+          if (anyFail) {
+            // Show blocked state
+            const el = document.getElementById('abuseChecks');
+            if (el) el.insertAdjacentHTML('afterend', `
+              <div style="margin-top:1.2rem;background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.2);border-radius:10px;padding:1rem;text-align:center">
+                <div style="font-size:22px;margin-bottom:.5rem">🚫</div>
+                <div style="font-size:14px;font-weight:700;color:#F0F4FF;margin-bottom:.4rem">Demo already used</div>
+                <div style="font-size:12px;color:#8892A4;margin-bottom:1rem">This device or contact has already received a free test. Create an account to send unlimited messages.</div>
+                <button class="demo-btn" onclick="window.location='signup.html'">Create Free Account →</button>
+              </div>`);
+          } else {
+            demoStep = 4;
+            renderDemo();
+          }
+        }, 2400);
+      }
+
+      function step4() {
+        const isEmail = demoChannel === 'email';
+        demoOTP = Math.floor(100000 + Math.random() * 900000).toString();
+        return `
+          <div class="demo-badge">✅ All checks passed</div>
+          <div class="demo-h">Verify it's really you</div>
+          <div class="demo-sub">We sent a 6-digit code to <strong style="color:#F0F4FF">${demoContact}</strong>. Enter it below to receive your test message.</div>
+          <div style="background:rgba(0,232,122,.06);border:1px solid rgba(0,232,122,.2);border-radius:10px;padding:.9rem 1rem;font-size:12px;color:#8892A4;margin-bottom:1.2rem;text-align:center">
+            💡 Demo mode: your code is <strong style="color:#00E87A;font-size:16px;letter-spacing:2px">${demoOTP}</strong>
+          </div>
+          <div class="otp-inputs" id="otpInputs">
+            ${Array.from({length:6},(_,i)=>`<input class="otp-digit" maxlength="1" id="od${i}" oninput="otpInput(this,${i})" onkeydown="otpBack(event,${i})" />`).join('')}
+          </div>
+          <button class="demo-btn" onclick="verifyOTP()">Verify & Send →</button>
+          <button class="demo-btn-ghost" onclick="demoStep=2;renderDemo()">← Back</button>`;
+      }
+
+      function otpInput(el, idx) {
+        if (el.value && idx < 5) document.getElementById(`od${idx+1}`)?.focus();
+      }
+      function otpBack(e, idx) {
+        if (e.key === 'Backspace' && !e.target.value && idx > 0) document.getElementById(`od${idx-1}`)?.focus();
+      }
+      function verifyOTP() {
+        const entered = Array.from({length:6},(_,i)=>document.getElementById(`od${i}`)?.value||'').join('');
+        if (entered === demoOTP) {
+          // Mark as used
+          const used = JSON.parse(localStorage.getItem(DEMO_KEY) || '{}');
+          used.device = true;
+          used.contacts = [...(used.contacts||[]), demoContact.toLowerCase()];
+          localStorage.setItem(DEMO_KEY, JSON.stringify(used));
+          demoStep = 5;
+          renderDemo();
+          simulateSend();
+        } else {
+          document.querySelectorAll('.otp-digit').forEach(d => {
+            d.style.borderColor = 'rgba(239,68,68,.5)';
+            setTimeout(() => d.style.borderColor = '', 1500);
+          });
+        }
+      }
+
+      function step5() {
+        return `
+          <div style="text-align:center;padding:.5rem 0">
+            <div style="font-size:40px;margin-bottom:1rem" id="sendAnim">📤</div>
+            <div class="demo-h" id="sendStatus">Sending your message…</div>
+            <div class="demo-sub" id="sendSub">Routing through NotifyPro's delivery network…</div>
+            <div style="background:#111820;border-radius:10px;padding:1rem;margin-top:1rem;text-align:left">
+              <div style="font-size:11px;color:#8892A4;margin-bottom:.5rem;text-transform:uppercase;letter-spacing:.07em">Delivery log</div>
+              <div id="logLines" style="font-family:monospace;font-size:11px;color:#8892A4;line-height:2"></div>
+            </div>
+          </div>`;
+      }
+
+      function simulateSend() {
+        const logs = [
+          '→ Message queued',
+          '→ Selecting optimal gateway…',
+          '→ Gateway: MTN-NG-01',
+          '→ Encoding: GSM-7',
+          '✓ Message delivered',
+        ];
+        const logEl = document.getElementById('logLines');
+        logs.forEach((line, i) => {
+          setTimeout(() => {
+            if (logEl) logEl.innerHTML += `<div style="color:${line.startsWith('✓')?'#00E87A':'#8892A4'}">${line}</div>`;
+          }, i * 500);
+        });
+        setTimeout(() => {
+          demoStep = 6; renderDemo();
+        }, logs.length * 500 + 400);
+      }
+
+      function step6() {
+        const channelName = demoChannel === 'sms' ? 'SMS' : demoChannel === 'otp' ? 'OTP' : 'Email';
+        const otherChannels = [
+          { icon:'💬', name:'Bulk SMS' },
+          { icon:'🔐', name:'OTP' },
+          { icon:'📧', name:'Email' },
+          { icon:'💚', name:'WhatsApp' },
+        ].filter(c => c.name.toLowerCase().replace(' ','') !== (demoChannel==='sms'?'bulksms':demoChannel));
+
+        return `
+          <div style="text-align:center">
+            <div class="success-ring">✅</div>
+            <div class="demo-h">Message delivered!</div>
+            <div class="demo-sub">Your ${channelName} test was sent to <strong style="color:#F0F4FF">${demoContact}</strong>. Check your ${demoChannel==='email'?'inbox':'phone'}.</div>
+          </div>
+
+          <div style="background:#111820;border:1px solid rgba(0,232,122,.15);border-radius:10px;padding:1rem;margin:1rem 0;font-size:13px;color:#8892A4">
+            <div style="color:#00E87A;font-weight:700;margin-bottom:4px">✓ Delivered via NotifyPro</div>
+            Channel: ${channelName} &nbsp;·&nbsp; Status: Delivered &nbsp;·&nbsp; Latency: &lt;2s
+          </div>
+
+          <div style="font-size:12px;color:#8892A4;margin:1.2rem 0 .6rem;text-align:center">Want to try these channels? Sign up to unlock:</div>
+          <div class="locked-channels">
+            ${otherChannels.map(c=>`
+              <div class="locked-card">
+                <div style="font-size:22px">${c.icon}</div>
+                <div class="locked-name">${c.name}</div>
+              </div>`).join('')}
+          </div>
+
+          <button class="demo-btn" onclick="window.location='signup.html'" style="margin-top:1rem">🚀 Create Free Account — Unlock All Channels</button>
+          <div style="text-align:center;margin-top:.8rem;font-size:12px;color:#8892A4">No credit card required · 50 free messages on signup</div>
+          <button class="demo-btn-ghost" onclick="closeDemo()">Maybe later</button>`;
+      }
+
+      function demoNext() {
+        if (demoStep === 1 && !demoChannel) return;
+        demoStep++;
+        renderDemo();
+      }
+    </script>
+
+    <script>
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((e, i) => {
+            if (e.isIntersecting) {
+              setTimeout(() => e.target.classList.add("visible"), i * 80);
+            }
+          });
+        },
+        { threshold: 0.1 },
+      );
+      document
+        .querySelectorAll(".reveal")
+        .forEach((el) => observer.observe(el));
+    </script>
+  </body>
+</html>

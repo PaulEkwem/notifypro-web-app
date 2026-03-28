@@ -1,0 +1,543 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WhatsApp — NotifyPro</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../assets/css/dashboard.css" />
+    <style>
+      /* ── Coming Soon Banner ── */
+      .wa-coming-soon-banner {
+        background: linear-gradient(135deg, rgba(37,211,102,0.08) 0%, rgba(37,211,102,0.03) 100%);
+        border: 1px solid rgba(37,211,102,0.25);
+        border-radius: var(--radius-lg);
+        padding: 2.5rem 2rem;
+        text-align: center;
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+      }
+      .wa-coming-soon-banner::before {
+        content: '';
+        position: absolute;
+        top: -60px; left: 50%;
+        transform: translateX(-50%);
+        width: 280px; height: 280px;
+        background: radial-gradient(circle, rgba(37,211,102,0.12) 0%, transparent 70%);
+        pointer-events: none;
+      }
+      .wa-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: #25D366;
+        background: rgba(37,211,102,0.1);
+        border: 1px solid rgba(37,211,102,0.3);
+        border-radius: 100px;
+        padding: 5px 14px;
+        margin-bottom: 1rem;
+      }
+      .wa-badge-dot {
+        width: 6px; height: 6px;
+        border-radius: 50%;
+        background: #25D366;
+        animation: pulse-green 1.5s ease-in-out infinite;
+      }
+      @keyframes pulse-green {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50%       { opacity: 0.4; transform: scale(0.7); }
+      }
+      .wa-coming-soon-banner h2 {
+        font-family: var(--font-display);
+        font-size: clamp(1.6rem, 3vw, 2.4rem);
+        font-weight: 800;
+        letter-spacing: -0.5px;
+        margin-bottom: 0.8rem;
+        line-height: 1.2;
+      }
+      .wa-coming-soon-banner h2 span { color: #25D366; }
+      .wa-coming-soon-banner p {
+        color: var(--muted);
+        font-size: 14px;
+        max-width: 480px;
+        margin: 0 auto 1.5rem;
+        line-height: 1.7;
+      }
+      .wa-notify-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(37,211,102,0.12);
+        border: 1px solid rgba(37,211,102,0.35);
+        color: #25D366;
+        font-size: 13px;
+        font-weight: 600;
+        padding: 10px 22px;
+        border-radius: 100px;
+        cursor: pointer;
+        transition: background 0.2s, transform 0.15s;
+        font-family: var(--font-body);
+      }
+      .wa-notify-btn:hover { background: rgba(37,211,102,0.2); transform: translateY(-1px); }
+
+      /* ── Stats row ── */
+      .wa-stats-row {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1rem;
+        margin-bottom: 2rem;
+      }
+      .wa-stat-card {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: var(--radius-md);
+        padding: 1.2rem 1.4rem;
+        text-align: center;
+      }
+      .wa-stat-num {
+        font-family: var(--font-display);
+        font-size: 1.8rem;
+        font-weight: 800;
+        color: #25D366;
+        line-height: 1;
+        margin-bottom: 4px;
+      }
+      .wa-stat-label {
+        font-size: 12px;
+        color: var(--muted);
+      }
+
+      /* ── Section label ── */
+      .section-label-wa {
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        color: #25D366;
+        margin-bottom: 0.8rem;
+      }
+
+      /* ── Services grid ── */
+      .wa-services-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+        margin-bottom: 2rem;
+      }
+      .wa-service-card {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: var(--radius-lg);
+        padding: 1.6rem;
+        position: relative;
+        overflow: hidden;
+        transition: border-color 0.2s, transform 0.2s;
+      }
+      .wa-service-card::before {
+        content: '';
+        position: absolute;
+        top: -30px; right: -30px;
+        width: 90px; height: 90px;
+        border-radius: 50%;
+        background: rgba(37,211,102,0.06);
+        pointer-events: none;
+      }
+      .wa-service-card:hover {
+        border-color: rgba(37,211,102,0.2);
+        transform: translateY(-2px);
+      }
+      .wa-service-icon {
+        width: 40px; height: 40px;
+        background: rgba(37,211,102,0.1);
+        border: 1px solid rgba(37,211,102,0.2);
+        border-radius: var(--radius-md);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1rem;
+        font-size: 18px;
+      }
+      .wa-service-pill {
+        position: absolute;
+        top: 1rem; right: 1rem;
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: #25D366;
+        background: rgba(37,211,102,0.1);
+        border: 1px solid rgba(37,211,102,0.25);
+        border-radius: 100px;
+        padding: 3px 10px;
+      }
+      .wa-service-card h3 {
+        font-family: var(--font-display);
+        font-size: 15px;
+        font-weight: 800;
+        margin-bottom: 0.5rem;
+      }
+      .wa-service-card p {
+        font-size: 13px;
+        color: var(--muted);
+        line-height: 1.65;
+        margin-bottom: 1rem;
+      }
+      .wa-service-features {
+        list-style: none;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .wa-service-features li {
+        font-size: 12px;
+        color: var(--muted);
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+        line-height: 1.5;
+      }
+      .wa-feature-dot {
+        width: 5px; height: 5px;
+        border-radius: 50%;
+        background: #25D366;
+        flex-shrink: 0;
+        margin-top: 5px;
+        opacity: 0.7;
+      }
+
+      /* ── How it works ── */
+      .wa-how-section {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: var(--radius-lg);
+        padding: 1.8rem;
+        margin-bottom: 2rem;
+      }
+      .wa-how-section h3 {
+        font-family: var(--font-display);
+        font-size: 15px;
+        font-weight: 800;
+        margin-bottom: 1.4rem;
+      }
+      .wa-steps {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1rem;
+      }
+      .wa-step { text-align: center; }
+      .wa-step-num {
+        width: 36px; height: 36px;
+        border-radius: 50%;
+        background: rgba(37,211,102,0.1);
+        border: 1px solid rgba(37,211,102,0.25);
+        color: #25D366;
+        font-family: var(--font-display);
+        font-size: 14px;
+        font-weight: 800;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 0.75rem;
+      }
+      .wa-step-label {
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--text);
+        margin-bottom: 4px;
+      }
+      .wa-step-desc {
+        font-size: 11px;
+        color: var(--muted);
+        line-height: 1.5;
+      }
+
+      /* ── Early access ── */
+      .wa-early-access {
+        background: linear-gradient(135deg, rgba(37,211,102,0.06) 0%, rgba(0,191,255,0.04) 100%);
+        border: 1px solid rgba(37,211,102,0.2);
+        border-radius: var(--radius-lg);
+        padding: 1.8rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 2rem;
+      }
+      .wa-early-left h3 {
+        font-family: var(--font-display);
+        font-size: 16px;
+        font-weight: 800;
+        margin-bottom: 0.4rem;
+      }
+      .wa-early-left p {
+        font-size: 13px;
+        color: var(--muted);
+      }
+      .wa-early-form {
+        display: flex;
+        gap: 8px;
+        flex-shrink: 0;
+      }
+      .wa-early-input {
+        background: rgba(255,255,255,0.05);
+        border: 1px solid var(--card-border);
+        border-radius: var(--radius-md);
+        padding: 10px 14px;
+        font-size: 13px;
+        color: var(--text);
+        font-family: var(--font-body);
+        outline: none;
+        width: 220px;
+        transition: border-color 0.2s;
+      }
+      .wa-early-input::placeholder { color: var(--muted); }
+      .wa-early-input:focus { border-color: rgba(37,211,102,0.4); }
+      .wa-early-submit {
+        background: #25D366;
+        color: #000;
+        border: none;
+        border-radius: var(--radius-md);
+        padding: 10px 20px;
+        font-size: 13px;
+        font-weight: 700;
+        cursor: pointer;
+        font-family: var(--font-body);
+        transition: opacity 0.2s, transform 0.15s;
+        white-space: nowrap;
+      }
+      .wa-early-submit:hover { opacity: 0.88; transform: translateY(-1px); }
+
+      /* ── Toast ── */
+      #waToast {
+        position: fixed;
+        bottom: 24px; left: 50%;
+        transform: translateX(-50%) translateY(80px);
+        background: rgba(37,211,102,0.15);
+        border: 1px solid rgba(37,211,102,0.4);
+        color: #25D366;
+        padding: 10px 20px;
+        border-radius: 100px;
+        font-size: 13px;
+        font-weight: 600;
+        z-index: 999;
+        transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1), opacity 0.3s;
+        opacity: 0;
+        pointer-events: none;
+        white-space: nowrap;
+      }
+      #waToast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+      @media (max-width: 900px) {
+        .wa-services-grid { grid-template-columns: 1fr; }
+        .wa-steps { grid-template-columns: repeat(2, 1fr); }
+        .wa-stats-row { grid-template-columns: 1fr 1fr; }
+        .wa-early-access { flex-direction: column; align-items: flex-start; }
+        .wa-early-form { width: 100%; }
+        .wa-early-input { flex: 1; width: auto; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="dash-layout">
+      <!-- Sidebar injected by sidebar.js -->
+
+      <div class="main">
+        <main class="page-content">
+
+          <!-- HEADER -->
+          <div class="page-header">
+            <div class="page-header-left">
+              <h1>WhatsApp</h1>
+              <p>Business messaging at scale — coming soon.</p>
+            </div>
+          </div>
+
+          <!-- Coming Soon Banner -->
+          <div class="wa-coming-soon-banner">
+            <div class="wa-badge">
+              <span class="wa-badge-dot"></span>
+              Coming Soon
+            </div>
+            <h2>WhatsApp Messaging<br /><span>is on its way</span></h2>
+            <p>We're building full WhatsApp Business API integration so you can send notifications, OTPs, and campaigns directly to your customers on WhatsApp — the platform they use every day.</p>
+            <button class="wa-notify-btn" onclick="focusWaitlist()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+              Notify Me When It Launches
+            </button>
+          </div>
+
+          <!-- Stats row -->
+          <div class="wa-stats-row">
+            <div class="wa-stat-card">
+              <div class="wa-stat-num">98%</div>
+              <div class="wa-stat-label">WhatsApp message open rate</div>
+            </div>
+            <div class="wa-stat-card">
+              <div class="wa-stat-num">2B+</div>
+              <div class="wa-stat-label">Active WhatsApp users globally</div>
+            </div>
+            <div class="wa-stat-card">
+              <div class="wa-stat-num">45%</div>
+              <div class="wa-stat-label">Avg. click-through rate on WhatsApp</div>
+            </div>
+          </div>
+
+          <!-- What we're building -->
+          <div class="section-label-wa">What We're Building</div>
+          <div class="wa-services-grid">
+
+            <div class="wa-service-card">
+              <div class="wa-service-pill">Soon</div>
+              <div class="wa-service-icon">📣</div>
+              <h3>Bulk WhatsApp Campaigns</h3>
+              <p>Send promotional messages, announcements, and updates to thousands of opted-in customers at once — with rich media support.</p>
+              <ul class="wa-service-features">
+                <li><span class="wa-feature-dot"></span>Send to contact lists or CSV uploads</li>
+                <li><span class="wa-feature-dot"></span>Images, PDFs, and video attachments</li>
+                <li><span class="wa-feature-dot"></span>Personalisation with merge tags (name, order ID, etc.)</li>
+                <li><span class="wa-feature-dot"></span>Delivery and read receipt tracking</li>
+              </ul>
+            </div>
+
+            <div class="wa-service-card">
+              <div class="wa-service-pill">Soon</div>
+              <div class="wa-service-icon">🔐</div>
+              <h3>WhatsApp OTP & 2FA</h3>
+              <p>Deliver one-time passwords and two-factor authentication codes via WhatsApp — higher delivery rates than SMS on some networks.</p>
+              <ul class="wa-service-features">
+                <li><span class="wa-feature-dot"></span>Instant OTP delivery via API</li>
+                <li><span class="wa-feature-dot"></span>Automatic code expiry and rate limiting</li>
+                <li><span class="wa-feature-dot"></span>Template-based messages (Meta-approved)</li>
+                <li><span class="wa-feature-dot"></span>Fallback to SMS if WhatsApp fails</li>
+              </ul>
+            </div>
+
+            <div class="wa-service-card">
+              <div class="wa-service-pill">Soon</div>
+              <div class="wa-service-icon">🏢</div>
+              <h3>WhatsApp Business API</h3>
+              <p>Connect your own WhatsApp Business number and manage conversations at enterprise scale with full API access.</p>
+              <ul class="wa-service-features">
+                <li><span class="wa-feature-dot"></span>Verified business number (green tick)</li>
+                <li><span class="wa-feature-dot"></span>Two-way messaging and conversation management</li>
+                <li><span class="wa-feature-dot"></span>Webhook support for incoming messages</li>
+                <li><span class="wa-feature-dot"></span>REST API with full documentation</li>
+              </ul>
+            </div>
+
+            <div class="wa-service-card">
+              <div class="wa-service-pill">Soon</div>
+              <div class="wa-service-icon">🤖</div>
+              <h3>WhatsApp Chatbot & Automations</h3>
+              <p>Automate customer conversations with intelligent flows — handle FAQs, order tracking, and support without human agents.</p>
+              <ul class="wa-service-features">
+                <li><span class="wa-feature-dot"></span>No-code flow builder</li>
+                <li><span class="wa-feature-dot"></span>Smart keyword triggers</li>
+                <li><span class="wa-feature-dot"></span>Handoff to human agent when needed</li>
+                <li><span class="wa-feature-dot"></span>Integration with your CRM or backend</li>
+              </ul>
+            </div>
+
+          </div>
+
+          <!-- How it works -->
+          <div class="wa-how-section">
+            <div class="section-label-wa">How It Will Work</div>
+            <h3>From setup to first message in minutes</h3>
+            <div class="wa-steps">
+              <div class="wa-step">
+                <div class="wa-step-num">1</div>
+                <div class="wa-step-label">Connect Number</div>
+                <div class="wa-step-desc">Link your WhatsApp Business number or use a NotifyPro shared sender</div>
+              </div>
+              <div class="wa-step">
+                <div class="wa-step-num">2</div>
+                <div class="wa-step-label">Get Templates Approved</div>
+                <div class="wa-step-desc">Submit message templates for Meta approval — we handle the process</div>
+              </div>
+              <div class="wa-step">
+                <div class="wa-step-num">3</div>
+                <div class="wa-step-label">Import Contacts</div>
+                <div class="wa-step-desc">Upload opted-in contacts via CSV or sync from your existing contacts list</div>
+              </div>
+              <div class="wa-step">
+                <div class="wa-step-num">4</div>
+                <div class="wa-step-label">Send & Track</div>
+                <div class="wa-step-desc">Send campaigns or trigger via API, then track delivery and reads in real time</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Early Access -->
+          <div class="wa-early-access" id="earlyAccessRow">
+            <div class="wa-early-left">
+              <h3>Get Early Access</h3>
+              <p>Be the first to try WhatsApp messaging when we launch. Early users get priority onboarding and discounted rates.</p>
+            </div>
+            <div class="wa-early-form">
+              <input class="wa-early-input" type="email" id="earlyEmail" placeholder="your@email.com" />
+              <button class="wa-early-submit" onclick="submitEarlyAccess()">Join Waitlist →</button>
+            </div>
+          </div>
+
+        </main>
+      </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="waToast"></div>
+
+    <script>
+      window.NP_PAGE  = 'whatsapp';
+      window.NP_TITLE = 'WhatsApp';
+    </script>
+    <script src="../assets/js/sidebar.js"></script>
+    <script type="module" src="../assets/js/auth-guard.js"></script>
+    <script src="../assets/js/topbar.js"></script>
+    <script>
+      'use strict';
+
+      function showWaToast(msg) {
+        const t = document.getElementById('waToast');
+        t.textContent = msg;
+        t.classList.add('show');
+        setTimeout(() => t.classList.remove('show'), 3500);
+      }
+
+      function focusWaitlist() {
+        document.getElementById('earlyAccessRow').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        setTimeout(() => document.getElementById('earlyEmail').focus(), 400);
+      }
+
+      function submitEarlyAccess() {
+        const email = document.getElementById('earlyEmail').value.trim();
+        if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+          showWaToast('Please enter a valid email address.');
+          return;
+        }
+        const waitlist = JSON.parse(localStorage.getItem('np_wa_waitlist') || '[]');
+        if (waitlist.includes(email)) {
+          showWaToast("You're already on the waitlist!");
+          return;
+        }
+        waitlist.push(email);
+        localStorage.setItem('np_wa_waitlist', JSON.stringify(waitlist));
+        document.getElementById('earlyEmail').value = '';
+        showWaToast("✓ You're on the waitlist — we'll be in touch!");
+      }
+
+      window.npLogout = function () {
+        window.location.href = '../login.html';
+      };
+    </script>
+  </body>
+</html>

@@ -1,0 +1,351 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Get Started — NotifyPro</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="assets/css/signup.css" />
+  </head>
+  <body>
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+
+    <!-- NAV -->
+    <nav>
+      <a href="index.html" class="logo">Notify<span>Pro</span></a>
+      <a href="index.html" class="nav-back">← Back to home</a>
+    </nav>
+
+    <!-- PAGE -->
+    <div class="page-wrap">
+      <div class="signup-container">
+        <!-- Progress -->
+        <div class="progress-wrap">
+          <div class="step-labels">
+            <span class="step-label active" id="lbl-1">Account</span>
+            <span class="step-label" id="lbl-2">Plan</span>
+            <span class="step-label" id="lbl-3">Services</span>
+            <span class="step-label" id="lbl-4">Verify</span>
+          </div>
+          <div class="progress-track">
+            <div
+              class="progress-fill"
+              id="progress-fill"
+              style="width: 25%"
+            ></div>
+          </div>
+        </div>
+
+        <!-- Card -->
+        <div class="card">
+          <!-- STEP 1: Account Details -->
+          <div class="step active" id="step-1">
+            <h2 class="step-heading">Create your account</h2>
+            <p class="step-sub">Tell us about you and your business.</p>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>First Name</label>
+                <input type="text" id="firstName" placeholder="e.g. Emeka" />
+                <div class="error-msg" id="err-firstName">
+                  First name is required
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Last Name</label>
+                <input type="text" id="lastName" placeholder="e.g. Okafor" />
+                <div class="error-msg" id="err-lastName">
+                  Last name is required
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Business Name</label>
+              <input
+                type="text"
+                id="bizName"
+                placeholder="e.g. Okafor Ventures Ltd"
+              />
+              <div class="error-msg" id="err-bizName">
+                Business name is required
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Email Address</label>
+              <input
+                type="email"
+                id="email"
+                placeholder="hello@yourbusiness.ng"
+              />
+              <div class="error-msg" id="err-email">
+                Enter a valid email address
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>Phone Number</label>
+                <input type="tel" id="phone" placeholder="+234 800 000 0000" />
+                <div class="error-msg" id="err-phone">
+                  Enter a valid phone number
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Password</label>
+                <div class="pw-wrap">
+                  <input
+                    type="password"
+                    id="password"
+                    placeholder="Min. 8 characters"
+                  />
+                  <button class="pw-toggle" type="button" onclick="togglePw()">
+                    👁
+                  </button>
+                </div>
+                <div class="pw-strength">
+                  <div class="pw-strength-track">
+                    <div class="pw-strength-fill" id="pw-fill"></div>
+                  </div>
+                  <div class="pw-strength-label" id="pw-label"></div>
+                </div>
+                <div class="error-msg" id="err-password">
+                  Password must be at least 8 characters
+                </div>
+              </div>
+            </div>
+
+            <div class="btn-row" style="margin-top: 1.5rem">
+              <button class="btn-primary" onclick="goStep(2)">
+                Continue →
+              </button>
+            </div>
+            <div class="login-link">
+              Already have an account? <a href="login.html">Log in</a>
+            </div>
+          </div>
+
+          <!-- STEP 2: Choose Plan -->
+          <div class="step" id="step-2">
+            <h2 class="step-heading">Choose your plan</h2>
+            <p class="step-sub">
+              You can upgrade anytime. All plans include a free trial.
+            </p>
+
+            <div class="plan-grid">
+              <label
+                class="plan-card"
+                id="plan-starter"
+                onclick="selectPlan('starter')"
+              >
+                <input type="radio" name="plan" value="starter" />
+                <div class="plan-name">Starter</div>
+                <div class="plan-price">₦5k<span>/mo</span></div>
+                <div class="plan-detail">5,000 SMS units</div>
+              </label>
+              <label
+                class="plan-card selected"
+                id="plan-business"
+                onclick="selectPlan('business')"
+              >
+                <div class="plan-popular">POPULAR</div>
+                <input type="radio" name="plan" value="business" checked />
+                <div class="plan-name">Business</div>
+                <div class="plan-price">₦25k<span>/mo</span></div>
+                <div class="plan-detail">30,000 SMS units</div>
+              </label>
+              <label
+                class="plan-card"
+                id="plan-enterprise"
+                onclick="selectPlan('enterprise')"
+              >
+                <input type="radio" name="plan" value="enterprise" />
+                <div class="plan-name">Enterprise</div>
+                <div
+                  class="plan-price"
+                  style="font-size: 16px; padding-top: 3px"
+                >
+                  Custom
+                </div>
+                <div class="plan-detail">Unlimited volume</div>
+              </label>
+            </div>
+
+            <div class="btn-row">
+              <button class="btn-back" onclick="goStep(1)">←</button>
+              <button class="btn-primary" onclick="goStep(3)">
+                Continue →
+              </button>
+            </div>
+          </div>
+
+          <!-- STEP 3: Choose Services -->
+          <div class="step" id="step-3">
+            <h2 class="step-heading">What do you need?</h2>
+            <p class="step-sub">
+              Pick all services you plan to use. You can change this later.
+            </p>
+
+            <div class="service-grid">
+              <div class="service-card selected" id="svc-sms">
+                <div class="service-icon">💬</div>
+                <div class="service-info">
+                  <h4>Bulk SMS</h4>
+                  <p>Mass messaging to Nigerian networks</p>
+                </div>
+                <div class="service-check">✓</div>
+              </div>
+              <div class="service-card" id="svc-email">
+                <div class="service-icon">📧</div>
+                <div class="service-info">
+                  <h4>Email Campaigns</h4>
+                  <p>Design & track email campaigns</p>
+                </div>
+                <div class="service-check"></div>
+              </div>
+              <div class="service-card" id="svc-otp">
+                <div class="service-icon">🔐</div>
+                <div class="service-info">
+                  <h4>OTP Verification</h4>
+                  <p>Sub 3s one-time passwords</p>
+                </div>
+                <div class="service-check"></div>
+              </div>
+              <div class="service-card" id="svc-2fa">
+                <div class="service-icon">🛡️</div>
+                <div class="service-info">
+                  <h4>2FA Authentication</h4>
+                  <p>Secure your app with 2-factor auth</p>
+                </div>
+                <div class="service-check"></div>
+              </div>
+            </div>
+
+            <div class="btn-row">
+              <button class="btn-back" onclick="goStep(2)">←</button>
+              <button class="btn-primary" onclick="goStep(4)">
+                Continue →
+              </button>
+            </div>
+          </div>
+
+          <!-- STEP 4: Verify -->
+          <div class="step" id="step-4">
+            <h2 class="step-heading">Verify your email</h2>
+            <p class="step-sub">
+              Enter the 6-digit code sent to your email address.
+            </p>
+
+            <div class="verify-info">
+              Code sent to
+              <strong id="verify-email-display">your email</strong>. Check your
+              inbox (and spam folder).
+            </div>
+
+            <button
+              class="btn-primary"
+              id="verify-send-btn"
+              onclick="sendOtpEmail()"
+              style="margin-bottom: 1.2rem"
+            >
+              Send Code →
+            </button>
+
+            <div class="otp-wrap">
+              <input
+                class="otp-input"
+                maxlength="1"
+                id="otp1"
+                oninput="otpNext(this, 'otp2')"
+                onkeydown="otpBack(event, this, null, 'otp1')"
+              />
+              <input
+                class="otp-input"
+                maxlength="1"
+                id="otp2"
+                oninput="otpNext(this, 'otp3')"
+                onkeydown="otpBack(event, this, 'otp1', 'otp2')"
+              />
+              <input
+                class="otp-input"
+                maxlength="1"
+                id="otp3"
+                oninput="otpNext(this, 'otp4')"
+                onkeydown="otpBack(event, this, 'otp2', 'otp3')"
+              />
+              <input
+                class="otp-input"
+                maxlength="1"
+                id="otp4"
+                oninput="otpNext(this, 'otp5')"
+                onkeydown="otpBack(event, this, 'otp3', 'otp4')"
+              />
+              <input
+                class="otp-input"
+                maxlength="1"
+                id="otp5"
+                oninput="otpNext(this, 'otp6')"
+                onkeydown="otpBack(event, this, 'otp4', 'otp5')"
+              />
+              <input
+                class="otp-input"
+                maxlength="1"
+                id="otp6"
+                oninput="otpNext(this, null)"
+                onkeydown="otpBack(event, this, 'otp5', 'otp6')"
+              />
+            </div>
+
+            <div class="resend">
+              Didn't receive it? <a onclick="resendCode()">Resend code</a>
+              <span id="resend-timer"></span>
+            </div>
+
+            <div class="btn-row" style="margin-top: 1.5rem">
+              <button class="btn-back" onclick="goStep(3)">←</button>
+              <button class="btn-primary" onclick="verifyOtp()">
+                Verify & Finish →
+              </button>
+            </div>
+          </div>
+
+          <!-- STEP 5: Success -->
+          <div class="step" id="step-5">
+            <div class="success-wrap">
+              <div class="success-icon">🎉</div>
+              <h2>You're all set!</h2>
+              <p>
+                Welcome to NotifyPro. Your account is ready. Start sending in
+                seconds.
+              </p>
+              <a
+                href="pages/dashboard.html"
+                class="btn-primary"
+                style="
+                  display: inline-block;
+                  text-decoration: none;
+                  padding: 14px 40px;
+                  width: auto;
+                "
+                >Go to Dashboard →</a
+              >
+            </div>
+          </div>
+        </div>
+        <!-- /card -->
+      </div>
+      <!-- /signup-container -->
+    </div>
+    <!-- /page-wrap -->
+
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <script type="module" src="assets/js/signup.js"></script>
+  </body>
+</html>

@@ -1,0 +1,676 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Contacts — NotifyPro</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../assets/css/dashboard.css" />
+    <style>
+      .contact-avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: var(--font-display);
+        font-size: 12px;
+        font-weight: 800;
+        color: #000;
+        flex-shrink: 0;
+      }
+      .group-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: var(--radius-md);
+        padding: 0.85rem 1.1rem;
+        cursor: pointer;
+        transition:
+          border-color var(--transition),
+          transform var(--transition);
+      }
+      .group-chip:hover {
+        border-color: rgba(255, 255, 255, 0.18);
+        transform: translateY(-1px);
+      }
+      .group-chip.active {
+        border-color: var(--accent);
+        background: rgba(0, 232, 122, 0.05);
+      }
+      .group-name {
+        font-size: 13px;
+        font-weight: 500;
+      }
+      .group-count {
+        font-size: 11px;
+        color: var(--muted);
+        margin-top: 1px;
+      }
+      .group-icon {
+        font-size: 18px;
+        margin-right: 4px;
+      }
+      .groups-row {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+      .filter-bar {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+        padding: 1rem;
+        background: var(--bg2);
+        border: 1px solid var(--card-border);
+        border-radius: var(--radius-md);
+      }
+      .filter-bar input {
+        flex: 1;
+        min-width: 160px;
+        background: var(--bg3);
+        border: 1px solid var(--card-border);
+        border-radius: var(--radius-sm);
+        padding: 7px 12px;
+        color: var(--text);
+        font-family: var(--font-body);
+        font-size: 13px;
+        outline: none;
+        transition: border-color var(--transition);
+      }
+      .filter-bar input:focus {
+        border-color: rgba(0, 232, 122, 0.35);
+      }
+      .filter-bar select {
+        background: var(--bg3);
+        border: 1px solid var(--card-border);
+        border-radius: var(--radius-sm);
+        padding: 7px 12px;
+        color: var(--text);
+        font-family: var(--font-body);
+        font-size: 13px;
+        outline: none;
+        appearance: none;
+        transition: border-color var(--transition);
+        cursor: pointer;
+      }
+      .checkbox-col {
+        width: 36px;
+      }
+      input[type="checkbox"] {
+        accent-color: var(--accent);
+        width: 15px;
+        height: 15px;
+        cursor: pointer;
+      }
+      .bulk-bar {
+        display: none;
+        align-items: center;
+        gap: 12px;
+        padding: 0.75rem 1rem;
+        background: rgba(0, 232, 122, 0.06);
+        border: 1px solid rgba(0, 232, 122, 0.2);
+        border-radius: var(--radius-md);
+        font-size: 13px;
+      }
+      .bulk-bar.show {
+        display: flex;
+      }
+      .two-col {
+        display: grid;
+        grid-template-columns: 1fr 320px;
+        gap: 1rem;
+      }
+      @media (max-width: 900px) {
+        .two-col {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="dash-layout">
+      <div class="main">
+        <main class="page-content">
+          <!-- HEADER -->
+          <div class="page-header">
+            <div class="page-header-left">
+              <h1>Contacts</h1>
+              <p>Manage your audience groups and subscriber lists.</p>
+            </div>
+            <div class="page-header-actions">
+              <button class="btn-secondary" onclick="importContacts()">
+                <svg
+                  width="13"
+                  height="13"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                  <polyline points="17 8 12 3 7 8" />
+                  <line x1="12" y1="3" x2="12" y2="15" />
+                </svg>
+                Import CSV
+              </button>
+              <button class="btn-primary" onclick="addContact()">
+                + Add Contact
+              </button>
+            </div>
+          </div>
+
+          <!-- STATS -->
+          <div class="stats-row">
+            <div class="stat-card green">
+              <div class="stat-card-top">
+                <div class="stat-label">Total Contacts</div>
+                <div class="stat-icon green">👥</div>
+              </div>
+              <div class="stat-val green" id="cStatTotal">0</div>
+              <div class="stat-change up">↑ 428 <span>this month</span></div>
+            </div>
+            <div class="stat-card blue">
+              <div class="stat-card-top">
+                <div class="stat-label">Active</div>
+                <div class="stat-icon blue">✅</div>
+              </div>
+              <div class="stat-val blue" id="cStatActive">0</div>
+              <div class="stat-change up">
+                ↑ 2.1% <span>vs last month</span>
+              </div>
+            </div>
+            <div class="stat-card amber">
+              <div class="stat-card-top">
+                <div class="stat-label">Groups</div>
+                <div class="stat-icon amber">📁</div>
+              </div>
+              <div class="stat-val amber">6</div>
+              <div class="stat-change up">+1 <span>new this month</span></div>
+            </div>
+            <div class="stat-card red">
+              <div class="stat-card-top">
+                <div class="stat-label">Unsubscribed</div>
+                <div class="stat-icon red">🚫</div>
+              </div>
+              <div class="stat-val red" id="cStatUnsub">0</div>
+              <div class="stat-change down">↑ 12 <span>this month</span></div>
+            </div>
+          </div>
+
+          <div class="two-col">
+            <div style="display: flex; flex-direction: column; gap: 1rem">
+              <!-- GROUPS -->
+              <div class="card">
+                <div class="card-header">
+                  <div class="card-title">Contact Groups</div>
+                  <button class="btn-secondary text-sm" onclick="newGroup()">
+                    + New Group
+                  </button>
+                </div>
+                <div class="groups-row">
+                  <div
+                    class="group-chip active"
+                    onclick="filterByGroup(this, 'all')"
+                  >
+                    <span class="group-icon">👥</span>
+                    <div>
+                      <div class="group-name">All Contacts</div>
+                      <div class="group-count">14,891</div>
+                    </div>
+                  </div>
+                  <div
+                    class="group-chip"
+                    onclick="filterByGroup(this, 'customers')"
+                  >
+                    <span class="group-icon">🛍️</span>
+                    <div>
+                      <div class="group-name">Customers</div>
+                      <div class="group-count">8,420</div>
+                    </div>
+                  </div>
+                  <div
+                    class="group-chip"
+                    onclick="filterByGroup(this, 'prospects')"
+                  >
+                    <span class="group-icon">🎯</span>
+                    <div>
+                      <div class="group-name">Prospects</div>
+                      <div class="group-count">3,210</div>
+                    </div>
+                  </div>
+                  <div class="group-chip" onclick="filterByGroup(this, 'vip')">
+                    <span class="group-icon">⭐</span>
+                    <div>
+                      <div class="group-name">VIP</div>
+                      <div class="group-count">920</div>
+                    </div>
+                  </div>
+                  <div
+                    class="group-chip"
+                    onclick="filterByGroup(this, 'inactive')"
+                  >
+                    <span class="group-icon">💤</span>
+                    <div>
+                      <div class="group-name">Inactive</div>
+                      <div class="group-count">1,840</div>
+                    </div>
+                  </div>
+                  <div
+                    class="group-chip"
+                    onclick="filterByGroup(this, 'unsub')"
+                  >
+                    <span class="group-icon">🚫</span>
+                    <div>
+                      <div class="group-name">Unsubscribed</div>
+                      <div class="group-count">341</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- FILTER -->
+              <div class="filter-bar">
+                <svg
+                  width="13"
+                  height="13"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  style="color: var(--muted); flex-shrink: 0"
+                >
+                  <circle cx="11" cy="11" r="8" />
+                  <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                </svg>
+                <input
+                  type="text"
+                  placeholder="Search contacts by name, phone or email…"
+                  id="contactSearch"
+                  oninput="filterContacts()"
+                />
+                <select id="contactStatus" onchange="filterContacts()">
+                  <option value="all">All Status</option>
+                  <option value="active">Active</option>
+                  <option value="inactive">Inactive</option>
+                  <option value="unsub">Unsubscribed</option>
+                </select>
+              </div>
+
+              <!-- BULK BAR -->
+              <div class="bulk-bar" id="bulkBar">
+                <span class="text-green fw-bold" id="bulkCount"
+                  >0 selected</span
+                >
+                <button
+                  class="btn-secondary text-sm"
+                  onclick="bulkAction('sms')"
+                >
+                  Send SMS
+                </button>
+                <button
+                  class="btn-secondary text-sm"
+                  onclick="bulkAction('email')"
+                >
+                  Send Email
+                </button>
+                <button
+                  class="btn-danger text-sm"
+                  onclick="bulkAction('delete')"
+                >
+                  Delete
+                </button>
+                <button
+                  class="btn-secondary text-sm"
+                  style="margin-left: auto"
+                  onclick="clearSelection()"
+                >
+                  ✕ Clear
+                </button>
+              </div>
+
+              <!-- CONTACTS TABLE -->
+              <div class="card" style="padding: 0">
+                <table class="data-table" style="table-layout: fixed">
+                  <thead>
+                    <tr>
+                      <th style="width: 36px">
+                        <input
+                          type="checkbox"
+                          id="selectAll"
+                          onchange="toggleSelectAll(this)"
+                        />
+                      </th>
+                      <th>Name</th>
+                      <th>Phone</th>
+                      <th>Email</th>
+                      <th>Group</th>
+                      <th>Status</th>
+                      <th style="width: 70px">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="contactsTable"></tbody>
+                </table>
+                <div
+                  style="
+                    padding: 0.75rem 1rem;
+                    font-size: 12px;
+                    color: var(--muted);
+                    border-top: 1px solid var(--card-border);
+                  "
+                >
+                  Showing 1–20 of <span id="contactTotal">14,891</span> contacts
+                </div>
+              </div>
+            </div>
+
+            <!-- SIDEBAR PANEL -->
+            <div style="display: flex; flex-direction: column; gap: 1rem">
+              <div class="card">
+                <div class="card-title" style="margin-bottom: 1.2rem">
+                  Growth This Month
+                </div>
+                <div
+                  style="display: flex; flex-direction: column; gap: 0.85rem"
+                >
+                  <div class="flex-between">
+                    <span style="font-size: 13px">New Contacts</span
+                    ><span class="fw-bold text-green font-display">+428</span>
+                  </div>
+                  <div class="flex-between">
+                    <span style="font-size: 13px">Unsubscribed</span
+                    ><span class="fw-bold text-red font-display">-12</span>
+                  </div>
+                  <div class="flex-between">
+                    <span style="font-size: 13px">Net Growth</span
+                    ><span class="fw-bold text-blue font-display">+416</span>
+                  </div>
+                  <hr class="divider" />
+                  <div class="flex-between">
+                    <span style="font-size: 13px">SMS Reachable</span
+                    ><span class="fw-bold font-display">12,480</span>
+                  </div>
+                  <div class="flex-between">
+                    <span style="font-size: 13px">Email Reachable</span
+                    ><span class="fw-bold font-display">11,240</span>
+                  </div>
+                </div>
+              </div>
+              <div class="card">
+                <div class="card-title" style="margin-bottom: 1.2rem">
+                  Import Contacts
+                </div>
+                <div
+                  style="
+                    border: 2px dashed var(--card-border);
+                    border-radius: var(--radius-md);
+                    padding: 2rem;
+                    text-align: center;
+                    cursor: pointer;
+                    transition: border-color var(--transition);
+                  "
+                  onmouseover="this.style.borderColor = 'rgba(0,232,122,0.3)'"
+                  onmouseout="this.style.borderColor = 'var(--card-border)'"
+                >
+                  <div style="font-size: 28px; margin-bottom: 0.5rem">📁</div>
+                  <div
+                    style="
+                      font-size: 13px;
+                      font-weight: 500;
+                      margin-bottom: 4px;
+                    "
+                  >
+                    Drop your CSV here
+                  </div>
+                  <div class="text-xs text-muted">or click to browse</div>
+                </div>
+                <div
+                  class="text-xs text-muted mt-sm"
+                  style="text-align: center"
+                >
+                  Supports CSV · Max 50,000 rows per upload
+                </div>
+                <button
+                  class="btn-primary"
+                  style="width: 100%; margin-top: 1rem; justify-content: center"
+                  onclick="importContacts()"
+                >
+                  Upload & Import
+                </button>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <script>
+      window.NP_PAGE = "contacts";
+      window.NP_TITLE = "Contacts";
+    </script>
+    <script src="../assets/js/sidebar.js"></script>
+    <script type="module" src="../assets/js/auth-guard.js"></script>
+    <script src="../assets/js/topbar.js"></script>
+    <script>
+      "use strict";
+      function animateCount(id, target) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        const inc = target / 80;
+        let c = 0;
+        const iv = setInterval(() => {
+          c = Math.min(c + inc, target);
+          el.textContent = Math.floor(c).toLocaleString("en-NG");
+          if (c >= target) clearInterval(iv);
+        }, 16);
+      }
+      setTimeout(() => {
+        animateCount("cStatTotal", 14891);
+        animateCount("cStatActive", 12480);
+        animateCount("cStatUnsub", 341);
+      }, 300);
+
+      const firstNames = [
+        "Emeka",
+        "Aisha",
+        "Chukwudi",
+        "Fatima",
+        "Tunde",
+        "Ngozi",
+        "Damilola",
+        "Halima",
+        "Seun",
+        "Uche",
+        "Bola",
+        "Amina",
+        "Korede",
+        "Chioma",
+        "Yemi",
+        "Adaeze",
+        "Kunle",
+        "Zainab",
+        "Ade",
+        "Obiageli",
+      ];
+      const lastNames = [
+        "Okafor",
+        "Bello",
+        "Nwosu",
+        "Abubakar",
+        "Adeyemi",
+        "Eze",
+        "Okonkwo",
+        "Ibrahim",
+        "Adeleke",
+        "Chukwu",
+        "Johnson",
+        "Musa",
+        "Adeola",
+        "Onyeka",
+        "Olawale",
+        "Nduka",
+      ];
+      const groups = [
+        "Customers",
+        "Prospects",
+        "VIP",
+        "Inactive",
+        "Customers",
+        "Customers",
+      ];
+      const statuses = [
+        "active",
+        "active",
+        "active",
+        "active",
+        "inactive",
+        "active",
+      ];
+      const avatarColors = [
+        "linear-gradient(135deg,#00E87A,#00BFFF)",
+        "linear-gradient(135deg,#FFB800,#FF4D6D)",
+        "linear-gradient(135deg,#B464FF,#00BFFF)",
+        "linear-gradient(135deg,#00E87A,#B464FF)",
+      ];
+
+      let contacts = Array.from({ length: 60 }, (_, i) => {
+        const fn = firstNames[i % firstNames.length],
+          ln = lastNames[i % lastNames.length];
+        return {
+          id: i + 1,
+          name: `${fn} ${ln}`,
+          phone: `+234 ${["803", "706", "811", "909", "813"][i % 5]} ${String(10000000 + i * 13197).slice(0, 7)}`,
+          email: `${fn.toLowerCase()}.${ln.toLowerCase()}${i}@gmail.com`,
+          group: groups[i % groups.length],
+          status: statuses[i % statuses.length],
+          color: avatarColors[i % avatarColors.length],
+          initials: fn[0] + ln[0],
+        };
+      });
+
+      let selected = new Set();
+
+      function renderContacts(data) {
+        const tb = document.getElementById("contactsTable");
+        document.getElementById("contactTotal").textContent =
+          data.length.toLocaleString();
+        tb.innerHTML = data
+          .slice(0, 20)
+          .map(
+            (c) => `
+    <tr>
+      <td><input type="checkbox" class="contact-cb" data-id="${c.id}" ${selected.has(c.id) ? "checked" : ""} onchange="toggleSelect(${c.id},this)"/></td>
+      <td>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div class="contact-avatar" style="background:${c.color}">${c.initials}</div>
+          <span style="font-weight:500;font-size:13px">${c.name}</span>
+        </div>
+      </td>
+      <td class="text-sm">${c.phone}</td>
+      <td class="text-sm truncate" style="max-width:160px">${c.email}</td>
+      <td><span class="tag">${c.group}</span></td>
+      <td><span class="status-pill ${c.status === "active" ? "sent" : c.status === "inactive" ? "paused" : "failed"}">${c.status.charAt(0).toUpperCase() + c.status.slice(1)}</span></td>
+      <td>
+        <div style="display:flex;gap:4px">
+          <button class="btn-icon" onclick="editContact(${c.id})" title="Edit">✎</button>
+          <button class="btn-icon" onclick="deleteContact(${c.id})" title="Delete" style="color:var(--accent4)">✕</button>
+        </div>
+      </td>
+    </tr>`,
+          )
+          .join("");
+      }
+
+      function toggleSelect(id, cb) {
+        if (cb.checked) selected.add(id);
+        else selected.delete(id);
+        updateBulkBar();
+      }
+      function toggleSelectAll(cb) {
+        document.querySelectorAll(".contact-cb").forEach((el) => {
+          el.checked = cb.checked;
+          const id = Number(el.dataset.id);
+          if (cb.checked) selected.add(id);
+          else selected.delete(id);
+        });
+        updateBulkBar();
+      }
+      function updateBulkBar() {
+        const bar = document.getElementById("bulkBar");
+        document.getElementById("bulkCount").textContent =
+          `${selected.size} selected`;
+        bar.classList.toggle("show", selected.size > 0);
+      }
+      function clearSelection() {
+        selected.clear();
+        document
+          .querySelectorAll(".contact-cb")
+          .forEach((el) => (el.checked = false));
+        document.getElementById("selectAll").checked = false;
+        updateBulkBar();
+      }
+      function bulkAction(action) {
+        alert(
+          `${action.toUpperCase()} action for ${selected.size} contacts — connect to backend`,
+        );
+      }
+      function filterByGroup(el, group) {
+        document
+          .querySelectorAll(".group-chip")
+          .forEach((c) => c.classList.remove("active"));
+        el.classList.add("active");
+        const filtered =
+          group === "all"
+            ? contacts
+            : contacts.filter(
+                (c) =>
+                  c.group.toLowerCase() === group ||
+                  (group === "unsub" && c.status === "unsub"),
+              );
+        renderContacts(filtered);
+      }
+      function filterContacts() {
+        const q = document.getElementById("contactSearch").value.toLowerCase();
+        const s = document.getElementById("contactStatus").value;
+        const filtered = contacts.filter(
+          (c) =>
+            (!q ||
+              c.name.toLowerCase().includes(q) ||
+              c.phone.includes(q) ||
+              c.email.includes(q)) &&
+            (s === "all" || c.status === s),
+        );
+        renderContacts(filtered);
+      }
+      function addContact() {
+        alert("Add contact modal — connect to backend");
+      }
+      function importContacts() {
+        alert("Import CSV — connect to backend");
+      }
+      function editContact(id) {
+        alert(`Edit contact ${id} — connect to backend`);
+      }
+      function deleteContact(id) {
+        if (confirm("Delete this contact?")) {
+          contacts = contacts.filter((c) => c.id !== id);
+          renderContacts(contacts);
+        }
+      }
+      function newGroup() {
+        alert("New group modal — connect to backend");
+      }
+
+      renderContacts(contacts);
+    </script>
+  </body>
+</html>

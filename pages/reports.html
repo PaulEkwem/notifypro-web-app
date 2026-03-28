@@ -1,0 +1,679 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Reports — NotifyPro</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../assets/css/dashboard.css" />
+    <style>
+      .two-col {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+      }
+      .three-col {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 1rem;
+      }
+      .date-range {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: var(--bg3);
+        border: 1px solid var(--card-border);
+        border-radius: var(--radius-sm);
+        padding: 7px 14px;
+      }
+      .date-range input {
+        background: none;
+        border: none;
+        outline: none;
+        color: var(--text);
+        font-family: var(--font-body);
+        font-size: 13px;
+        cursor: pointer;
+        width: 110px;
+      }
+      .date-range input::-webkit-calendar-picker-indicator {
+        filter: invert(0.6);
+        cursor: pointer;
+      }
+      .donut-wrap {
+        position: relative;
+        width: 130px;
+        height: 130px;
+        margin: 0 auto 1rem;
+      }
+      .donut-wrap svg {
+        overflow: visible;
+      }
+      .donut-center {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
+      .donut-val {
+        font-family: var(--font-display);
+        font-size: 22px;
+        font-weight: 800;
+      }
+      .donut-lbl {
+        font-size: 10px;
+        color: var(--muted);
+      }
+      .legend-row {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .legend-line {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 13px;
+      }
+      .legend-swatch {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        flex-shrink: 0;
+      }
+      .legend-line-val {
+        margin-left: auto;
+        font-family: var(--font-display);
+        font-weight: 700;
+        font-size: 13px;
+      }
+      .cost-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.7rem 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      }
+      .cost-item:last-child {
+        border-bottom: none;
+      }
+      @media (max-width: 900px) {
+        .two-col,
+        .three-col {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="dash-layout">
+      <div class="main">
+        <main class="page-content">
+          <!-- HEADER -->
+          <div class="page-header">
+            <div class="page-header-left">
+              <h1>Reports</h1>
+              <p>
+                Analytics and insights across all your notification channels.
+              </p>
+            </div>
+            <div class="page-header-actions">
+              <div class="date-range">
+                <svg
+                  width="13"
+                  height="13"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  style="color: var(--muted); flex-shrink: 0"
+                >
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                  <line x1="16" y1="2" x2="16" y2="6" />
+                  <line x1="8" y1="2" x2="8" y2="6" />
+                  <line x1="3" y1="10" x2="21" y2="10" />
+                </svg>
+                <input type="date" value="2026-03-01" id="dateFrom" />
+                <span style="color: var(--muted)">—</span>
+                <input type="date" value="2026-03-26" id="dateTo" />
+              </div>
+              <button class="btn-secondary" onclick="exportReport()">
+                <svg
+                  width="13"
+                  height="13"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                  <polyline points="7 10 12 15 17 10" />
+                  <line x1="12" y1="15" x2="12" y2="3" />
+                </svg>
+                Export CSV
+              </button>
+            </div>
+          </div>
+
+          <!-- STATS -->
+          <div class="stats-row">
+            <div class="stat-card green">
+              <div class="stat-card-top">
+                <div class="stat-label">Total Messages</div>
+                <div class="stat-icon green">📊</div>
+              </div>
+              <div class="stat-val green" id="rStatTotal">0</div>
+              <div class="stat-change up">
+                ↑ 14.3% <span>vs last period</span>
+              </div>
+            </div>
+            <div class="stat-card blue">
+              <div class="stat-card-top">
+                <div class="stat-label">Total Delivered</div>
+                <div class="stat-icon blue">✅</div>
+              </div>
+              <div class="stat-val blue" id="rStatDelivered">0</div>
+              <div class="stat-change up">
+                ↑ 13.8% <span>vs last period</span>
+              </div>
+            </div>
+            <div class="stat-card amber">
+              <div class="stat-card-top">
+                <div class="stat-label">Total Spend</div>
+                <div class="stat-icon amber">💰</div>
+              </div>
+              <div class="stat-val amber">₦186K</div>
+              <div class="stat-change up">
+                ↑ 11.2% <span>vs last period</span>
+              </div>
+            </div>
+            <div class="stat-card red">
+              <div class="stat-card-top">
+                <div class="stat-label">Failure Rate</div>
+                <div class="stat-icon red">⚠️</div>
+              </div>
+              <div class="stat-val red">1.4%</div>
+              <div class="stat-change down">↓ 0.3% <span>improved</span></div>
+            </div>
+          </div>
+
+          <!-- MAIN CHART -->
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">All Channels — Volume Trend</div>
+                <div class="card-subtitle">
+                  Daily messages delivered across SMS, Email and OTP
+                </div>
+              </div>
+              <div class="chart-tabs">
+                <button
+                  class="chart-tab active"
+                  onclick="switchReportTab(this, '7d')"
+                >
+                  7D
+                </button>
+                <button
+                  class="chart-tab"
+                  onclick="switchReportTab(this, '30d')"
+                >
+                  30D
+                </button>
+                <button
+                  class="chart-tab"
+                  onclick="switchReportTab(this, '90d')"
+                >
+                  90D
+                </button>
+              </div>
+            </div>
+            <div class="chart-area" style="height: 220px">
+              <canvas id="reportChart"></canvas>
+            </div>
+            <div class="chart-legend">
+              <div class="legend-item">
+                <div class="legend-dot" style="background: var(--accent)"></div>
+                Bulk SMS
+              </div>
+              <div class="legend-item">
+                <div
+                  class="legend-dot"
+                  style="background: var(--accent2)"
+                ></div>
+                Email
+              </div>
+              <div class="legend-item">
+                <div
+                  class="legend-dot"
+                  style="background: var(--accent3)"
+                ></div>
+                OTP
+              </div>
+            </div>
+          </div>
+
+          <!-- DONUT + COST BREAKDOWN -->
+          <div class="two-col">
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">Channel Distribution</div>
+              </div>
+              <div
+                style="
+                  display: flex;
+                  align-items: center;
+                  gap: 2rem;
+                  flex-wrap: wrap;
+                "
+              >
+                <div class="donut-wrap">
+                  <svg width="130" height="130" viewBox="0 0 130 130">
+                    <circle
+                      cx="65"
+                      cy="65"
+                      r="50"
+                      fill="none"
+                      stroke="rgba(255,255,255,0.05)"
+                      stroke-width="14"
+                    />
+                    <!-- SMS 72% -->
+                    <circle
+                      cx="65"
+                      cy="65"
+                      r="50"
+                      fill="none"
+                      stroke="var(--accent)"
+                      stroke-width="14"
+                      stroke-dasharray="314"
+                      stroke-dashoffset="88"
+                      stroke-linecap="round"
+                      transform="rotate(-90 65 65)"
+                    />
+                    <!-- Email 20% -->
+                    <circle
+                      cx="65"
+                      cy="65"
+                      r="50"
+                      fill="none"
+                      stroke="var(--accent2)"
+                      stroke-width="14"
+                      stroke-dasharray="314"
+                      stroke-dashoffset="251"
+                      stroke-linecap="round"
+                      transform="rotate(169 65 65)"
+                    />
+                    <!-- OTP 8% -->
+                    <circle
+                      cx="65"
+                      cy="65"
+                      r="50"
+                      fill="none"
+                      stroke="var(--accent3)"
+                      stroke-width="14"
+                      stroke-dasharray="314"
+                      stroke-dashoffset="289"
+                      stroke-linecap="round"
+                      transform="rotate(241 65 65)"
+                    />
+                  </svg>
+                  <div class="donut-center">
+                    <div class="donut-val">1.07M</div>
+                    <div class="donut-lbl">Total</div>
+                  </div>
+                </div>
+                <div class="legend-row" style="flex: 1">
+                  <div class="legend-line">
+                    <div
+                      class="legend-swatch"
+                      style="background: var(--accent)"
+                    ></div>
+                    Bulk SMS
+                    <div class="legend-line-val text-green">72%</div>
+                  </div>
+                  <div class="legend-line">
+                    <div
+                      class="legend-swatch"
+                      style="background: var(--accent2)"
+                    ></div>
+                    Email
+                    <div class="legend-line-val text-blue">20%</div>
+                  </div>
+                  <div class="legend-line">
+                    <div
+                      class="legend-swatch"
+                      style="background: var(--accent3)"
+                    ></div>
+                    OTP & 2FA
+                    <div class="legend-line-val text-amber">8%</div>
+                  </div>
+                  <hr class="divider" />
+                  <div class="legend-line text-sm text-muted">
+                    Delivery Rate
+                    <div class="legend-line-val text-green fw-bold">98.6%</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">Cost Breakdown</div>
+                <div class="card-subtitle">This period spend by channel</div>
+              </div>
+              <div>
+                <div class="cost-item">
+                  <div>
+                    <div style="font-size: 13px; font-weight: 500">
+                      💬 Bulk SMS
+                    </div>
+                    <div class="text-xs text-muted">771,840 messages × ₦6</div>
+                  </div>
+                  <div
+                    class="fw-bold font-display text-green"
+                    style="font-size: 15px"
+                  >
+                    ₦143,040
+                  </div>
+                </div>
+                <div class="cost-item">
+                  <div>
+                    <div style="font-size: 13px; font-weight: 500">
+                      📧 Email Campaigns
+                    </div>
+                    <div class="text-xs text-muted">218,045 emails</div>
+                  </div>
+                  <div
+                    class="fw-bold font-display text-blue"
+                    style="font-size: 15px"
+                  >
+                    ₦32,707
+                  </div>
+                </div>
+                <div class="cost-item">
+                  <div>
+                    <div style="font-size: 13px; font-weight: 500">
+                      🔐 OTP Verification
+                    </div>
+                    <div class="text-xs text-muted">12,481 verifications</div>
+                  </div>
+                  <div
+                    class="fw-bold font-display text-amber"
+                    style="font-size: 15px"
+                  >
+                    ₦9,360
+                  </div>
+                </div>
+                <div class="cost-item">
+                  <div>
+                    <div style="font-size: 13px; font-weight: 500">
+                      🛡️ 2FA Auth
+                    </div>
+                    <div class="text-xs text-muted">4,920 authentications</div>
+                  </div>
+                  <div
+                    class="fw-bold font-display text-red"
+                    style="font-size: 15px"
+                  >
+                    ₦1,476
+                  </div>
+                </div>
+                <div
+                  style="
+                    margin-top: 1rem;
+                    padding-top: 1rem;
+                    border-top: 1px solid var(--card-border);
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                  "
+                >
+                  <span style="font-size: 13px; font-weight: 600"
+                    >Total This Period</span
+                  >
+                  <span
+                    class="font-display fw-bold"
+                    style="font-size: 22px; color: var(--accent)"
+                    >₦186,583</span
+                  >
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- TOP CAMPAIGNS TABLE -->
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Top Performing Campaigns</div>
+                <div class="card-subtitle">
+                  Ranked by delivery rate this period
+                </div>
+              </div>
+              <button class="btn-secondary text-sm" onclick="exportReport()">
+                Export
+              </button>
+            </div>
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Campaign</th>
+                  <th>Channel</th>
+                  <th>Sent</th>
+                  <th>Delivered</th>
+                  <th>Rate</th>
+                  <th>Cost</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="reportTable"></tbody>
+            </table>
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <script>
+      window.NP_PAGE = "reports";
+      window.NP_TITLE = "Reports";
+    </script>
+    <script src="../assets/js/sidebar.js"></script>
+    <script type="module" src="../assets/js/auth-guard.js"></script>
+    <script src="../assets/js/topbar.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script>
+      "use strict";
+      function animateCount(id, target) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        const inc = target / 80;
+        let c = 0;
+        const iv = setInterval(() => {
+          c = Math.min(c + inc, target);
+          el.textContent = Math.floor(c).toLocaleString("en-NG");
+          if (c >= target) clearInterval(iv);
+        }, 16);
+      }
+      setTimeout(() => {
+        animateCount("rStatTotal", 1073281);
+        animateCount("rStatDelivered", 1058177);
+      }, 300);
+
+      // Chart
+      const ctx = document.getElementById("reportChart").getContext("2d");
+      const CD = {
+        "7d": {
+          labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+          sms: [120, 145, 132, 98, 156, 178, 142],
+          email: [30, 42, 38, 25, 51, 64, 48],
+          otp: [18, 21, 19, 14, 22, 28, 25],
+        },
+        "30d": {
+          labels: ["W1", "W2", "W3", "W4"],
+          sms: [820, 910, 775, 842],
+          email: [190, 220, 205, 218],
+          otp: [42, 51, 48, 49],
+        },
+        "90d": {
+          labels: ["Jan", "Feb", "Mar"],
+          sms: [2400, 2650, 2510],
+          email: [610, 680, 654],
+          otp: [140, 155, 148],
+        },
+      };
+      function mg(c, col) {
+        const g = c.createLinearGradient(0, 0, 0, 220);
+        g.addColorStop(0, col.replace("1)", "0.15)"));
+        g.addColorStop(1, col.replace("1)", "0)"));
+        return g;
+      }
+      let rc = new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels: CD["7d"].labels,
+          datasets: [
+            {
+              label: "SMS",
+              data: CD["7d"].sms,
+              backgroundColor: "rgba(0,232,122,0.6)",
+              borderColor: "var(--accent)",
+              borderWidth: 0,
+              borderRadius: 4,
+            },
+            {
+              label: "Email",
+              data: CD["7d"].email,
+              backgroundColor: "rgba(0,191,255,0.6)",
+              borderColor: "var(--accent2)",
+              borderWidth: 0,
+              borderRadius: 4,
+            },
+            {
+              label: "OTP",
+              data: CD["7d"].otp,
+              backgroundColor: "rgba(255,184,0,0.6)",
+              borderColor: "var(--accent3)",
+              borderWidth: 0,
+              borderRadius: 4,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: { mode: "index", intersect: false },
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: "#0D1117",
+              borderColor: "rgba(255,255,255,0.08)",
+              borderWidth: 1,
+              titleColor: "#F0F4FF",
+              bodyColor: "#8892A4",
+              padding: 10,
+            },
+          },
+          scales: {
+            x: {
+              grid: { display: false },
+              ticks: {
+                color: "#8892A4",
+                font: { family: "DM Sans", size: 11 },
+              },
+              stacked: true,
+            },
+            y: {
+              grid: { color: "rgba(255,255,255,0.04)" },
+              ticks: {
+                color: "#8892A4",
+                font: { family: "DM Sans", size: 11 },
+                callback: (v) => v + "K",
+              },
+              stacked: true,
+            },
+          },
+        },
+      });
+      function switchReportTab(btn, k) {
+        document
+          .querySelectorAll(".chart-tab")
+          .forEach((t) => t.classList.remove("active"));
+        btn.classList.add("active");
+        rc.data.labels = CD[k].labels;
+        rc.data.datasets[0].data = CD[k].sms;
+        rc.data.datasets[1].data = CD[k].email;
+        rc.data.datasets[2].data = CD[k].otp;
+        rc.update("active");
+      }
+
+      // Table
+      const rows = [
+        {
+          rank: 1,
+          name: "Ramadan Promo Blast",
+          ch: "💬 SMS",
+          sent: "24,000",
+          del: "23,568",
+          rate: "98.2%",
+          cost: "₦144,000",
+          status: "sent",
+        },
+        {
+          rank: 2,
+          name: "Newsletter — March",
+          ch: "📧 Email",
+          sent: "12,000",
+          del: "11,364",
+          rate: "94.7%",
+          cost: "₦18,000",
+          status: "sent",
+        },
+        {
+          rank: 3,
+          name: "Flash Sale Alert",
+          ch: "💬 SMS",
+          sent: "15,000",
+          del: "14,625",
+          rate: "97.5%",
+          cost: "₦90,000",
+          status: "sent",
+        },
+        {
+          rank: 4,
+          name: "OTP Login Flow",
+          ch: "🔐 OTP",
+          sent: "3,210",
+          del: "3,181",
+          rate: "99.1%",
+          cost: "₦24,075",
+          status: "sending",
+        },
+        {
+          rank: 5,
+          name: "Welcome Email Series",
+          ch: "📧 Email",
+          sent: "3,210",
+          del: "3,047",
+          rate: "94.9%",
+          cost: "₦4,815",
+          status: "sent",
+        },
+      ];
+      const tb = document.getElementById("reportTable");
+      rows.forEach((r) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td class="text-muted">${r.rank}</td><td><div style="font-size:13px;font-weight:500">${r.name}</div></td><td>${r.ch}</td><td>${r.sent}</td><td>${r.del}</td><td class="text-green fw-bold">${r.rate}</td><td class="text-amber">${r.cost}</td><td><span class="status-pill ${r.status}">${r.status.charAt(0).toUpperCase() + r.status.slice(1)}</span></td>`;
+        tb.appendChild(tr);
+      });
+      function exportReport() {
+        alert("Exporting CSV… (connect to backend)");
+      }
+    </script>
+  </body>
+</html>

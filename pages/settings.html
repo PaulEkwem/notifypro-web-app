@@ -1,0 +1,944 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Settings — NotifyPro</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../assets/css/dashboard.css" />
+    <style>
+      .settings-layout {
+        display: grid;
+        grid-template-columns: 220px 1fr;
+        gap: 1.5rem;
+        align-items: start;
+      }
+      .settings-nav {
+        background: var(--bg2);
+        border: 1px solid var(--card-border);
+        border-radius: var(--radius-md);
+        padding: 0.75rem;
+        position: sticky;
+        top: 84px;
+      }
+      .settings-nav-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 9px 12px;
+        border-radius: var(--radius-sm);
+        font-size: 13.5px;
+        color: var(--muted);
+        cursor: pointer;
+        transition: all var(--transition);
+        border: none;
+        background: none;
+        width: 100%;
+        text-align: left;
+      }
+      .settings-nav-item:hover {
+        background: rgba(255, 255, 255, 0.04);
+        color: var(--text);
+      }
+      .settings-nav-item.active {
+        background: rgba(0, 232, 122, 0.08);
+        color: var(--accent);
+        font-weight: 500;
+      }
+      .settings-panel {
+        display: none;
+      }
+      .settings-panel.active {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+      }
+      .panel-header {
+        margin-bottom: 0.5rem;
+      }
+      .panel-header h2 {
+        font-family: var(--font-display);
+        font-size: 18px;
+        font-weight: 800;
+        letter-spacing: -0.3px;
+      }
+      .panel-header p {
+        font-size: 13px;
+        color: var(--muted);
+        margin-top: 3px;
+      }
+      .form-row-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+      }
+      .avatar-wrap {
+        display: flex;
+        align-items: center;
+        gap: 1.2rem;
+      }
+      .avatar-large {
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--accent), var(--accent2));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: var(--font-display);
+        font-size: 24px;
+        font-weight: 800;
+        color: #000;
+        flex-shrink: 0;
+      }
+      .plan-current {
+        background: linear-gradient(
+          135deg,
+          rgba(0, 232, 122, 0.07),
+          rgba(0, 191, 255, 0.04)
+        );
+        border: 1px solid rgba(0, 232, 122, 0.2);
+        border-radius: var(--radius-md);
+        padding: 1.2rem 1.4rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 1rem;
+      }
+      .plan-name-big {
+        font-family: var(--font-display);
+        font-size: 22px;
+        font-weight: 800;
+        color: var(--accent);
+      }
+      .invoice-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+        font-size: 13px;
+      }
+      .invoice-row:last-child {
+        border-bottom: none;
+      }
+      .sender-id-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: var(--bg3);
+        border: 1px solid var(--card-border);
+        border-radius: 100px;
+        padding: 6px 14px;
+        font-size: 13px;
+        font-weight: 500;
+      }
+      .sender-id-chip button {
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1;
+        transition: color var(--transition);
+      }
+      .sender-id-chip button:hover {
+        color: var(--accent4);
+      }
+      .danger-zone {
+        border: 1px solid rgba(255, 77, 109, 0.2);
+        border-radius: var(--radius-md);
+        padding: 1.4rem;
+      }
+      .danger-action {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        flex-wrap: wrap;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid rgba(255, 77, 109, 0.08);
+      }
+      .danger-action:last-child {
+        border-bottom: none;
+      }
+      @media (max-width: 900px) {
+        .settings-layout {
+          grid-template-columns: 1fr;
+        }
+        .settings-nav {
+          position: static;
+          display: flex;
+          flex-wrap: wrap;
+          gap: 4px;
+        }
+        .form-row-2 {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="dash-layout">
+      <div class="main">
+        <main class="page-content">
+          <div class="page-header">
+            <div class="page-header-left">
+              <h1>Settings</h1>
+              <p>Manage your account, billing, and platform preferences.</p>
+            </div>
+          </div>
+
+          <div class="settings-layout">
+            <!-- SETTINGS NAV -->
+            <nav class="settings-nav">
+              <button
+                class="settings-nav-item active"
+                onclick="showPanel('profile', this)"
+              >
+                👤 Profile
+              </button>
+              <button
+                class="settings-nav-item"
+                onclick="showPanel('business', this)"
+              >
+                🏢 Business
+              </button>
+              <button
+                class="settings-nav-item"
+                onclick="showPanel('senderids', this)"
+              >
+                📛 Sender IDs
+              </button>
+              <button
+                class="settings-nav-item"
+                onclick="showPanel('notifications', this)"
+              >
+                🔔 Notifications
+              </button>
+              <button
+                class="settings-nav-item"
+                onclick="showPanel('billing', this)"
+              >
+                💳 Billing
+              </button>
+              <button
+                class="settings-nav-item"
+                onclick="showPanel('security', this)"
+              >
+                🔐 Security
+              </button>
+              <button
+                class="settings-nav-item"
+                onclick="showPanel('danger', this)"
+                style="color: var(--accent4)"
+              >
+                ⚠️ Danger Zone
+              </button>
+            </nav>
+
+            <!-- PANELS -->
+            <div>
+              <!-- PROFILE -->
+              <div class="settings-panel active" id="panel-profile">
+                <div class="panel-header">
+                  <h2>Profile</h2>
+                  <p>Your personal information and preferences.</p>
+                </div>
+                <div class="card">
+                  <div class="avatar-wrap" style="margin-bottom: 1.5rem">
+                    <div class="avatar-large" id="settingsAvatar">EO</div>
+                    <div>
+                      <div
+                        style="
+                          font-family: var(--font-display);
+                          font-size: 16px;
+                          font-weight: 700;
+                        "
+                      >
+                        Emeka Okafor
+                      </div>
+                      <div class="text-muted text-sm">
+                        Business Plan · Member since Jan 2026
+                      </div>
+                      <button
+                        class="btn-secondary text-sm mt-sm"
+                        onclick="changeAvatar()"
+                      >
+                        Change Photo
+                      </button>
+                    </div>
+                  </div>
+                  <div class="form-row-2">
+                    <div class="form-group">
+                      <label>First Name</label
+                      ><input class="form-control" type="text" value="Emeka" />
+                    </div>
+                    <div class="form-group">
+                      <label>Last Name</label
+                      ><input class="form-control" type="text" value="Okafor" />
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label>Email Address</label
+                    ><input
+                      class="form-control"
+                      type="email"
+                      value="emeka.okafor@okaforventures.ng"
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label>Phone Number</label
+                    ><input
+                      class="form-control"
+                      type="tel"
+                      value="+234 803 456 7890"
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label>Timezone</label>
+                    <select class="form-control">
+                      <option selected>Africa/Lagos (WAT, UTC+1)</option>
+                      <option>Africa/Abidjan (GMT, UTC+0)</option>
+                      <option>Europe/London (BST, UTC+1)</option>
+                    </select>
+                  </div>
+                  <button class="btn-primary" onclick="saveProfile()">
+                    Save Changes
+                  </button>
+                </div>
+              </div>
+
+              <!-- BUSINESS -->
+              <div class="settings-panel" id="panel-business">
+                <div class="panel-header">
+                  <h2>Business Info</h2>
+                  <p>Your company details used on invoices and sender IDs.</p>
+                </div>
+                <div class="card">
+                  <div class="form-group">
+                    <label>Business Name</label
+                    ><input
+                      class="form-control"
+                      type="text"
+                      value="Okafor Ventures Ltd"
+                    />
+                  </div>
+                  <div class="form-row-2">
+                    <div class="form-group">
+                      <label>RC Number (CAC)</label
+                      ><input
+                        class="form-control"
+                        type="text"
+                        value="RC-1234567"
+                        placeholder="e.g. RC-1234567"
+                      />
+                    </div>
+                    <div class="form-group">
+                      <label>Industry</label>
+                      <select class="form-control">
+                        <option>Retail / E-commerce</option>
+                        <option>Financial Services</option>
+                        <option>Healthcare</option>
+                        <option>Education</option>
+                        <option>Logistics</option>
+                        <option>Technology</option>
+                        <option>Other</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label>Business Address</label
+                    ><input
+                      class="form-control"
+                      type="text"
+                      value="14 Aba Road, Port Harcourt, Rivers State"
+                    />
+                  </div>
+                  <div class="form-row-2">
+                    <div class="form-group">
+                      <label>State</label>
+                      <select class="form-control">
+                        <option>Rivers State</option>
+                        <option>Lagos State</option>
+                        <option>Abuja (FCT)</option>
+                        <option>Kano State</option>
+                        <option>Oyo State</option>
+                      </select>
+                    </div>
+                    <div class="form-group">
+                      <label>Business Phone</label
+                      ><input
+                        class="form-control"
+                        type="tel"
+                        value="+234 803 456 7890"
+                      />
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label>Website</label
+                    ><input
+                      class="form-control"
+                      type="url"
+                      value="https://okaforventures.ng"
+                      placeholder="https://yourbusiness.ng"
+                    />
+                  </div>
+                  <div
+                    style="
+                      background: rgba(0, 232, 122, 0.05);
+                      border: 1px solid rgba(0, 232, 122, 0.15);
+                      border-radius: var(--radius-sm);
+                      padding: 0.85rem 1rem;
+                      font-size: 12px;
+                      color: var(--muted);
+                      margin-bottom: 1.2rem;
+                    "
+                  >
+                    ✅
+                    <strong style="color: var(--text)">KYC Verified</strong> —
+                    Your business is verified. CAC documents approved.
+                  </div>
+                  <button class="btn-primary" onclick="saveBusiness()">
+                    Save Business Info
+                  </button>
+                </div>
+              </div>
+
+              <!-- SENDER IDs -->
+              <div class="settings-panel" id="panel-senderids">
+                <div class="panel-header">
+                  <h2>Sender IDs</h2>
+                  <p>Custom sender names that appear on SMS messages.</p>
+                </div>
+                <div class="card">
+                  <div
+                    style="
+                      background: rgba(255, 184, 0, 0.06);
+                      border: 1px solid rgba(255, 184, 0, 0.2);
+                      border-radius: var(--radius-sm);
+                      padding: 0.85rem 1rem;
+                      margin-bottom: 1.2rem;
+                      font-size: 12px;
+                      color: var(--muted);
+                    "
+                  >
+                    ⚠️ Sender IDs must be approved by NCC and take 1–3 business
+                    days. Max 11 characters.
+                  </div>
+                  <div class="card-title" style="margin-bottom: 0.85rem">
+                    Active Sender IDs
+                  </div>
+                  <div
+                    style="
+                      display: flex;
+                      flex-wrap: wrap;
+                      gap: 8px;
+                      margin-bottom: 1.5rem;
+                    "
+                    id="senderIdList"
+                  >
+                    <div class="sender-id-chip">
+                      NotifyPro
+                      <button onclick="removeSenderId(this)" title="Remove">
+                        ×
+                      </button>
+                    </div>
+                    <div class="sender-id-chip">
+                      OkaforBiz
+                      <button onclick="removeSenderId(this)" title="Remove">
+                        ×
+                      </button>
+                    </div>
+                    <div
+                      class="sender-id-chip"
+                      style="
+                        border-color: rgba(255, 184, 0, 0.3);
+                        color: var(--accent3);
+                      "
+                    >
+                      FlashSales
+                      <span
+                        style="
+                          font-size: 10px;
+                          color: var(--accent3);
+                          margin-left: 4px;
+                        "
+                        >Pending</span
+                      >
+                    </div>
+                  </div>
+                  <div class="card-title" style="margin-bottom: 0.75rem">
+                    Request New Sender ID
+                  </div>
+                  <div class="form-row-2">
+                    <div class="form-group">
+                      <label>Sender Name</label>
+                      <input
+                        class="form-control"
+                        type="text"
+                        id="newSenderId"
+                        placeholder="e.g. MyBrand"
+                        maxlength="11"
+                      />
+                      <div class="form-hint">
+                        Max 11 characters, letters and numbers only
+                      </div>
+                    </div>
+                    <div class="form-group">
+                      <label>Use Case</label>
+                      <select class="form-control">
+                        <option>Promotions</option>
+                        <option>Transactional</option>
+                        <option>OTP</option>
+                        <option>Customer Service</option>
+                      </select>
+                    </div>
+                  </div>
+                  <button class="btn-primary" onclick="requestSenderId()">
+                    Submit for Approval
+                  </button>
+                </div>
+              </div>
+
+              <!-- NOTIFICATIONS -->
+              <div class="settings-panel" id="panel-notifications">
+                <div class="panel-header">
+                  <h2>Notifications</h2>
+                  <p>Choose how and when NotifyPro alerts you.</p>
+                </div>
+                <div class="card">
+                  <div class="card-title" style="margin-bottom: 0.85rem">
+                    Email Alerts
+                  </div>
+                  <div class="toggle-wrap">
+                    <div class="toggle-info">
+                      <h4>Campaign Completed</h4>
+                      <p>Get notified when a campaign finishes sending</p>
+                    </div>
+                    <label class="toggle"
+                      ><input type="checkbox" checked /><span
+                        class="toggle-slider"
+                      ></span
+                    ></label>
+                  </div>
+                  <div class="toggle-wrap">
+                    <div class="toggle-info">
+                      <h4>Delivery Failures</h4>
+                      <p>Alert when delivery rate drops below 90%</p>
+                    </div>
+                    <label class="toggle"
+                      ><input type="checkbox" checked /><span
+                        class="toggle-slider"
+                      ></span
+                    ></label>
+                  </div>
+                  <div class="toggle-wrap">
+                    <div class="toggle-info">
+                      <h4>Low Wallet Balance</h4>
+                      <p>Alert when balance drops below ₦5,000</p>
+                    </div>
+                    <label class="toggle"
+                      ><input type="checkbox" checked /><span
+                        class="toggle-slider"
+                      ></span
+                    ></label>
+                  </div>
+                  <div class="toggle-wrap">
+                    <div class="toggle-info">
+                      <h4>Monthly Summary Report</h4>
+                      <p>Receive a monthly usage and cost summary</p>
+                    </div>
+                    <label class="toggle"
+                      ><input type="checkbox" /><span
+                        class="toggle-slider"
+                      ></span
+                    ></label>
+                  </div>
+                  <hr class="divider" />
+                  <div class="card-title" style="margin-bottom: 0.85rem">
+                    In-App Alerts
+                  </div>
+                  <div class="toggle-wrap">
+                    <div class="toggle-info">
+                      <h4>API Key Access</h4>
+                      <p>Alert on unusual API usage patterns</p>
+                    </div>
+                    <label class="toggle"
+                      ><input type="checkbox" checked /><span
+                        class="toggle-slider"
+                      ></span
+                    ></label>
+                  </div>
+                  <div class="toggle-wrap">
+                    <div class="toggle-info">
+                      <h4>Login from New Device</h4>
+                      <p>Notify when a new device logs in</p>
+                    </div>
+                    <label class="toggle"
+                      ><input type="checkbox" checked /><span
+                        class="toggle-slider"
+                      ></span
+                    ></label>
+                  </div>
+                  <button
+                    class="btn-primary mt-md"
+                    onclick="saveNotifications()"
+                  >
+                    Save Preferences
+                  </button>
+                </div>
+              </div>
+
+              <!-- BILLING -->
+              <div class="settings-panel" id="panel-billing">
+                <div class="panel-header">
+                  <h2>Billing</h2>
+                  <p>Your plan, wallet, and payment history.</p>
+                </div>
+                <div class="plan-current">
+                  <div>
+                    <div
+                      class="text-xs text-muted"
+                      style="
+                        text-transform: uppercase;
+                        letter-spacing: 0.08em;
+                        margin-bottom: 4px;
+                      "
+                    >
+                      Current Plan
+                    </div>
+                    <div class="plan-name-big">Business</div>
+                    <div class="text-sm text-muted">
+                      ₦25,000/month · 30,000 SMS included · Renews Apr 1, 2026
+                    </div>
+                  </div>
+                  <div style="display: flex; gap: 8px">
+                    <button class="btn-secondary">Downgrade</button>
+                    <button class="btn-primary">Upgrade →</button>
+                  </div>
+                </div>
+                <div class="card">
+                  <div class="card-header">
+                    <div class="card-title">Wallet</div>
+                  </div>
+                  <div
+                    style="
+                      display: flex;
+                      align-items: center;
+                      justify-content: space-between;
+                      flex-wrap: wrap;
+                      gap: 1rem;
+                      margin-bottom: 1.2rem;
+                    "
+                  >
+                    <div>
+                      <div class="text-xs text-muted">Available Balance</div>
+                      <div
+                        class="font-display fw-bold text-green"
+                        style="font-size: 32px; letter-spacing: -1px"
+                      >
+                        ₦47,500
+                      </div>
+                      <div class="text-sm text-muted">
+                        ≈ 11,875 SMS remaining at ₦6/SMS
+                      </div>
+                    </div>
+                    <button
+                      class="btn-primary"
+                      onclick="topUp()"
+                      style="padding: 12px 28px; font-size: 14px"
+                    >
+                      + Top Up Wallet
+                    </button>
+                  </div>
+                  <div class="form-group">
+                    <label>Auto Top-Up</label>
+                    <select class="form-control">
+                      <option>Disabled</option>
+                      <option>
+                        When balance drops below ₦5,000 — add ₦20,000
+                      </option>
+                      <option>
+                        When balance drops below ₦10,000 — add ₦50,000
+                      </option>
+                      <option>
+                        When balance drops below ₦20,000 — add ₦100,000
+                      </option>
+                    </select>
+                    <div class="form-hint">
+                      Auto top-up charges your saved payment method
+                      automatically.
+                    </div>
+                  </div>
+                </div>
+                <div class="card">
+                  <div class="card-header">
+                    <div class="card-title">Invoice History</div>
+                    <a class="card-action">Download All</a>
+                  </div>
+                  <div>
+                    <div class="invoice-row">
+                      <span>March 2026</span
+                      ><span class="text-muted text-sm">Business Plan</span
+                      ><span class="text-green fw-bold">₦25,000</span
+                      ><button class="btn-secondary text-sm">PDF</button>
+                    </div>
+                    <div class="invoice-row">
+                      <span>February 2026</span
+                      ><span class="text-muted text-sm">Business Plan</span
+                      ><span class="text-green fw-bold">₦25,000</span
+                      ><button class="btn-secondary text-sm">PDF</button>
+                    </div>
+                    <div class="invoice-row">
+                      <span>January 2026</span
+                      ><span class="text-muted text-sm">Starter Plan</span
+                      ><span class="text-green fw-bold">₦5,000</span
+                      ><button class="btn-secondary text-sm">PDF</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- SECURITY -->
+              <div class="settings-panel" id="panel-security">
+                <div class="panel-header">
+                  <h2>Security</h2>
+                  <p>Password, 2FA, and active sessions.</p>
+                </div>
+                <div class="card">
+                  <div class="card-title" style="margin-bottom: 1rem">
+                    Change Password
+                  </div>
+                  <div class="form-group">
+                    <label>Current Password</label
+                    ><input
+                      class="form-control"
+                      type="password"
+                      placeholder="Enter current password"
+                    />
+                  </div>
+                  <div class="form-row-2">
+                    <div class="form-group">
+                      <label>New Password</label
+                      ><input
+                        class="form-control"
+                        type="password"
+                        placeholder="Min. 8 characters"
+                      />
+                    </div>
+                    <div class="form-group">
+                      <label>Confirm Password</label
+                      ><input
+                        class="form-control"
+                        type="password"
+                        placeholder="Repeat new password"
+                      />
+                    </div>
+                  </div>
+                  <button class="btn-primary" onclick="changePassword()">
+                    Update Password
+                  </button>
+                </div>
+                <div class="card">
+                  <div class="card-title" style="margin-bottom: 0.85rem">
+                    Two-Factor Authentication
+                  </div>
+                  <div class="toggle-wrap">
+                    <div class="toggle-info">
+                      <h4>Authenticator App (TOTP)</h4>
+                      <p>Use Google Authenticator or Authy</p>
+                    </div>
+                    <label class="toggle"
+                      ><input type="checkbox" checked /><span
+                        class="toggle-slider"
+                      ></span
+                    ></label>
+                  </div>
+                  <div class="toggle-wrap">
+                    <div class="toggle-info">
+                      <h4>SMS Verification</h4>
+                      <p>Receive a code on +234 803 XXX XXXX</p>
+                    </div>
+                    <label class="toggle"
+                      ><input type="checkbox" /><span
+                        class="toggle-slider"
+                      ></span
+                    ></label>
+                  </div>
+                </div>
+                <div class="card">
+                  <div class="card-header">
+                    <div class="card-title">Active Sessions</div>
+                    <button class="btn-danger text-sm" onclick="revokeAll()">
+                      Revoke All
+                    </button>
+                  </div>
+                  <div>
+                    <div class="invoice-row">
+                      <span>🖥️ Chrome — Windows</span
+                      ><span class="text-muted text-sm">Lagos · Current</span
+                      ><span class="status-pill active">Active</span>
+                    </div>
+                    <div class="invoice-row">
+                      <span>📱 Safari — iPhone</span
+                      ><span class="text-muted text-sm"
+                        >Port Harcourt · 2h ago</span
+                      ><button
+                        class="btn-danger text-sm"
+                        onclick="revokeSession(this)"
+                      >
+                        Revoke
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- DANGER ZONE -->
+              <div class="settings-panel" id="panel-danger">
+                <div class="panel-header">
+                  <h2>Danger Zone</h2>
+                  <p>Irreversible actions. Proceed with extreme caution.</p>
+                </div>
+                <div class="danger-zone">
+                  <div class="danger-action">
+                    <div>
+                      <div style="font-size: 14px; font-weight: 600">
+                        Pause Account
+                      </div>
+                      <div class="text-sm text-muted">
+                        Temporarily disable all outgoing messages
+                      </div>
+                    </div>
+                    <button class="btn-danger" onclick="dangerAction('pause')">
+                      Pause Account
+                    </button>
+                  </div>
+                  <div class="danger-action">
+                    <div>
+                      <div style="font-size: 14px; font-weight: 600">
+                        Export All Data
+                      </div>
+                      <div class="text-sm text-muted">
+                        Download a full copy of your account data
+                      </div>
+                    </div>
+                    <button
+                      class="btn-secondary"
+                      onclick="dangerAction('export')"
+                    >
+                      Export Data
+                    </button>
+                  </div>
+                  <div class="danger-action">
+                    <div>
+                      <div
+                        style="
+                          font-size: 14px;
+                          font-weight: 600;
+                          color: var(--accent4);
+                        "
+                      >
+                        Delete Account
+                      </div>
+                      <div class="text-sm text-muted">
+                        Permanently delete your account and all data. This
+                        cannot be undone.
+                      </div>
+                    </div>
+                    <button class="btn-danger" onclick="dangerAction('delete')">
+                      Delete Account
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <script>
+      window.NP_PAGE = "settings";
+      window.NP_TITLE = "Settings";
+    </script>
+    <script src="../assets/js/sidebar.js"></script>
+    <script type="module" src="../assets/js/auth-guard.js"></script>
+    <script src="../assets/js/topbar.js"></script>
+    <script>
+      "use strict";
+      function showPanel(id, btn) {
+        document
+          .querySelectorAll(".settings-panel")
+          .forEach((p) => p.classList.remove("active"));
+        document
+          .querySelectorAll(".settings-nav-item")
+          .forEach((b) => b.classList.remove("active"));
+        document.getElementById("panel-" + id).classList.add("active");
+        btn.classList.add("active");
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+      function saveProfile() {
+        showToast("Profile saved successfully ✓");
+      }
+      function saveBusiness() {
+        showToast("Business info saved ✓");
+      }
+      function saveNotifications() {
+        showToast("Notification preferences saved ✓");
+      }
+      function changePassword() {
+        showToast("Password updated ✓");
+      }
+      function revokeAll() {
+        if (confirm("Revoke all sessions? You will be logged out everywhere."))
+          showToast("All sessions revoked");
+      }
+      function revokeSession(btn) {
+        btn.closest(".invoice-row").remove();
+        showToast("Session revoked");
+      }
+      function topUp() {
+        alert("Redirect to payment gateway — connect Paystack/Flutterwave");
+      }
+      function changeAvatar() {
+        alert("Avatar upload — connect to backend");
+      }
+      function requestSenderId() {
+        const v = document.getElementById("newSenderId").value.trim();
+        if (!v || v.length > 11) {
+          alert("Enter a valid sender ID (max 11 chars)");
+          return;
+        }
+        showToast(`"${v}" submitted for NCC approval`);
+        document.getElementById("newSenderId").value = "";
+      }
+      function removeSenderId(btn) {
+        if (confirm("Remove this sender ID?"))
+          btn.closest(".sender-id-chip").remove();
+      }
+      function dangerAction(a) {
+        if (a === "delete") {
+          if (prompt("Type DELETE to confirm") !== "DELETE") return;
+        }
+        alert(`${a.toUpperCase()} — connect to backend`);
+      }
+
+      function showToast(msg) {
+        const t = document.createElement("div");
+        t.style.cssText =
+          "position:fixed;bottom:2rem;right:2rem;background:var(--bg2);border:1px solid rgba(0,232,122,0.3);border-radius:var(--radius-md);padding:12px 20px;font-size:13px;font-weight:500;color:var(--text);z-index:999;animation:fadeUp 0.3s ease;box-shadow:0 8px 32px rgba(0,0,0,0.3)";
+        t.textContent = msg;
+        document.body.appendChild(t);
+        setTimeout(() => t.remove(), 3000);
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,2513 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Email Campaigns — NotifyPro</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../assets/css/dashboard.css" />
+    <style>
+      /* ── Page tabs ── */
+      .page-tabs {
+        display: flex;
+        gap: 4px;
+        border-bottom: 1px solid var(--card-border);
+        margin-bottom: 1.5rem;
+      }
+      .page-tab {
+        padding: 10px 18px;
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--muted);
+        background: none;
+        border: none;
+        border-bottom: 2px solid transparent;
+        cursor: pointer;
+        margin-bottom: -1px;
+        transition: color 0.2s, border-color 0.2s;
+        font-family: var(--font-body);
+      }
+      .page-tab:hover { color: var(--text); }
+      .page-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+      /* ── Campaigns view ── */
+      .campaign-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1rem;
+      }
+      .camp-card {
+        background: var(--bg2);
+        border: 1px solid var(--card-border);
+        border-radius: var(--radius-md);
+        padding: 1.3rem;
+        transition: border-color var(--transition), transform var(--transition);
+        cursor: pointer;
+      }
+      .camp-card:hover { border-color: rgba(255,255,255,0.15); transform: translateY(-2px); }
+      .camp-card-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 1rem; }
+      .camp-title { font-family: var(--font-display); font-size: 15px; font-weight: 700; margin-bottom: 3px; }
+      .camp-meta { font-size: 12px; color: var(--muted); }
+      .camp-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--card-border); }
+      .camp-stat-val { font-family: var(--font-display); font-size: 17px; font-weight: 800; }
+      .camp-stat-lbl { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-top: 2px; }
+      .progress-bar { height: 3px; background: rgba(255,255,255,0.06); border-radius: 3px; margin-top: 10px; overflow: hidden; }
+      .progress-fill { height: 100%; border-radius: 3px; }
+      .filter-tabs { display: flex; gap: 4px; }
+      .filter-tab { padding: 6px 14px; border-radius: var(--radius-sm); font-size: 12px; font-weight: 500; color: var(--muted); cursor: pointer; border: 1px solid transparent; transition: all var(--transition); background: none; font-family: var(--font-body); }
+      .filter-tab:hover { color: var(--text); border-color: var(--card-border); }
+      .filter-tab.active { color: var(--text); background: var(--bg2); border-color: var(--card-border); }
+      .mid-row { display: grid; grid-template-columns: 1fr 300px; gap: 1rem; }
+
+      /* ── Templates view ── */
+      .tpl-category-label {
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--muted);
+        margin: 1.8rem 0 0.8rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .tpl-category-label::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: var(--card-border);
+      }
+      .tpl-category-label:first-child { margin-top: 0; }
+      .tpl-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+        gap: 1rem;
+        margin-bottom: 0.5rem;
+      }
+      .tpl-card {
+        background: var(--bg2);
+        border: 1px solid var(--card-border);
+        border-radius: var(--radius-md);
+        padding: 1.2rem;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        transition: border-color var(--transition), transform var(--transition);
+      }
+      .tpl-card:hover { border-color: rgba(255,255,255,0.15); transform: translateY(-2px); }
+      .tpl-card-top { display: flex; align-items: flex-start; gap: 12px; }
+      .tpl-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: var(--radius-sm);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        flex-shrink: 0;
+      }
+      .tpl-name { font-family: var(--font-display); font-size: 14px; font-weight: 700; margin-bottom: 3px; }
+      .tpl-desc { font-size: 12px; color: var(--muted); line-height: 1.5; }
+      .tpl-subject {
+        font-size: 11px;
+        color: var(--muted);
+        background: var(--bg3);
+        border: 1px solid var(--card-border);
+        border-radius: 4px;
+        padding: 6px 10px;
+        font-family: monospace;
+        line-height: 1.4;
+      }
+      .tpl-subject span { color: var(--accent); }
+      .tpl-tags { display: flex; gap: 4px; flex-wrap: wrap; }
+      .tpl-tag {
+        font-size: 10px;
+        font-weight: 600;
+        padding: 2px 8px;
+        border-radius: 100px;
+        background: rgba(255,255,255,0.05);
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+      .tpl-actions { display: flex; gap: 6px; margin-top: 4px; }
+      .tpl-btn-use {
+        flex: 1;
+        padding: 8px;
+        background: var(--accent);
+        color: #000;
+        border: none;
+        border-radius: var(--radius-sm);
+        font-family: var(--font-display);
+        font-size: 12px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: opacity 0.2s;
+      }
+      .tpl-btn-use:hover { opacity: 0.85; }
+      .tpl-btn-preview {
+        padding: 8px 12px;
+        background: none;
+        border: 1px solid var(--card-border);
+        border-radius: var(--radius-sm);
+        color: var(--muted);
+        font-size: 12px;
+        cursor: pointer;
+        transition: border-color 0.2s, color 0.2s;
+        font-family: var(--font-body);
+      }
+      .tpl-btn-preview:hover { border-color: rgba(255,255,255,0.2); color: var(--text); }
+
+      /* ── Modal ── */
+      .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.7);
+        backdrop-filter: blur(4px);
+        z-index: 200;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.2s;
+      }
+      .modal-overlay.open { opacity: 1; pointer-events: all; }
+      .modal {
+        background: var(--bg2);
+        border: 1px solid var(--card-border);
+        border-radius: var(--radius-lg);
+        width: 100%;
+        max-width: 720px;
+        max-height: 90vh;
+        overflow-y: auto;
+        transform: translateY(16px);
+        transition: transform 0.2s;
+      }
+      .modal-overlay.open .modal { transform: translateY(0); }
+      .modal-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1.4rem 1.6rem 1rem;
+        border-bottom: 1px solid var(--card-border);
+        position: sticky;
+        top: 0;
+        background: var(--bg2);
+        z-index: 1;
+      }
+      .modal-title { font-family: var(--font-display); font-size: 17px; font-weight: 800; }
+      .modal-close {
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: none;
+        border: 1px solid var(--card-border);
+        border-radius: var(--radius-sm);
+        color: var(--muted);
+        cursor: pointer;
+        font-size: 16px;
+        transition: all 0.2s;
+      }
+      .modal-close:hover { border-color: rgba(255,255,255,0.2); color: var(--text); }
+      .modal-body { padding: 1.4rem 1.6rem; }
+      .modal-footer {
+        padding: 1rem 1.6rem;
+        border-top: 1px solid var(--card-border);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 8px;
+      }
+
+      /* Stepper */
+      .stepper {
+        display: flex;
+        align-items: center;
+        gap: 0;
+        margin-bottom: 1.6rem;
+      }
+      .step {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 12px;
+        font-weight: 500;
+        color: var(--muted);
+      }
+      .step.active { color: var(--accent); }
+      .step.done { color: var(--text); }
+      .step-num {
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        font-weight: 700;
+        border: 1.5px solid var(--card-border);
+        color: var(--muted);
+        flex-shrink: 0;
+      }
+      .step.active .step-num { border-color: var(--accent); color: var(--accent); background: rgba(0,232,122,0.1); }
+      .step.done .step-num { background: var(--accent); border-color: var(--accent); color: #000; }
+      .step-line { flex: 1; height: 1px; background: var(--card-border); margin: 0 6px; }
+
+      /* Form fields in modal */
+      .m-field { margin-bottom: 1.1rem; }
+      .m-field:last-child { margin-bottom: 0; }
+      .m-label { display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted); margin-bottom: 6px; }
+      .m-input, .m-select, .m-textarea {
+        width: 100%;
+        background: var(--bg3);
+        border: 1px solid var(--card-border);
+        border-radius: var(--radius-sm);
+        padding: 10px 14px;
+        color: var(--text);
+        font-family: var(--font-body);
+        font-size: 14px;
+        outline: none;
+        transition: border-color 0.2s, box-shadow 0.2s;
+      }
+      .m-input:focus, .m-select:focus, .m-textarea:focus {
+        border-color: rgba(0,232,122,0.35);
+        box-shadow: 0 0 0 3px rgba(0,232,122,0.06);
+      }
+      .m-input::placeholder, .m-textarea::placeholder { color: rgba(136,146,164,0.5); }
+      .m-textarea { resize: none; line-height: 1.6; }
+      .m-select { appearance: none; cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%238892A4' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px; }
+      .m-hint { font-size: 11px; color: var(--muted); margin-top: 5px; }
+      .m-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+      .merge-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 6px; }
+      .merge-tag {
+        font-size: 11px;
+        background: rgba(0,232,122,0.08);
+        color: var(--accent);
+        border: 1px solid rgba(0,232,122,0.2);
+        border-radius: 4px;
+        padding: 2px 8px;
+        cursor: pointer;
+        font-family: monospace;
+        transition: background 0.15s;
+      }
+      .merge-tag:hover { background: rgba(0,232,122,0.15); }
+      .tpl-selected-banner {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background: rgba(0,232,122,0.06);
+        border: 1px solid rgba(0,232,122,0.2);
+        border-radius: var(--radius-sm);
+        padding: 10px 14px;
+        margin-bottom: 1.2rem;
+        font-size: 13px;
+      }
+      .tpl-selected-banner strong { color: var(--accent); }
+
+      /* Preview panel */
+      .email-preview-frame {
+        background: #fff;
+        border-radius: var(--radius-sm);
+        padding: 24px;
+        font-family: Arial, sans-serif;
+        font-size: 14px;
+        color: #1a1a1a;
+        line-height: 1.6;
+        max-height: 300px;
+        overflow-y: auto;
+        border: 1px solid var(--card-border);
+        margin-top: 1rem;
+      }
+      .email-preview-frame h2 { font-size: 20px; color: #07090f; margin-bottom: 12px; }
+      .email-preview-frame p { margin-bottom: 10px; color: #333; }
+      .email-preview-frame .ep-btn {
+        display: inline-block;
+        background: #00e87a;
+        color: #000;
+        padding: 10px 24px;
+        border-radius: 6px;
+        text-decoration: none;
+        font-weight: 700;
+        margin: 12px 0;
+      }
+      .email-preview-frame .ep-footer { color: #888; font-size: 12px; margin-top: 20px; border-top: 1px solid #eee; padding-top: 12px; }
+
+      @media (max-width: 900px) {
+        .mid-row { grid-template-columns: 1fr; }
+        .m-row { grid-template-columns: 1fr; }
+        .tpl-grid { grid-template-columns: 1fr; }
+      }
+
+      /* ── Contacts tab ── */
+      .contacts-stats { display:grid; grid-template-columns:repeat(4,1fr); gap:1rem; margin-bottom:1.5rem; }
+      .contact-stat { background:var(--bg2); border:1px solid var(--card-border); border-radius:var(--radius-md); padding:1rem 1.2rem; }
+      .contact-stat-val { font-family:var(--font-display); font-size:22px; font-weight:800; margin-bottom:2px; }
+      .contact-stat-lbl { font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; }
+
+      /* Empty state */
+      .empty-state { display:flex; flex-direction:column; align-items:center; justify-content:center; padding:4rem 2rem; text-align:center; background:var(--bg2); border:1px solid var(--card-border); border-radius:var(--radius-md); }
+      .empty-icon { font-size:48px; margin-bottom:1rem; opacity:.6; }
+      .empty-title { font-family:var(--font-display); font-size:18px; font-weight:800; margin-bottom:0.5rem; }
+      .empty-sub { font-size:13px; color:var(--muted); max-width:360px; line-height:1.6; margin-bottom:1.5rem; }
+      .empty-actions { display:flex; gap:8px; }
+
+      /* Contacts table */
+      .contacts-table-wrap { background:var(--bg2); border:1px solid var(--card-border); border-radius:var(--radius-md); overflow:hidden; }
+      .contacts-toolbar { display:flex; align-items:center; justify-content:space-between; padding:1rem 1.2rem; border-bottom:1px solid var(--card-border); gap:12px; flex-wrap:wrap; }
+      .contacts-search { flex:1; min-width:180px; max-width:280px; background:var(--bg3); border:1px solid var(--card-border); border-radius:var(--radius-sm); padding:8px 12px; color:var(--text); font-size:13px; outline:none; font-family:var(--font-body); transition:border-color .2s; }
+      .contacts-search:focus { border-color:rgba(0,232,122,.3); }
+      .contacts-table { width:100%; border-collapse:collapse; }
+      .contacts-table th { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.07em; color:var(--muted); padding:10px 16px; text-align:left; border-bottom:1px solid var(--card-border); background:var(--bg3); }
+      .contacts-table td { padding:10px 16px; font-size:13px; border-bottom:1px solid rgba(255,255,255,0.04); vertical-align:middle; }
+      .contacts-table tr:last-child td { border-bottom:none; }
+      .contacts-table tr:hover td { background:rgba(255,255,255,0.02); }
+      .contact-avatar { width:30px; height:30px; border-radius:50%; background:rgba(0,232,122,0.15); display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; color:var(--accent); flex-shrink:0; }
+      .contact-name-cell { display:flex; align-items:center; gap:10px; }
+      .contact-name { font-weight:600; font-size:13px; }
+      .status-dot { width:7px; height:7px; border-radius:50%; display:inline-block; margin-right:5px; background:var(--accent); }
+
+      /* Upload zone */
+      .upload-zone { border:2px dashed var(--card-border); border-radius:var(--radius-md); padding:2rem; text-align:center; cursor:pointer; transition:border-color .2s, background .2s; }
+      .upload-zone:hover, .upload-zone.drag-over { border-color:rgba(0,232,122,.4); background:rgba(0,232,122,.03); }
+      .upload-zone-icon { font-size:32px; margin-bottom:0.8rem; }
+      .upload-zone-text { font-size:14px; color:var(--muted); }
+      .upload-zone-text strong { color:var(--accent); }
+      .upload-zone input[type=file] { display:none; }
+
+      /* Import preview table */
+      .preview-table-wrap { overflow-x:auto; border:1px solid var(--card-border); border-radius:var(--radius-sm); margin-top:1rem; max-height:200px; overflow-y:auto; }
+      .preview-table { width:100%; border-collapse:collapse; font-size:12px; }
+      .preview-table th { background:var(--bg3); padding:8px 12px; text-align:left; font-size:10px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); font-weight:700; border-bottom:1px solid var(--card-border); position:sticky; top:0; }
+      .preview-table td { padding:8px 12px; border-bottom:1px solid rgba(255,255,255,0.04); color:var(--text); }
+      .preview-table tr:last-child td { border-bottom:none; }
+
+      .import-info-box { background:rgba(0,232,122,0.06); border:1px solid rgba(0,232,122,0.2); border-radius:var(--radius-sm); padding:12px 16px; font-size:13px; color:var(--muted); margin-bottom:1rem; line-height:1.6; }
+      .detected-tags { display:flex; flex-wrap:wrap; gap:5px; margin-top:8px; }
+
+      @media (max-width: 700px) { .contacts-stats { grid-template-columns:1fr 1fr; } }
+
+      /* ── Queued status pill ── */
+      .status-pill.queued { background:rgba(168,85,247,0.1); color:#a855f7; }
+      .status-pill.queued::before { background:#a855f7; animation:blink 1s infinite; }
+
+      /* ── Campaign detail modal ── */
+      .cd-meta-row { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:1.2rem; }
+      .cd-meta-item { background:var(--bg3); border:1px solid var(--card-border); border-radius:var(--radius-sm); padding:10px 14px; }
+      .cd-meta-label { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.07em; color:var(--muted); margin-bottom:4px; }
+      .cd-meta-val { font-size:13px; color:var(--text); font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+      .cd-stats { display:grid; grid-template-columns:repeat(5,1fr); gap:8px; margin-bottom:1.2rem; }
+      .cd-stat { background:var(--bg3); border:1px solid var(--card-border); border-radius:var(--radius-sm); padding:12px 10px; text-align:center; }
+      .cd-stat-val { font-family:var(--font-display); font-size:18px; font-weight:800; margin-bottom:2px; }
+      .cd-stat-lbl { font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; }
+      .cd-section { margin-bottom:1.2rem; }
+      .cd-section-title { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); margin-bottom:8px; }
+      .cd-resend-box { background:var(--bg3); border:1px solid var(--card-border); border-radius:var(--radius-sm); padding:12px 14px; display:flex; align-items:center; justify-content:space-between; gap:12px; }
+      .camp-card { cursor:pointer; }
+      @media (max-width:600px) { .cd-stats { grid-template-columns:repeat(3,1fr); } .cd-meta-row { grid-template-columns:1fr; } }
+
+      /* ── Unlayer full-screen overlay ── */
+      #unlayerOverlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 600;
+        background: #0D1117;
+        flex-direction: column;
+      }
+      #unlayerOverlay.open { display: flex; }
+      .unlayer-topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.9rem 1.4rem;
+        border-bottom: 1px solid rgba(255,255,255,0.08);
+        background: #0D1117;
+        gap: 12px;
+        flex-shrink: 0;
+      }
+      .unlayer-topbar-left { display:flex; flex-direction:column; gap:2px; }
+      .unlayer-topbar-title { font-family:var(--font-display); font-size:16px; font-weight:800; }
+      .unlayer-topbar-sub { font-size:11px; color:var(--muted); }
+      #unlayer-container { flex: 1; min-height: 0; }
+
+      /* Designer status card in Step 2 */
+      .design-status-card {
+        background: rgba(0,232,122,0.06);
+        border: 1px solid rgba(0,232,122,0.2);
+        border-radius: var(--radius-sm);
+        padding: 14px 16px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
+      .design-open-btn {
+        width: 100%;
+        padding: 14px;
+        background: var(--bg3);
+        border: 2px dashed var(--card-border);
+        border-radius: var(--radius-sm);
+        color: var(--muted);
+        font-size: 14px;
+        cursor: pointer;
+        transition: border-color .2s, background .2s;
+        font-family: var(--font-body);
+        text-align: center;
+      }
+      .design-open-btn:hover { border-color: rgba(0,232,122,.4); background: rgba(0,232,122,.03); color: var(--text); }
+    </style>
+  </head>
+  <body>
+    <div class="dash-layout">
+      <div class="main">
+        <main class="page-content">
+          <!-- PAGE HEADER -->
+          <div class="page-header">
+            <div class="page-header-left">
+              <h1>Email Campaigns</h1>
+              <p>Design, send, and track professional email campaigns.</p>
+            </div>
+            <div class="page-header-actions">
+              <button class="btn-secondary" onclick="exportCampaigns()">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                  <polyline points="7 10 12 15 17 10"/>
+                  <line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+                Export
+              </button>
+              <button class="btn-primary" onclick="openModal()">+ New Campaign</button>
+            </div>
+          </div>
+
+          <!-- PAGE TABS -->
+          <div class="page-tabs">
+            <button class="page-tab active" onclick="switchPageTab(this, 'overview')">Overview</button>
+            <button class="page-tab" onclick="switchPageTab(this, 'contacts')">Contacts</button>
+            <button class="page-tab" onclick="switchPageTab(this, 'templates')">Templates</button>
+          </div>
+
+          <!-- ── OVERVIEW TAB ── -->
+          <div id="tab-overview">
+            <!-- STATS -->
+            <div class="stats-row">
+              <div class="stat-card blue">
+                <div class="stat-card-top"><div class="stat-label">Emails Sent</div><div class="stat-icon blue">📧</div></div>
+                <div class="stat-val blue" id="statSent">0</div>
+                <div class="stat-change up">↑ 8.1% <span>vs last month</span></div>
+              </div>
+              <div class="stat-card green">
+                <div class="stat-card-top"><div class="stat-label">Open Rate</div><div class="stat-icon green">👁</div></div>
+                <div class="stat-val green">42.8%</div>
+                <div class="stat-change up">↑ 3.2% <span>vs last month</span></div>
+              </div>
+              <div class="stat-card amber">
+                <div class="stat-card-top"><div class="stat-label">Click Rate</div><div class="stat-icon amber">🖱</div></div>
+                <div class="stat-val amber">18.4%</div>
+                <div class="stat-change up">↑ 1.9% <span>vs last month</span></div>
+              </div>
+              <div class="stat-card red">
+                <div class="stat-card-top"><div class="stat-label">Unsubscribes</div><div class="stat-icon red">🚫</div></div>
+                <div class="stat-val red">0.8%</div>
+                <div class="stat-change down">↑ 0.1% <span>vs last month</span></div>
+              </div>
+            </div>
+
+            <!-- CHART + AUDIENCE -->
+            <div class="mid-row">
+              <div class="card">
+                <div class="card-header">
+                  <div>
+                    <div class="card-title">Engagement Over Time</div>
+                    <div class="card-subtitle">Opens vs clicks — last 30 days</div>
+                  </div>
+                  <div class="chart-tabs">
+                    <button class="chart-tab active" onclick="switchEmailTab(this,'7d')">7D</button>
+                    <button class="chart-tab" onclick="switchEmailTab(this,'30d')">30D</button>
+                    <button class="chart-tab" onclick="switchEmailTab(this,'90d')">90D</button>
+                  </div>
+                </div>
+                <div class="chart-area"><canvas id="emailChart"></canvas></div>
+                <div class="chart-legend">
+                  <div class="legend-item"><div class="legend-dot" style="background:var(--accent2)"></div>Opens</div>
+                  <div class="legend-item"><div class="legend-dot" style="background:var(--accent3)"></div>Clicks</div>
+                </div>
+              </div>
+              <div class="card">
+                <div class="card-header"><div class="card-title">Audience Breakdown</div></div>
+                <div style="display:flex;flex-direction:column;gap:1rem">
+                  <div>
+                    <div class="flex-between" style="margin-bottom:6px"><span style="font-size:13px">Active Subscribers</span><span class="text-green fw-bold font-display">12,480</span></div>
+                    <div class="progress-bar"><div class="progress-fill" style="width:87%;background:var(--accent)"></div></div>
+                  </div>
+                  <div>
+                    <div class="flex-between" style="margin-bottom:6px"><span style="font-size:13px">Engaged (30d)</span><span class="text-blue fw-bold font-display">8,941</span></div>
+                    <div class="progress-bar"><div class="progress-fill" style="width:71%;background:var(--accent2)"></div></div>
+                  </div>
+                  <div>
+                    <div class="flex-between" style="margin-bottom:6px"><span style="font-size:13px">Unsubscribed</span><span class="text-amber fw-bold font-display">341</span></div>
+                    <div class="progress-bar"><div class="progress-fill" style="width:12%;background:var(--accent3)"></div></div>
+                  </div>
+                  <div>
+                    <div class="flex-between" style="margin-bottom:6px"><span style="font-size:13px">Bounced</span><span class="text-red fw-bold font-display">128</span></div>
+                    <div class="progress-bar"><div class="progress-fill" style="width:5%;background:var(--accent4)"></div></div>
+                  </div>
+                  <hr class="divider"/>
+                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+                    <div style="background:var(--bg3);border:1px solid var(--card-border);border-radius:var(--radius-sm);padding:10px;text-align:center">
+                      <div class="text-xs text-muted">Avg Open Rate</div>
+                      <div class="font-display fw-bold text-green" style="font-size:18px;margin-top:3px">42.8%</div>
+                    </div>
+                    <div style="background:var(--bg3);border:1px solid var(--card-border);border-radius:var(--radius-sm);padding:10px;text-align:center">
+                      <div class="text-xs text-muted">Deliverability</div>
+                      <div class="font-display fw-bold text-blue" style="font-size:18px;margin-top:3px">94.7%</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- CAMPAIGNS LIST -->
+            <div class="card">
+              <div class="card-header">
+                <div>
+                  <div class="card-title">All Campaigns</div>
+                  <div class="card-subtitle" id="campCount">6 campaigns</div>
+                </div>
+                <div class="filter-tabs">
+                  <button class="filter-tab active" onclick="filterCamps(this,'all')">All</button>
+                  <button class="filter-tab" onclick="filterCamps(this,'queued')">Queued</button>
+                  <button class="filter-tab" onclick="filterCamps(this,'sent')">Sent</button>
+                  <button class="filter-tab" onclick="filterCamps(this,'draft')">Drafts</button>
+                  <button class="filter-tab" onclick="filterCamps(this,'scheduled')">Scheduled</button>
+                </div>
+              </div>
+              <div class="campaign-grid" id="campaignGrid"></div>
+              <div id="campPagination"></div>
+            </div>
+          </div>
+
+          <!-- ── CONTACTS TAB ── -->
+          <div id="tab-contacts" style="display:none">
+            <!-- Stats row -->
+            <div class="contacts-stats">
+              <div class="contact-stat">
+                <div class="contact-stat-val text-green" id="cStatTotal">0</div>
+                <div class="contact-stat-lbl">Total Contacts</div>
+              </div>
+              <div class="contact-stat">
+                <div class="contact-stat-val text-blue" id="cStatActive">0</div>
+                <div class="contact-stat-lbl">Active</div>
+              </div>
+              <div class="contact-stat">
+                <div class="contact-stat-val text-amber" id="cStatUnsub">0</div>
+                <div class="contact-stat-lbl">Unsubscribed</div>
+              </div>
+              <div class="contact-stat">
+                <div class="contact-stat-val text-red" id="cStatBounced">0</div>
+                <div class="contact-stat-lbl">Bounced</div>
+              </div>
+            </div>
+
+            <!-- Empty state (shown when no contacts imported) -->
+            <div class="empty-state" id="contactsEmpty">
+              <div class="empty-icon">👥</div>
+              <div class="empty-title">No contacts yet</div>
+              <div class="empty-sub">Import your contact list to start sending personalized email campaigns. Download the template, fill it in Excel or Google Sheets, then upload.</div>
+              <div class="empty-actions">
+                <button class="btn-secondary" onclick="downloadCSVTemplate()">⬇️ Download Template</button>
+                <button class="btn-primary" onclick="openImportModal()">Import Contacts</button>
+              </div>
+            </div>
+
+            <!-- Contacts table (hidden until contacts imported) -->
+            <div id="contactsTableWrap" style="display:none"></div>
+          </div>
+
+          <!-- ── TEMPLATES TAB ── -->
+          <div id="tab-templates" style="display:none">
+            <div id="templateGallery"></div>
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <!-- ── MY TEMPLATE PREVIEW MODAL ── -->
+    <div class="modal-overlay" id="tplPreviewOverlay" onclick="if(event.target===this)closeTplPreview()">
+      <div class="modal" style="max-width:680px">
+        <div class="modal-header">
+          <div>
+            <div class="modal-title" id="tplPreviewTitle"></div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px" id="tplPreviewMeta"></div>
+          </div>
+          <button class="modal-close" onclick="closeTplPreview()">✕</button>
+        </div>
+        <div class="modal-body" id="tplPreviewBody"></div>
+        <div class="modal-footer">
+          <button class="btn-secondary" onclick="closeTplPreview()">Close</button>
+          <button class="btn-primary" id="tplPreviewUseBtn">Use Template</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── CAMPAIGN DETAIL MODAL ── -->
+    <div class="modal-overlay" id="campDetailOverlay" onclick="if(event.target===this)closeCampDetail()">
+      <div class="modal" style="max-width:680px" id="campDetailModal">
+        <div class="modal-header" id="campDetailHeader"></div>
+        <div class="modal-body" id="campDetailBody"></div>
+        <div class="modal-footer" id="campDetailFooter"></div>
+      </div>
+    </div>
+
+    <!-- ── UNLAYER EMAIL DESIGNER ── -->
+    <div id="unlayerOverlay">
+      <div class="unlayer-topbar">
+        <div class="unlayer-topbar-left">
+          <div class="unlayer-topbar-title">Email Designer</div>
+          <div class="unlayer-topbar-sub">Add your logo, images, buttons and brand colours. Merge tags like {{first_name}} work everywhere.</div>
+        </div>
+        <div style="display:flex;gap:8px;flex-shrink:0">
+          <button class="btn-secondary" onclick="closeUnlayer()">← Back</button>
+          <button class="btn-primary" onclick="saveUnlayerDesign()">✅ Save Design</button>
+        </div>
+      </div>
+      <div id="unlayer-container"></div>
+    </div>
+
+    <!-- ── IMPORT CONTACTS MODAL ── -->
+    <div class="modal-overlay" id="importOverlay" onclick="if(event.target===this)closeImportModal()">
+      <div class="modal" id="importModal">
+        <div class="modal-header">
+          <div class="modal-title" id="importTitle">Import Contacts</div>
+          <button class="modal-close" onclick="closeImportModal()">✕</button>
+        </div>
+        <div class="modal-body" id="importBody"></div>
+        <div class="modal-footer" id="importFooter"></div>
+      </div>
+    </div>
+
+    <!-- ── NEW CAMPAIGN MODAL ── -->
+    <div class="modal-overlay" id="modalOverlay" onclick="handleOverlayClick(event)">
+      <div class="modal" id="modal">
+        <div class="modal-header">
+          <div class="modal-title" id="modalTitle">New Campaign</div>
+          <button class="modal-close" onclick="closeModal()">✕</button>
+        </div>
+        <div class="modal-body" id="modalBody"></div>
+        <div class="modal-footer" id="modalFooter"></div>
+      </div>
+    </div>
+
+    <script>window.NP_PAGE = "email";</script>
+    <script src="../assets/js/sidebar.js"></script>
+    <script type="module" src="../assets/js/auth-guard.js"></script>
+    <script src="https://editor.unlayer.com/embed.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script>
+      "use strict";
+
+      // ── Templates data ──
+      const TEMPLATES = [
+        {
+          category: "Banking & Finance",
+          color: "rgba(0,191,255,0.12)",
+          iconBg: "rgba(0,191,255,0.12)",
+          items: [
+            {
+              id: "bank-statement",
+              icon: "🏦",
+              name: "Monthly Account Statement",
+              desc: "Send monthly account statements with balance and transaction summary.",
+              subject: "Your {{month}} Account Statement — {{bank_name}}",
+              tags: ["Finance", "Monthly"],
+              body: `Dear {{first_name}},\n\nYour account statement for {{month}} {{year}} is now available.\n\nAccount Number: {{account_number}}\nOpening Balance: ₦{{opening_balance}}\nTotal Credits: ₦{{total_credits}}\nTotal Debits: ₦{{total_debits}}\nClosing Balance: ₦{{closing_balance}}\n\nLog in to your dashboard to view the full statement.\n\nThank you for banking with {{bank_name}}.`,
+              mergeTags: ["{{first_name}}", "{{month}}", "{{year}}", "{{account_number}}", "{{opening_balance}}", "{{total_credits}}", "{{total_debits}}", "{{closing_balance}}", "{{bank_name}}"],
+            },
+            {
+              id: "loan-approval",
+              icon: "✅",
+              name: "Loan Approval",
+              desc: "Notify customers their loan application has been approved.",
+              subject: "Congratulations! Your Loan of ₦{{amount}} Has Been Approved",
+              tags: ["Finance", "Loans"],
+              body: `Dear {{first_name}},\n\nWe are pleased to inform you that your loan application has been approved!\n\nLoan Amount: ₦{{amount}}\nTenure: {{tenure}} months\nInterest Rate: {{rate}}% per annum\nMonthly Repayment: ₦{{monthly_payment}}\nDisbursement Date: {{disbursement_date}}\n\nPlease log in to your account to accept the offer and complete disbursement.\n\nCongratulations once again from the {{business_name}} team.`,
+              mergeTags: ["{{first_name}}", "{{amount}}", "{{tenure}}", "{{rate}}", "{{monthly_payment}}", "{{disbursement_date}}", "{{business_name}}"],
+            },
+            {
+              id: "transaction-alert",
+              icon: "💳",
+              name: "Transaction Alert",
+              desc: "Real-time debit/credit notification emails for every transaction.",
+              subject: "Transaction Alert — ₦{{amount}} {{type}} on Your Account",
+              tags: ["Finance", "Alerts"],
+              body: `Dear {{first_name}},\n\nA transaction has been recorded on your account.\n\nTransaction Type: {{type}}\nAmount: ₦{{amount}}\nDate: {{date}} at {{time}}\nAccount: ****{{last4}}\nBalance After: ₦{{balance}}\nReference: {{reference}}\n\nIf you did not authorize this transaction, please contact us immediately at {{support_email}} or call {{support_phone}}.\n\n{{business_name}} Customer Support`,
+              mergeTags: ["{{first_name}}", "{{amount}}", "{{type}}", "{{date}}", "{{time}}", "{{last4}}", "{{balance}}", "{{reference}}", "{{support_email}}", "{{support_phone}}", "{{business_name}}"],
+            },
+            {
+              id: "kyc-reminder",
+              icon: "🪪",
+              name: "KYC Verification Reminder",
+              desc: "Remind users to complete their identity verification to unlock full access.",
+              subject: "Action Required: Complete Your KYC — {{business_name}}",
+              tags: ["Compliance", "KYC"],
+              body: `Dear {{first_name}},\n\nTo continue enjoying full access to your {{business_name}} account, you need to complete your Know Your Customer (KYC) verification.\n\nWhat you need:\n• A valid government-issued ID (NIN, Passport, or Driver's Licence)\n• A clear selfie\n• Proof of address (utility bill or bank statement)\n\nDeadline: {{deadline}}\n\nAfter this date, your account will be restricted. Click below to complete your verification now.\n\nThank you,\n{{business_name}} Compliance Team`,
+              mergeTags: ["{{first_name}}", "{{business_name}}", "{{deadline}}"],
+            },
+          ],
+        },
+        {
+          category: "E-commerce & Retail",
+          color: "rgba(0,232,122,0.1)",
+          iconBg: "rgba(0,232,122,0.1)",
+          items: [
+            {
+              id: "order-confirmation",
+              icon: "🛒",
+              name: "Order Confirmation",
+              desc: "Confirm customer orders instantly with an itemized receipt.",
+              subject: "Order Confirmed ✅ — #{{order_id}} | {{business_name}}",
+              tags: ["E-commerce", "Orders"],
+              body: `Hi {{first_name}},\n\nThank you for your order! We've received it and it's being processed.\n\nOrder ID: #{{order_id}}\nDate: {{order_date}}\nItems: {{order_items}}\n\nSubtotal: ₦{{subtotal}}\nDelivery: ₦{{delivery_fee}}\nTotal: ₦{{total}}\n\nDelivery Address:\n{{delivery_address}}\n\nEstimated Delivery: {{estimated_delivery}}\n\nYou'll receive another email when your order ships. Track your order on our website.\n\nThank you for shopping with {{business_name}}!`,
+              mergeTags: ["{{first_name}}", "{{order_id}}", "{{order_date}}", "{{order_items}}", "{{subtotal}}", "{{delivery_fee}}", "{{total}}", "{{delivery_address}}", "{{estimated_delivery}}", "{{business_name}}"],
+            },
+            {
+              id: "shipping",
+              icon: "🚚",
+              name: "Shipping Notification",
+              desc: "Notify customers when their order has been dispatched with tracking details.",
+              subject: "Your Order #{{order_id}} Has Been Shipped! 🚚",
+              tags: ["E-commerce", "Shipping"],
+              body: `Great news, {{first_name}}!\n\nYour order #{{order_id}} has been shipped and is on its way to you.\n\nTracking Number: {{tracking_number}}\nCourier: {{courier_name}}\nEstimated Arrival: {{estimated_arrival}}\n\nYou can track your package here: {{tracking_link}}\n\nDelivery Address:\n{{delivery_address}}\n\nIf you have any questions, reply to this email or contact us at {{support_email}}.\n\nThank you,\n{{business_name}}`,
+              mergeTags: ["{{first_name}}", "{{order_id}}", "{{tracking_number}}", "{{courier_name}}", "{{estimated_arrival}}", "{{tracking_link}}", "{{delivery_address}}", "{{support_email}}", "{{business_name}}"],
+            },
+            {
+              id: "flash-sale",
+              icon: "⚡",
+              name: "Flash Sale Promotion",
+              desc: "Drive urgency with a limited-time offer email to your customer list.",
+              subject: "⚡ Flash Sale! {{discount}}% Off — Ends {{end_time}}",
+              tags: ["Promo", "Sales"],
+              body: `Hi {{first_name}},\n\n🔥 FLASH SALE IS LIVE!\n\nFor the next {{hours}} hours only, enjoy {{discount}}% OFF on all {{product_category}}!\n\nUse code: {{promo_code}}\nValid until: {{end_date}} at {{end_time}}\n\nTop deals:\n• {{item_1}} — was ₦{{old_price_1}}, now ₦{{new_price_1}}\n• {{item_2}} — was ₦{{old_price_2}}, now ₦{{new_price_2}}\n• {{item_3}} — was ₦{{old_price_3}}, now ₦{{new_price_3}}\n\nShop now before stock runs out!\n\n{{business_name}}`,
+              mergeTags: ["{{first_name}}", "{{discount}}", "{{hours}}", "{{product_category}}", "{{promo_code}}", "{{end_date}}", "{{end_time}}", "{{item_1}}", "{{old_price_1}}", "{{new_price_1}}", "{{item_2}}", "{{old_price_2}}", "{{new_price_2}}", "{{item_3}}", "{{old_price_3}}", "{{new_price_3}}", "{{business_name}}"],
+            },
+            {
+              id: "abandoned-cart",
+              icon: "🛍️",
+              name: "Abandoned Cart Recovery",
+              desc: "Win back customers who left items in their cart without checking out.",
+              subject: "{{first_name}}, you left something behind 👀",
+              tags: ["E-commerce", "Recovery"],
+              body: `Hi {{first_name}},\n\nYou left some items in your cart! Don't let them get away.\n\nItems in your cart:\n{{cart_items}}\n\nCart Total: ₦{{cart_total}}\n\nComplete your order now and get it delivered to you by {{delivery_estimate}}.\n\nAs a little incentive, use code {{discount_code}} for {{discount_amount}}% off your order.\nThis offer expires in {{offer_expiry}} hours.\n\nThank you,\n{{business_name}}`,
+              mergeTags: ["{{first_name}}", "{{cart_items}}", "{{cart_total}}", "{{delivery_estimate}}", "{{discount_code}}", "{{discount_amount}}", "{{offer_expiry}}", "{{business_name}}"],
+            },
+          ],
+        },
+        {
+          category: "Fintech & Payments",
+          color: "rgba(255,184,0,0.1)",
+          iconBg: "rgba(255,184,0,0.1)",
+          items: [
+            {
+              id: "payment-receipt",
+              icon: "🧾",
+              name: "Payment Receipt",
+              desc: "Automatically send payment confirmation receipts to customers.",
+              subject: "Payment Received — ₦{{amount}} | {{business_name}}",
+              tags: ["Payments", "Receipt"],
+              body: `Dear {{first_name}},\n\nWe have received your payment. Here are the details:\n\nAmount Paid: ₦{{amount}}\nPayment Date: {{payment_date}}\nPayment Method: {{payment_method}}\nTransaction ID: {{transaction_id}}\nFor: {{payment_description}}\n\nThis is your official receipt. Please keep it for your records.\n\nThank you for your payment.\n\n{{business_name}}\n{{business_address}}`,
+              mergeTags: ["{{first_name}}", "{{amount}}", "{{payment_date}}", "{{payment_method}}", "{{transaction_id}}", "{{payment_description}}", "{{business_name}}", "{{business_address}}"],
+            },
+            {
+              id: "loan-rejection",
+              icon: "📋",
+              name: "Loan Application Update",
+              desc: "Professionally inform applicants about their loan application status.",
+              subject: "Update on Your Loan Application — {{business_name}}",
+              tags: ["Finance", "Loans"],
+              body: `Dear {{first_name}},\n\nThank you for your loan application submitted on {{application_date}}.\n\nAfter careful review of your application, we regret to inform you that we are unable to approve your loan request of ₦{{amount}} at this time.\n\nReason(s): {{reason}}\n\nYou may re-apply after {{reapply_date}} once the above conditions have been addressed.\n\nIf you have questions or need further clarification, please contact our support team at {{support_phone}} or {{support_email}}.\n\nWe appreciate your interest in {{business_name}}.`,
+              mergeTags: ["{{first_name}}", "{{amount}}", "{{application_date}}", "{{reason}}", "{{reapply_date}}", "{{support_phone}}", "{{support_email}}", "{{business_name}}"],
+            },
+          ],
+        },
+        {
+          category: "Education",
+          color: "rgba(168,85,247,0.1)",
+          iconBg: "rgba(168,85,247,0.1)",
+          items: [
+            {
+              id: "result-notification",
+              icon: "📚",
+              name: "Exam Result Notification",
+              desc: "Notify students or parents when exam results are available on the portal.",
+              subject: "{{student_name}}'s {{exam}} Result is Now Available",
+              tags: ["Education", "Results"],
+              body: `Dear {{parent_name}},\n\nWe are pleased to inform you that the result for {{exam}} is now available.\n\nStudent Name: {{student_name}}\nClass: {{class}}\nExamination: {{exam}}\nSession: {{session}}\n\nLogin to the parent portal to view the full result:\nPortal: {{portal_link}}\nUsername: {{username}}\n\nFor any queries, please contact the school office at {{school_phone}}.\n\nBest regards,\n{{school_name}}`,
+              mergeTags: ["{{parent_name}}", "{{student_name}}", "{{exam}}", "{{class}}", "{{session}}", "{{portal_link}}", "{{username}}", "{{school_phone}}", "{{school_name}}"],
+            },
+            {
+              id: "school-fees",
+              icon: "🎓",
+              name: "School Fees Invoice",
+              desc: "Send term fees invoices to parents with payment breakdown and due date.",
+              subject: "{{term}} Fees Invoice — {{school_name}}",
+              tags: ["Education", "Fees"],
+              body: `Dear {{parent_name}},\n\nPlease find below the fees invoice for {{student_name}} for the {{term}} term, {{session}} academic session.\n\nTuition Fee: ₦{{tuition}}\nDevelopment Levy: ₦{{development_levy}}\nExamination Fee: ₦{{exam_fee}}\nOther Charges: ₦{{other_charges}}\nTotal: ₦{{total_fees}}\n\nPayment Due Date: {{due_date}}\n\nPayment Details:\nBank: {{bank_name}}\nAccount Name: {{account_name}}\nAccount Number: {{account_number}}\n\nNote: A late fee of ₦{{late_fee}} will be applied after the due date.\n\n{{school_name}}`,
+              mergeTags: ["{{parent_name}}", "{{student_name}}", "{{term}}", "{{session}}", "{{tuition}}", "{{development_levy}}", "{{exam_fee}}", "{{other_charges}}", "{{total_fees}}", "{{due_date}}", "{{bank_name}}", "{{account_name}}", "{{account_number}}", "{{late_fee}}", "{{school_name}}"],
+            },
+          ],
+        },
+        {
+          category: "Onboarding & Security",
+          color: "rgba(0,232,122,0.07)",
+          iconBg: "rgba(0,232,122,0.07)",
+          items: [
+            {
+              id: "welcome",
+              icon: "👋",
+              name: "Welcome Email",
+              desc: "Warm welcome for new customers or subscribers with next steps.",
+              subject: "Welcome to {{business_name}}, {{first_name}}! 🎉",
+              tags: ["Onboarding"],
+              body: `Hi {{first_name}},\n\nWelcome to {{business_name}}! We're thrilled to have you.\n\nYour account is ready. Here's what you can do next:\n\n1. Complete your profile — {{profile_link}}\n2. Explore our services — {{services_link}}\n3. Contact support if you need help — {{support_email}}\n\nAs a welcome gift, use code {{promo_code}} for {{discount}}% off your first transaction.\n\nIf you have any questions, we're always here to help.\n\nWarm regards,\nThe {{business_name}} Team`,
+              mergeTags: ["{{first_name}}", "{{business_name}}", "{{profile_link}}", "{{services_link}}", "{{support_email}}", "{{promo_code}}", "{{discount}}"],
+            },
+            {
+              id: "otp-email",
+              icon: "🔐",
+              name: "OTP / Email Verification",
+              desc: "Send one-time verification codes or email confirmation links.",
+              subject: "Your {{business_name}} Verification Code: {{otp_code}}",
+              tags: ["Security", "OTP"],
+              body: `Hi {{first_name}},\n\nYour verification code for {{business_name}} is:\n\n{{otp_code}}\n\nThis code is valid for {{expiry}} minutes.\n\nDo not share this code with anyone. {{business_name}} will never ask for your OTP via phone or chat.\n\nIf you did not request this code, please ignore this email or contact us at {{support_email}}.\n\n{{business_name}} Security Team`,
+              mergeTags: ["{{first_name}}", "{{otp_code}}", "{{expiry}}", "{{business_name}}", "{{support_email}}"],
+            },
+            {
+              id: "password-reset",
+              icon: "🔑",
+              name: "Password Reset",
+              desc: "Secure password reset email with a time-limited reset link.",
+              subject: "Reset Your {{business_name}} Password",
+              tags: ["Security", "Account"],
+              body: `Hi {{first_name}},\n\nWe received a request to reset the password for your {{business_name}} account.\n\nClick the button below to reset your password. This link expires in {{expiry}} hours.\n\n{{reset_link}}\n\nIf you didn't request a password reset, you can safely ignore this email. Your password will not change.\n\nFor security, never share this link with anyone.\n\n{{business_name}} Security Team`,
+              mergeTags: ["{{first_name}}", "{{reset_link}}", "{{expiry}}", "{{business_name}}"],
+            },
+          ],
+        },
+      ];
+
+      // ── Campaign data ──
+      let campaigns = [
+        { id:'c1', title:"Ramadan Promo Blast", sub:"Promotional", fromName:"Konga", subject:"🌙 Ramadan Special — Up to 50% Off!", sentAt:"2026-03-15 09:00", recipients:8500, sent:"8,500", open:"48.2%", click:"22.1%", bounce:"0.4%", unsub:"0.2%", status:"sent", color:"var(--accent)", pct:48, resendEnabled:true, resendStatus:"sent", resendDays:3, resendSubject:"Last chance — Ramadan deals ending soon!" },
+        { id:'c2', title:"Newsletter — March", sub:"Newsletter", fromName:"NotifyPro Updates", subject:"What's new in NotifyPro this March", sentAt:"2026-03-20 08:30", recipients:12000, sent:"12,000", open:"42.7%", click:"18.4%", bounce:"0.6%", unsub:"0.1%", status:"sent", color:"var(--accent)", pct:43, resendEnabled:false, resendStatus:null },
+        { id:'c3', title:"Welcome Series #1", sub:"Automation", fromName:"FairMonii", subject:"Welcome to FairMonii, {{first_name}}! 🎉", sentAt:"2026-03-25 07:00", recipients:3210, sent:"3,210", open:"61.0%", click:"34.2%", bounce:"0.2%", unsub:"0.0%", status:"sending", color:"var(--accent2)", pct:61, resendEnabled:true, resendStatus:"scheduled", resendDays:2, resendSubject:null },
+        { id:'c4', title:"Easter Promo", sub:"Promotional", fromName:"Shoprite NG", subject:"🐣 Easter Sale — Starts Friday!", sentAt:"2026-03-29 10:00", recipients:5400, sent:"—", open:"—", click:"—", bounce:"—", unsub:"—", status:"scheduled", color:"var(--accent3)", pct:0, resendEnabled:false, resendStatus:null },
+        { id:'c5', title:"Product Update v2.3", sub:"Transactional", fromName:"TechLagos", subject:"New features in v2.3", sentAt:null, recipients:0, sent:"—", open:"—", click:"—", bounce:"—", unsub:"—", status:"draft", color:"var(--muted)", pct:0, resendEnabled:false, resendStatus:null },
+        { id:'c6', title:"Re-engagement Flow", sub:"Automation", fromName:"Konga", subject:"We miss you! Here's 15% off to come back", sentAt:"2026-03-10 11:00", recipients:1820, sent:"1,820", open:"29.1%", click:"9.4%", bounce:"1.2%", unsub:"0.5%", status:"sent", color:"var(--accent)", pct:29, resendEnabled:true, resendStatus:"sent", resendDays:3, resendSubject:"Still thinking? Extra 5% off just for you" },
+      ];
+
+      // ── Modal state ──
+      let currentStep = 1;
+      let selectedTemplate = null;
+      let savedFormData = {};
+      let savedEmailDesign = null;   // Unlayer JSON design
+      let savedEmailHtml = '';       // Unlayer exported HTML
+      let unlayerInitialized = false;
+
+      // ── My Templates (localStorage) ──
+      let myTemplates = JSON.parse(localStorage.getItem('np_my_templates') || '[]');
+      function persistMyTemplates() { localStorage.setItem('np_my_templates', JSON.stringify(myTemplates)); }
+
+      // ── Page tab switching ──
+      function switchPageTab(btn, tab) {
+        document.querySelectorAll('.page-tab').forEach(t => t.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById('tab-overview').style.display = tab === 'overview' ? '' : 'none';
+        document.getElementById('tab-contacts').style.display = tab === 'contacts' ? '' : 'none';
+        document.getElementById('tab-templates').style.display = tab === 'templates' ? '' : 'none';
+      }
+
+      // ── Render campaigns ──
+      const CAMPS_PER_PAGE = 9;
+      let campPage = 1;
+      let campFilter = 'all';
+
+      function renderCampaigns(filter) {
+        if (filter !== undefined) { campFilter = filter; campPage = 1; }
+        const all = campFilter === 'all' ? campaigns : campaigns.filter(c => c.status === campFilter);
+        const totalPages = Math.max(1, Math.ceil(all.length / CAMPS_PER_PAGE));
+        if (campPage > totalPages) campPage = totalPages;
+        const start = (campPage - 1) * CAMPS_PER_PAGE;
+        const data = all.slice(start, start + CAMPS_PER_PAGE);
+
+        document.getElementById('campCount').textContent = `${all.length} campaign${all.length !== 1 ? 's' : ''}`;
+        document.getElementById('campaignGrid').innerHTML = data.length === 0
+          ? `<div style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--muted);font-size:14px">No campaigns in this category yet.</div>`
+          : data.map(c => `
+          <div class="camp-card" onclick="openCampDetail('${c.id}')">
+            <div class="camp-card-top">
+              <div>
+                <div class="camp-title">${c.title}</div>
+                <div class="camp-meta">${c.fromName ? c.fromName + ' · ' : ''}${c.sub}</div>
+              </div>
+              <span class="status-pill ${c.status}">${c.status.charAt(0).toUpperCase()+c.status.slice(1)}</span>
+            </div>
+            <div class="progress-bar"><div class="progress-fill" style="width:${c.pct}%;background:${c.color}"></div></div>
+            <div class="camp-stats">
+              <div><div class="camp-stat-val" style="color:${c.color}">${c.sent}</div><div class="camp-stat-lbl">Sent</div></div>
+              <div><div class="camp-stat-val" style="color:${c.color}">${c.open}</div><div class="camp-stat-lbl">Opens</div></div>
+              <div><div class="camp-stat-val" style="color:${c.color}">${c.click}</div><div class="camp-stat-lbl">Clicks</div></div>
+            </div>
+          </div>`).join('');
+
+        // Pagination controls
+        const paginationEl = document.getElementById('campPagination');
+        if (totalPages <= 1) {
+          if (paginationEl) paginationEl.innerHTML = '';
+          return;
+        }
+        const pages = [];
+        for (let i = 1; i <= totalPages; i++) {
+          if (i === 1 || i === totalPages || Math.abs(i - campPage) <= 1) pages.push(i);
+          else if (pages[pages.length - 1] !== '…') pages.push('…');
+        }
+        if (paginationEl) paginationEl.innerHTML = `
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:1rem 0 0;border-top:1px solid var(--card-border);margin-top:1rem;flex-wrap:wrap;gap:8px">
+            <span style="font-size:12px;color:var(--muted)">Page ${campPage} of ${totalPages} · ${all.length} campaigns</span>
+            <div style="display:flex;gap:4px;align-items:center">
+              <button onclick="campGoPage(${campPage - 1})" ${campPage === 1 ? 'disabled' : ''} style="padding:5px 10px;border-radius:var(--radius-sm);border:1px solid var(--card-border);background:var(--bg3);color:${campPage === 1 ? 'var(--muted)' : 'var(--text)'};cursor:${campPage === 1 ? 'default' : 'pointer'};font-size:13px;font-family:var(--font-body)">‹</button>
+              ${pages.map(p => p === '…'
+                ? `<span style="padding:5px 6px;color:var(--muted);font-size:13px">…</span>`
+                : `<button onclick="campGoPage(${p})" style="padding:5px 10px;border-radius:var(--radius-sm);border:1px solid ${p === campPage ? 'var(--accent)' : 'var(--card-border)'};background:${p === campPage ? 'rgba(0,232,122,0.1)' : 'var(--bg3)'};color:${p === campPage ? 'var(--accent)' : 'var(--text)'};cursor:pointer;font-size:13px;font-weight:${p === campPage ? '700' : '400'};font-family:var(--font-body)">${p}</button>`
+              ).join('')}
+              <button onclick="campGoPage(${campPage + 1})" ${campPage === totalPages ? 'disabled' : ''} style="padding:5px 10px;border-radius:var(--radius-sm);border:1px solid var(--card-border);background:var(--bg3);color:${campPage === totalPages ? 'var(--muted)' : 'var(--text)'};cursor:${campPage === totalPages ? 'default' : 'pointer'};font-size:13px;font-family:var(--font-body)">›</button>
+            </div>
+          </div>`;
+      }
+
+      function campGoPage(p) {
+        const all = campFilter === 'all' ? campaigns : campaigns.filter(c => c.status === campFilter);
+        const total = Math.max(1, Math.ceil(all.length / CAMPS_PER_PAGE));
+        campPage = Math.max(1, Math.min(p, total));
+        renderCampaigns();
+      }
+
+      function filterCamps(btn, filter) {
+        document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+        btn.classList.add('active');
+        renderCampaigns(filter);
+      }
+      renderCampaigns('all');
+
+      // ── Render templates ──
+      function renderTemplates() {
+        const gallery = document.getElementById('templateGallery');
+
+        // ── My Templates section ──
+        const mySection = myTemplates.length > 0
+          ? `<div class="tpl-category-label" style="color:var(--accent)">★ My Templates</div>
+             <div class="tpl-grid" id="myTplGrid">
+               ${myTemplates.map(t => `
+                 <div class="tpl-card" style="border-color:rgba(0,232,122,0.2)">
+                   <div class="tpl-card-top">
+                     <div class="tpl-icon" style="background:rgba(0,232,122,0.1)">✏️</div>
+                     <div>
+                       <div class="tpl-name">${escHtml(t.name)}</div>
+                       <div class="tpl-desc">Saved ${t.savedAt}${t.hasDesign ? ' · Visual design' : ''}</div>
+                     </div>
+                   </div>
+                   <div class="tpl-subject">Subject: <span>${highlightMergeTags(escHtml(t.subject || '(no subject)'))}</span></div>
+                   <div class="tpl-tags">
+                     <span class="tpl-tag" style="background:rgba(0,232,122,0.1);color:var(--accent)">My Template</span>
+                     ${t.origin ? `<span class="tpl-tag" title="Based on NotifyPro template">Based on: ${escHtml(t.origin)}</span>` : '<span class="tpl-tag">Scratch</span>'}
+                     ${t.hasDesign ? '<span class="tpl-tag">Visual</span>' : ''}
+                   </div>
+                   <div class="tpl-actions">
+                     <button class="tpl-btn-use" onclick="useMyTemplate('${t.id}')">Use Template</button>
+                     <button class="tpl-btn-preview" onclick="previewMyTemplate('${t.id}')">Preview</button>
+                     <button class="tpl-btn-preview" onclick="deleteMyTemplate('${t.id}')" style="color:#f87171;border-color:rgba(248,113,113,0.25)" title="Delete this template">🗑️</button>
+                   </div>
+                 </div>`).join('')}
+             </div>`
+          : `<div class="tpl-category-label" style="color:var(--accent)">★ My Templates</div>
+             <div style="background:var(--bg2);border:1px dashed rgba(0,232,122,0.25);border-radius:var(--radius-md);padding:2rem;text-align:center;margin-bottom:0.5rem">
+               <div style="font-size:28px;margin-bottom:0.6rem;opacity:.5">✏️</div>
+               <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:0.4rem">No saved templates yet</div>
+               <div style="font-size:12px;color:var(--muted);max-width:340px;margin:0 auto 1rem">Build any campaign — from scratch or customise a NotifyPro template — then click <strong style="color:var(--text)">★ Save as My Template</strong> to store it here for reuse.</div>
+               <button class="btn-primary" style="font-size:13px;padding:8px 18px" onclick="openModal()">+ New Campaign</button>
+             </div>`;
+
+        gallery.innerHTML = mySection + TEMPLATES.map(cat => `
+          <div class="tpl-category-label">${cat.category}</div>
+          <div class="tpl-grid">
+            ${cat.items.map(t => `
+              <div class="tpl-card">
+                <div class="tpl-card-top">
+                  <div class="tpl-icon" style="background:${cat.iconBg}">${t.icon}</div>
+                  <div>
+                    <div class="tpl-name">${t.name}</div>
+                    <div class="tpl-desc">${t.desc}</div>
+                  </div>
+                </div>
+                <div class="tpl-subject">Subject: <span>${highlightMergeTags(t.subject)}</span></div>
+                <div class="tpl-tags">${t.tags.map(tag => `<span class="tpl-tag">${tag}</span>`).join('')}</div>
+                <div class="tpl-actions">
+                  <button class="tpl-btn-use" onclick="useTemplate('${t.id}')">Use Template</button>
+                  <button class="tpl-btn-preview" onclick="previewTemplate('${t.id}')">Preview</button>
+                  <button class="tpl-btn-preview" onclick="downloadTemplateCSV('${t.id}')" title="Download pre-filled CSV template for this email">⬇️ CSV</button>
+                </div>
+              </div>`).join('')}
+          </div>`).join('');
+      }
+      renderTemplates();
+
+      function escHtml(s) {
+        return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+      }
+
+      function highlightMergeTags(str) {
+        return str.replace(/\{\{[^}]+\}\}/g, m => `<span style="color:var(--accent)">${m}</span>`);
+      }
+
+      function downloadTemplateCSV(id) {
+        const t = getTemplateById(id);
+        if (!t) return;
+        // Extract column names from merge tags e.g. {{first_name}} → first_name
+        // Always put email first, then deduplicate the rest
+        const tagCols = t.mergeTags.map(tag => tag.replace(/\{\{|\}\}/g, '').trim());
+        const cols = ['email', ...tagCols.filter(c => c !== 'email')];
+        // Build one example row with placeholder values
+        const exampleRow = cols.map(col => {
+          const examples = {
+            email: 'customer@example.com', first_name: 'Tunde', last_name: 'Adeyemi',
+            phone: '08012345678', business_name: 'GTBank', amount: '50000',
+            account_number: '0123456789', month: 'March', year: '2026',
+            opening_balance: '100000', closing_balance: '150000',
+            total_credits: '80000', total_debits: '30000',
+            tenure: '12', rate: '18', monthly_payment: '5000',
+            disbursement_date: '2026-04-01', deadline: '2026-04-15',
+            order_id: 'ORD-00123', order_date: '2026-03-27', order_items: 'Sneakers x1',
+            subtotal: '25000', delivery_fee: '1500', total: '26500',
+            delivery_address: '14 Broad Street, Lagos Island',
+            estimated_delivery: '2026-03-30', estimated_arrival: '2026-03-30',
+            tracking_number: 'TRK-987654', courier_name: 'GIG Logistics',
+            tracking_link: 'https://track.example.com/TRK-987654',
+            support_email: 'support@business.ng', support_phone: '07001234567',
+            discount: '20', hours: '24', promo_code: 'SAVE20', end_date: '2026-03-28',
+            end_time: '11:59 PM', product_category: 'Footwear',
+            item_1: 'Nike Air Max', old_price_1: '45000', new_price_1: '36000',
+            item_2: 'Adidas Slides', old_price_2: '12000', new_price_2: '9600',
+            item_3: 'Jordan 1s', old_price_3: '80000', new_price_3: '64000',
+            cart_items: 'Sneakers x1, T-Shirt x2', cart_total: '38000',
+            delivery_estimate: '2026-03-29', discount_code: 'COMEBACK10',
+            discount_amount: '10', offer_expiry: '48',
+            payment_date: '2026-03-27', payment_method: 'Bank Transfer',
+            transaction_id: 'TXN-456789', payment_description: 'March Subscription',
+            business_address: '14 Broad Street, Lagos',
+            application_date: '2026-03-20', reason: 'Insufficient credit history',
+            reapply_date: '2026-06-01', type: 'Debit', date: '2026-03-27',
+            time: '10:45 AM', last4: '4521', balance: '125000', reference: 'REF-001234',
+            parent_name: 'Mr. Adeyemi', student_name: 'David Adeyemi',
+            exam: 'First Term Examination', class: 'JSS 2', session: '2025/2026',
+            portal_link: 'https://portal.school.ng', username: 'david.adeyemi',
+            school_phone: '09012345678', school_name: 'Greenfield Academy',
+            term: 'First Term', tuition: '150000', development_levy: '20000',
+            exam_fee: '10000', other_charges: '5000', total_fees: '185000',
+            due_date: '2026-04-10', bank_name: 'First Bank', account_name: 'Greenfield Academy',
+            late_fee: '5000', profile_link: 'https://app.example.ng/profile',
+            services_link: 'https://app.example.ng/services', promo_code2: 'WELCOME10',
+            otp_code: '847291', expiry: '10', reset_link: 'https://app.example.ng/reset?token=xxxx',
+          };
+          return examples[col] !== undefined ? examples[col] : `your_${col}`;
+        });
+        const csv = [cols.join(','), exampleRow.join(',')].join('\r\n');
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `notifypro-${id}-template.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+      }
+
+      function getTemplateById(id) {
+        for (const cat of TEMPLATES) {
+          const found = cat.items.find(t => t.id === id);
+          if (found) return found;
+        }
+        return null;
+      }
+
+      // ── Modal ──
+      function openModal(tplId) {
+        selectedTemplate = tplId ? getTemplateById(tplId) : null;
+        currentStep = selectedTemplate ? 2 : 1;
+        renderModal();
+        document.getElementById('modalOverlay').classList.add('open');
+      }
+
+      function closeModal() {
+        document.getElementById('modalOverlay').classList.remove('open');
+        selectedTemplate = null;
+        currentStep = 1;
+        savedFormData = {};
+        savedEmailDesign = null;
+        savedEmailHtml = '';
+      }
+
+      function handleOverlayClick(e) {
+        if (e.target === document.getElementById('modalOverlay')) closeModal();
+      }
+
+      function useTemplate(id) {
+        openModal(id);
+      }
+
+      function previewTemplate(id) {
+        const t = getTemplateById(id);
+        if (!t) return;
+        selectedTemplate = t;
+        currentStep = 4;
+        renderModal();
+        document.getElementById('modalOverlay').classList.add('open');
+      }
+
+      function renderModal() {
+        const titles = ['', 'Choose Template', 'Campaign Details', 'Recipients & Schedule', 'Preview'];
+        document.getElementById('modalTitle').textContent = titles[currentStep] || 'New Campaign';
+        renderStepper();
+        if (currentStep === 1) renderStep1();
+        else if (currentStep === 2) renderStep2();
+        else if (currentStep === 3) renderStep3();
+        else if (currentStep === 4) renderStep4();
+        renderFooter();
+      }
+
+      function renderStepper() {
+        const steps = ['Template', 'Details', 'Recipients', 'Preview'];
+        document.getElementById('modalBody').innerHTML = `
+          <div class="stepper">
+            ${steps.map((s, i) => `
+              ${i > 0 ? '<div class="step-line"></div>' : ''}
+              <div class="step ${currentStep === i+1 ? 'active' : currentStep > i+1 ? 'done' : ''}">
+                <div class="step-num">${currentStep > i+1 ? '✓' : i+1}</div>
+                ${s}
+              </div>`).join('')}
+          </div>
+          <div id="stepContent"></div>`;
+        if (currentStep === 1) renderStep1Content();
+        else if (currentStep === 2) renderStep2Content();
+        else if (currentStep === 3) renderStep3Content();
+        else if (currentStep === 4) renderStep4Content();
+      }
+
+      function renderStep1Content() {
+        const el = document.getElementById('stepContent');
+        const myTplHtml = myTemplates.length > 0 ? `
+          <div style="margin-bottom:1.2rem">
+            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--accent);margin-bottom:8px">★ My Templates</div>
+            <div style="display:flex;flex-direction:column;gap:6px">
+              ${myTemplates.map(t => `
+                <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:rgba(0,232,122,0.05);border:1px solid rgba(0,232,122,0.2);border-radius:var(--radius-sm);cursor:pointer;transition:border-color .2s" onclick="useMyTemplate('${t.id}')" onmouseover="this.style.borderColor='rgba(0,232,122,.4)'" onmouseout="this.style.borderColor='rgba(0,232,122,.2)'">
+                  <span style="font-size:18px">✏️</span>
+                  <div style="flex:1;min-width:0">
+                    <div style="font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escHtml(t.name)}</div>
+                    <div style="font-size:11px;color:var(--muted)">Saved ${t.savedAt}${t.hasDesign ? ' · Visual' : ''}</div>
+                  </div>
+                  <button onclick="event.stopPropagation();deleteMyTemplate('${t.id}')" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:13px;padding:3px 5px;border-radius:4px;flex-shrink:0;transition:color .15s" onmouseover="this.style.color='#f87171'" onmouseout="this.style.color='var(--muted)'" title="Delete">🗑️</button>
+                </div>`).join('')}
+            </div>
+          </div>` : '';
+        el.innerHTML = `
+          <div style="margin-bottom:1rem">
+            <button class="tpl-btn-use" style="width:100%;padding:12px;margin-bottom:1rem;font-size:14px" onclick="skipTemplate()">
+              ✏️ Start from Scratch
+            </button>
+          </div>
+          ${myTplHtml}
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:10px">NotifyPro Templates</div>
+          ${TEMPLATES.map(cat => `
+            <div style="margin-bottom:1.2rem">
+              <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">${cat.category}</div>
+              <div style="display:flex;flex-direction:column;gap:6px">
+                ${cat.items.map(t => `
+                  <div onclick="selectTemplate('${t.id}')" style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg3);border:1px solid var(--card-border);border-radius:var(--radius-sm);cursor:pointer;transition:border-color .2s" onmouseover="this.style.borderColor='rgba(0,232,122,.3)'" onmouseout="this.style.borderColor='var(--card-border)'">
+                    <span style="font-size:18px">${t.icon}</span>
+                    <div>
+                      <div style="font-size:13px;font-weight:600;color:var(--text)">${t.name}</div>
+                      <div style="font-size:11px;color:var(--muted)">${t.desc}</div>
+                    </div>
+                  </div>`).join('')}
+              </div>
+            </div>`).join('')}`;
+      }
+
+      function selectTemplate(id) {
+        selectedTemplate = getTemplateById(id);
+        currentStep = 2;
+        renderModal();
+      }
+
+      function skipTemplate() {
+        selectedTemplate = null;
+        currentStep = 2;
+        renderModal();
+      }
+
+      function renderStep2Content() {
+        const el = document.getElementById('stepContent');
+        const t = selectedTemplate;
+        const hasDesign = !!savedEmailDesign;
+        el.innerHTML = `
+          ${t ? `<div class="tpl-selected-banner"><span style="font-size:18px">${t.icon}</span><span>Using template: <strong>${t.name}</strong></span></div>` : ''}
+          <div class="m-field">
+            <label class="m-label">Campaign Name</label>
+            <input class="m-input" id="campName" placeholder="e.g. June Newsletter, Eid Promo" value="${savedFormData.campName || (t ? t.name : '')}" />
+          </div>
+          <div class="m-row">
+            <div class="m-field">
+              <label class="m-label">From Name <span style="color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0">(your brand)</span></label>
+              <input class="m-input" id="fromName" placeholder="e.g. GTBank, Konga, FoodHub NG" value="${savedFormData.fromName || ''}" />
+            </div>
+            <div class="m-field">
+              <label class="m-label">Reply-To Email <span style="color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0">(where replies go)</span></label>
+              <input class="m-input" id="replyTo" type="email" placeholder="e.g. support@gtbank.com" value="${savedFormData.replyTo || ''}" />
+            </div>
+          </div>
+          <div class="m-field">
+            <label class="m-label">Subject Line</label>
+            <input class="m-input" id="subject" placeholder="Enter email subject..." value="${savedFormData.subject || (t ? t.subject : '')}" />
+            ${t ? `<div class="merge-tags">${t.mergeTags.map(tag => `<span class="merge-tag" onclick="insertTag('subject','${tag}')">${tag}</span>`).join('')}</div>` : ''}
+          </div>
+          <div class="m-field">
+            <label class="m-label">Email Body</label>
+            <textarea class="m-textarea" id="emailBody" rows="10" placeholder="Write your email here...">${savedFormData.emailBody || (t ? t.body : '')}</textarea>
+            ${t ? `<div class="merge-tags">${t.mergeTags.map(tag => `<span class="merge-tag" onclick="insertTag('emailBody','${tag}')">${tag}</span>`).join('')}</div><div class="m-hint">Click a tag to insert it at cursor position.</div>` : ''}
+          </div>
+
+          <!-- Visual Designer — secondary/optional -->
+          <div style="border:1px solid var(--card-border);border-radius:var(--radius-sm);overflow:hidden;margin-top:0.5rem">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--bg3)">
+              <div>
+                <div style="font-size:12px;font-weight:700;color:var(--text)">🎨 Visual Designer <span style="font-size:10px;font-weight:500;color:var(--muted);margin-left:4px">Optional</span></div>
+                <div style="font-size:11px;color:var(--muted);margin-top:2px">Add logo, images, buttons & brand colours instead of plain text.</div>
+              </div>
+              ${hasDesign
+                ? `<div style="display:flex;gap:6px;flex-shrink:0">
+                     <button class="btn-secondary" style="font-size:11px;padding:5px 10px" onclick="removeDesign()">Remove</button>
+                     <button class="btn-secondary" style="font-size:11px;padding:5px 10px" onclick="openEmailDesigner()">Edit Design</button>
+                   </div>`
+                : `<button class="btn-secondary" style="font-size:12px;padding:6px 12px;flex-shrink:0" onclick="openEmailDesigner()">Open Designer →</button>`
+              }
+            </div>
+            ${hasDesign ? `<div style="padding:8px 14px;font-size:11px;color:var(--accent);background:rgba(0,232,122,0.05);border-top:1px solid rgba(0,232,122,0.15)">✅ Visual design saved — this will be used instead of the text body above.</div>` : ''}
+          </div>`;
+      }
+
+      function insertTag(fieldId, tag) {
+        const el = document.getElementById(fieldId);
+        const start = el.selectionStart;
+        const end = el.selectionEnd;
+        el.value = el.value.substring(0, start) + tag + el.value.substring(end);
+        el.focus();
+        el.setSelectionRange(start + tag.length, start + tag.length);
+      }
+
+      function renderStep3Content() {
+        const el = document.getElementById('stepContent');
+        const hasContacts = importedContacts.length > 0;
+
+        const recipientsField = hasContacts
+          ? `<div style="background:rgba(0,232,122,0.06);border:1px solid rgba(0,232,122,0.2);border-radius:var(--radius-sm);padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px">
+               <div>
+                 <div style="font-size:14px;font-weight:600;color:var(--text)">✅ ${importedContacts.length.toLocaleString('en-NG')} contacts loaded</div>
+                 <div style="font-size:11px;color:var(--muted);margin-top:3px">Merge tags available: ${importedColumns.map(c=>`<span style="color:var(--accent);font-family:monospace">{{${c}}}</span>`).join(', ')}</div>
+               </div>
+               <button class="btn-secondary" style="font-size:11px;padding:5px 10px;flex-shrink:0" onclick="campaignClearContacts()">Change file</button>
+             </div>`
+          : `<div id="campaignUploadZone" class="upload-zone" style="padding:1.4rem"
+               onclick="document.getElementById('campaignCsvInput').click()"
+               ondragover="event.preventDefault();this.classList.add('drag-over')"
+               ondragleave="this.classList.remove('drag-over')"
+               ondrop="handleCampaignFileDrop(event)">
+               <div class="upload-zone-icon">📊</div>
+               <div class="upload-zone-text">Drop your Excel/CSV file here, or <strong>browse</strong></div>
+               <div style="font-size:11px;color:var(--muted);margin-top:5px">Save Excel as CSV first · Column headers become <span style="color:var(--accent)">{{merge_tags}}</span></div>
+               <input type="file" id="campaignCsvInput" accept=".csv" onchange="handleCampaignFileSelect(this)">
+             </div>
+             <div id="campaignUploadFeedback" style="font-size:12px;color:var(--muted);margin-top:6px;text-align:center"></div>
+             <div style="margin-top:10px;display:flex;align-items:center;gap:8px">
+               <button class="btn-secondary" style="font-size:12px;padding:6px 12px" onclick="${selectedTemplate ? `downloadTemplateCSV('${selectedTemplate.id}')` : 'downloadCSVTemplate()'}">⬇️ Download template</button>
+               <span style="font-size:11px;color:var(--muted)">${selectedTemplate ? `Pre-filled for <strong style="color:var(--text)">${selectedTemplate.name}</strong> — fill in Excel, save as CSV.` : 'Need a starting point? Download our template, fill it in Excel, save as CSV.'}</span>
+             </div>`;
+
+        el.innerHTML = `
+          <div class="m-field">
+            <label class="m-label">Recipients & Personalisation</label>
+            ${recipientsField}
+          </div>
+          <div class="m-field">
+            <label class="m-label">Send Time</label>
+            <select class="m-select" id="sendTime" onchange="toggleSchedule(this.value)">
+              <option value="now">Send Immediately</option>
+              <option value="schedule">Schedule for Later</option>
+            </select>
+          </div>
+          <div id="scheduleFields" style="display:none">
+            <div class="m-row">
+              <div class="m-field">
+                <label class="m-label">Date</label>
+                <input class="m-input" id="schedDate" type="date" />
+              </div>
+              <div class="m-field">
+                <label class="m-label">Time</label>
+                <input class="m-input" id="schedTime" type="time" />
+              </div>
+            </div>
+          </div>
+
+          <div class="m-field" style="margin-top:1.2rem">
+            <label class="m-label">Resend to Non-Openers</label>
+            <div style="background:var(--bg3);border:1px solid var(--card-border);border-radius:var(--radius-sm);padding:12px 14px">
+              <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer">
+                <input type="checkbox" id="resendEnabled" style="margin-top:3px;accent-color:var(--accent);width:15px;height:15px;flex-shrink:0" onchange="toggleResend(this.checked)">
+                <div>
+                  <div style="font-size:13px;font-weight:600;color:var(--text)">Automatically resend to contacts who don't open</div>
+                  <div style="font-size:11px;color:var(--muted);margin-top:2px;line-height:1.5">Recovers 10–25% more opens. <strong style="color:var(--accent)">Uses additional wallet credits — you approve before it sends.</strong></div>
+                </div>
+              </label>
+              <div id="resendOptions" style="display:none;margin-top:12px;padding-top:12px;border-top:1px solid var(--card-border)">
+                <div class="m-row">
+                  <div class="m-field">
+                    <label class="m-label">Wait before resending</label>
+                    <select class="m-select" id="resendDays">
+                      <option value="1">1 day after first send</option>
+                      <option value="2">2 days after first send</option>
+                      <option value="3" selected>3 days after first send</option>
+                      <option value="5">5 days after first send</option>
+                      <option value="7">7 days after first send</option>
+                    </select>
+                  </div>
+                  <div class="m-field">
+                    <label class="m-label">Subject line</label>
+                    <select class="m-select" id="resendSubjectType" onchange="toggleResendSubject(this.value)">
+                      <option value="same">Use same subject line</option>
+                      <option value="custom">Use different subject line</option>
+                    </select>
+                  </div>
+                </div>
+                <div id="resendCustomSubjectField" style="display:none" class="m-field">
+                  <input class="m-input" id="resendSubjectText" placeholder="Alternative subject line for the resend..." />
+                  <div class="m-hint">A different subject often gets more opens on the second attempt.</div>
+                </div>
+                ${importedContacts.length > 0 ? `
+                <div style="background:rgba(255,184,0,0.07);border:1px solid rgba(255,184,0,0.2);border-radius:var(--radius-sm);padding:10px 14px;margin-top:6px">
+                  <div style="font-size:12px;color:var(--muted);line-height:1.6">
+                    ⚡ Based on your <strong style="color:var(--text)">${importedContacts.length.toLocaleString('en-NG')} contacts</strong> and a typical 40% open rate, the resend would reach approx.
+                    <strong style="color:var(--text)">${Math.round(importedContacts.length * 0.6).toLocaleString('en-NG')} non-openers</strong>.
+                    The exact credit cost will be confirmed for your approval before the resend goes out.
+                  </div>
+                </div>` : ''}
+              </div>
+            </div>
+          </div>`;
+      }
+
+      function toggleResend(checked) {
+        document.getElementById('resendOptions').style.display = checked ? '' : 'none';
+      }
+      function toggleResendSubject(val) {
+        document.getElementById('resendCustomSubjectField').style.display = val === 'custom' ? '' : 'none';
+      }
+
+      function handleCampaignFileSelect(input) {
+        const file = input.files[0];
+        if (file) handleCampaignCSV(file);
+      }
+      function handleCampaignFileDrop(e) {
+        e.preventDefault();
+        document.getElementById('campaignUploadZone').classList.remove('drag-over');
+        const file = e.dataTransfer.files[0];
+        if (file && file.name.toLowerCase().endsWith('.csv')) handleCampaignCSV(file);
+        else {
+          const fb = document.getElementById('campaignUploadFeedback');
+          if (fb) fb.innerHTML = '<span style="color:var(--accent4)">❌ Please upload a .csv file. Save your Excel as CSV first.</span>';
+        }
+      }
+      function handleCampaignCSV(file) {
+        const reader = new FileReader();
+        reader.onload = e => {
+          const result = parseCSV(e.target.result);
+          const fb = document.getElementById('campaignUploadFeedback');
+          if (!result.headers.includes('email')) {
+            if (fb) fb.innerHTML = '<span style="color:var(--accent4)">❌ No "email" column found. Check your file or use the template.</span>';
+            return;
+          }
+          if (result.rows.length === 0) {
+            if (fb) fb.innerHTML = '<span style="color:var(--accent4)">❌ No valid contacts found. Make sure emails are correct.</span>';
+            return;
+          }
+          // Save to global contacts
+          importedContacts = result.rows;
+          importedColumns = result.headers;
+          updateContactsStats();
+          // Re-render Step 3 to show the loaded state
+          renderStep3Content();
+        };
+        reader.onerror = () => {
+          const fb = document.getElementById('campaignUploadFeedback');
+          if (fb) fb.innerHTML = '<span style="color:var(--accent4)">❌ Could not read file. Try again.</span>';
+        };
+        reader.readAsText(file);
+      }
+      function campaignClearContacts() {
+        importedContacts = [];
+        importedColumns = [];
+        updateContactsStats();
+        renderStep3Content();
+      }
+
+      function toggleSchedule(val) {
+        document.getElementById('scheduleFields').style.display = val === 'schedule' ? '' : 'none';
+      }
+
+      // ── Preview state ──
+      let previewContactIdx = 0;
+      let previewDevice = 'desktop'; // 'desktop' | 'mobile'
+
+      function applyMergeTags(str, contact) {
+        if (!contact) return str;
+        return str.replace(/\{\{([^}]+)\}\}/g, (match, key) => {
+          const val = contact[key.trim()];
+          return val !== undefined && val !== '' ? val : match;
+        });
+      }
+
+      function renderStep4Content() {
+        const el = document.getElementById('stepContent');
+        previewContactIdx = 0;
+        previewDevice = 'desktop';
+        buildPreview(el);
+      }
+
+      function buildPreview(el) {
+        const rawSubj = savedFormData.subject   || selectedTemplate?.subject || 'Your Email Subject';
+        const rawBody = savedFormData.emailBody || selectedTemplate?.body    || '';
+        // Visual designer overrides the plain text body if saved
+        const fromName = savedFormData.fromName || 'Your Business';
+        const hasContacts = importedContacts.length > 0;
+        const contact = hasContacts ? importedContacts[previewContactIdx] : null;
+        const total = importedContacts.length;
+
+        // Merge fromName into contact data so {{business_name}} resolves in preview
+        const contactWithMeta = contact
+          ? { ...contact, business_name: contact.business_name || fromName, from_name: fromName }
+          : { business_name: fromName, from_name: fromName };
+
+        const subj = applyMergeTags(rawSubj, contactWithMeta);
+        const body = applyMergeTags(rawBody, contactWithMeta);
+
+        const bodyHtml = body
+          .replace(/\n\n/g, '</p><p>')
+          .replace(/\n/g, '<br>')
+          .replace(/\{\{[^}]+\}\}/g, m => `<span style="background:#fff3cd;color:#856404;padding:0 3px;border-radius:2px;font-weight:600">${m}</span>`);
+
+        const isMobile = previewDevice === 'mobile';
+        const wrapStyle = isMobile
+          ? 'width:375px;margin:0 auto;border-radius:24px;border:8px solid #1a1a2e;box-shadow:0 8px 32px rgba(0,0,0,.5);overflow:hidden;'
+          : 'width:100%;border-radius:var(--radius-sm);border:1px solid var(--card-border);overflow:hidden;';
+
+        // If Unlayer design exists, render via iframe; else fallback to plain text render
+        const emailContent = savedEmailHtml
+          ? applyMergeTags(savedEmailHtml, contactWithMeta)
+          : `<!DOCTYPE html><html><body style="margin:0;font-family:Arial,sans-serif;background:#f4f4f4">
+              <div style="max-width:${isMobile?'375px':'600px'};margin:0 auto;background:#fff;padding:${isMobile?'20px 16px':'28px 32px'}">
+                <div style="text-align:center;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid #eee">
+                  <span style="font-size:${isMobile?'18px':'22px'};font-weight:800;color:#07090f">${fromName}</span>
+                </div>
+                <h2 style="font-size:${isMobile?'16px':'20px'};color:#07090f;margin-bottom:14px">${subj}</h2>
+                <div style="font-size:14px;line-height:1.7;color:#333">${bodyHtml}</div>
+                <div style="margin-top:24px;padding-top:16px;border-top:1px solid #eee;font-size:11px;color:#999;text-align:center">
+                  You received this because you subscribed to <strong>${fromName}</strong>.<br>
+                  <a href="#" style="color:#00a854">Unsubscribe</a>
+                </div>
+              </div></body></html>`;
+
+        el.innerHTML = `
+          <!-- Toolbar -->
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:8px">
+            <div style="display:flex;align-items:center;gap:8px">
+              ${hasContacts ? `
+                <button onclick="previewNav(-1)" style="width:28px;height:28px;border-radius:6px;border:1px solid var(--card-border);background:var(--bg3);color:var(--text);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center">‹</button>
+                <span style="font-size:12px;color:var(--muted);white-space:nowrap">Contact <strong style="color:var(--text)">${previewContactIdx + 1}</strong> of ${total.toLocaleString('en-NG')}</span>
+                <button onclick="previewNav(1)" style="width:28px;height:28px;border-radius:6px;border:1px solid var(--card-border);background:var(--bg3);color:var(--text);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center">›</button>
+              ` : `<span style="font-size:12px;color:var(--muted)">No contacts loaded — showing template</span>`}
+            </div>
+            <div style="display:flex;gap:4px;background:var(--bg3);border:1px solid var(--card-border);border-radius:var(--radius-sm);padding:3px">
+              <button onclick="previewSetDevice('desktop')" style="padding:5px 12px;border-radius:4px;border:none;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font-body);transition:all .15s;${previewDevice==='desktop'?'background:var(--accent);color:#000;':'background:none;color:var(--muted);'}">🖥 Desktop</button>
+              <button onclick="previewSetDevice('mobile')" style="padding:5px 12px;border-radius:4px;border:none;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font-body);transition:all .15s;${previewDevice==='mobile'?'background:var(--accent);color:#000;':'background:none;color:var(--muted);'}">📱 Mobile</button>
+            </div>
+          </div>
+
+          <!-- Meta bar -->
+          <div style="background:var(--bg3);border:1px solid var(--card-border);border-radius:var(--radius-sm);padding:10px 14px;margin-bottom:1rem;font-size:13px">
+            <div style="display:flex;gap:8px;margin-bottom:4px"><span style="color:var(--muted);min-width:48px">From:</span><span>${fromName} &lt;noreply@notifypro.ng&gt;</span></div>
+            <div style="display:flex;gap:8px"><span style="color:var(--muted);min-width:48px">Subject:</span><span style="font-weight:600">${subj}</span></div>
+          </div>
+
+          <!-- Phone bezel for mobile -->
+          <div style="${wrapStyle}">
+            ${isMobile ? '<div style="background:#1a1a2e;height:28px;display:flex;align-items:center;justify-content:center"><div style="width:60px;height:5px;background:rgba(255,255,255,.2);border-radius:10px"></div></div>' : ''}
+            <iframe id="previewFrame" srcdoc="" style="width:100%;height:420px;border:none;display:block" sandbox="allow-same-origin"></iframe>
+          </div>
+          ${hasContacts && contact ? `<div style="margin-top:8px;font-size:11px;color:var(--muted);text-align:center">Previewing as: <strong style="color:var(--text)">${contact.email}</strong></div>` : ''}
+
+          <!-- Save as My Template checkbox (Brevo-style) -->
+          <div style="margin-top:1.2rem;padding:12px 14px;background:var(--bg3);border:1px solid var(--card-border);border-radius:var(--radius-sm)">
+            <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer">
+              <input type="checkbox" id="saveAsTemplateCheck" style="margin-top:2px;accent-color:var(--accent);width:15px;height:15px;flex-shrink:0" onchange="toggleTemplateSaveName(this.checked)">
+              <div>
+                <div style="font-size:13px;font-weight:600;color:var(--text)">Save this email as My Template</div>
+                <div style="font-size:11px;color:var(--muted);margin-top:2px">Reuse this layout in future campaigns without starting over.</div>
+              </div>
+            </label>
+            <div id="templateNameWrap" style="display:none;margin-top:10px;padding-top:10px;border-top:1px solid var(--card-border)">
+              <label class="m-label">Template name</label>
+              <input class="m-input" id="templateSaveName" placeholder="e.g. Branded Loan Approval, Weekly Newsletter..." value="${savedFormData.campName || selectedTemplate?.name || ''}" />
+              <div class="m-hint">This will appear under ★ My Templates in your template library.</div>
+            </div>
+          </div>`;
+
+        // Set iframe content after DOM insertion
+        requestAnimationFrame(() => {
+          const iframe = document.getElementById('previewFrame');
+          if (iframe) iframe.srcdoc = emailContent;
+        });
+      }
+
+      function toggleTemplateSaveName(checked) {
+        const wrap = document.getElementById('templateNameWrap');
+        if (wrap) wrap.style.display = checked ? '' : 'none';
+      }
+
+      function previewNav(dir) {
+        const total = importedContacts.length;
+        if (!total) return;
+        previewContactIdx = (previewContactIdx + dir + total) % total;
+        buildPreview(document.getElementById('stepContent'));
+      }
+
+      function previewSetDevice(device) {
+        previewDevice = device;
+        buildPreview(document.getElementById('stepContent'));
+      }
+
+      function renderStep1() {}
+      function renderStep2() {}
+      function renderStep3() {}
+      function renderStep4() {}
+
+      function renderFooter() {
+        const f = document.getElementById('modalFooter');
+        const isFirst = currentStep === 1;
+        const isLast = currentStep === 4;
+        f.innerHTML = `
+          <button class="btn-secondary" onclick="${isFirst ? 'closeModal()' : 'prevStep()'}">${isFirst ? 'Cancel' : '← Back'}</button>
+          <button class="btn-primary" onclick="${isLast ? 'sendCampaign()' : 'nextStep()'}">
+            ${isLast ? '🚀 Send Campaign' : 'Continue →'}
+          </button>`;
+      }
+
+      function nextStep() {
+        if (currentStep === 2) {
+          // Read current input values; fall back to template defaults so nothing is ever blank
+          savedFormData.campName  = document.getElementById('campName')?.value?.trim()  || selectedTemplate?.name   || '';
+          savedFormData.fromName  = document.getElementById('fromName')?.value?.trim()  || '';
+          savedFormData.replyTo   = document.getElementById('replyTo')?.value?.trim()   || '';
+          savedFormData.subject   = document.getElementById('subject')?.value?.trim()   || selectedTemplate?.subject || '';
+          savedFormData.emailBody = document.getElementById('emailBody')?.value         || selectedTemplate?.body    || '';
+        }
+
+        if (currentStep < 4) { currentStep++; renderModal(); }
+      }
+
+      function removeDesign() {
+        savedEmailDesign = null;
+        savedEmailHtml = '';
+        unlayerInitialized = false;
+        renderModal();
+      }
+      function prevStep() {
+        if (currentStep > 1) { currentStep--; renderModal(); }
+      }
+
+      function sendCampaign() {
+        if (importedContacts.length === 0) {
+          const toast = document.createElement('div');
+          toast.style.cssText = 'position:fixed;bottom:2rem;right:2rem;background:#f87171;color:#fff;padding:12px 20px;border-radius:8px;font-weight:700;font-size:14px;z-index:9999;box-shadow:0 4px 20px rgba(248,113,113,.3)';
+          toast.textContent = '⚠️ No recipients loaded. Please upload a CSV file first.';
+          document.body.appendChild(toast);
+          setTimeout(() => toast.remove(), 4000);
+          // Take user back to Step 3
+          currentStep = 3;
+          renderModal();
+          return;
+        }
+
+        // Gather campaign info from saved form data
+        const resendEnabled  = document.getElementById('resendEnabled')?.checked || false;
+        const resendDays     = parseInt(document.getElementById('resendDays')?.value || '3');
+        const resendSubjType = document.getElementById('resendSubjectType')?.value || 'same';
+        const resendSubject  = resendSubjType === 'custom' ? (document.getElementById('resendSubjectText')?.value || null) : null;
+        const sendTime       = document.getElementById('sendTime')?.value || 'now';
+        const isScheduled    = sendTime === 'schedule';
+        const schedDate      = document.getElementById('schedDate')?.value || '';
+        const schedTime      = document.getElementById('schedTime')?.value || '';
+
+        // Resolve campaign title: prefer what user typed, fall back to template name
+        const campTitle   = savedFormData.campName?.trim()  || selectedTemplate?.name || 'New Campaign';
+        const campFrom    = savedFormData.fromName?.trim()  || 'Your Business';
+        const campSubject = savedFormData.subject?.trim()   || selectedTemplate?.subject || '—';
+        const campSub     = selectedTemplate?.tags?.[0]    || 'Campaign';
+
+        // Resolve sentAt / scheduled time
+        let sentAt;
+        if (isScheduled && schedDate && schedTime) {
+          sentAt = new Date(`${schedDate}T${schedTime}`).toLocaleString('en-NG', { dateStyle:'medium', timeStyle:'short' });
+        } else {
+          sentAt = new Date().toLocaleString('en-NG', { dateStyle:'medium', timeStyle:'short' });
+        }
+
+        const newCamp = {
+          id:            'c' + Date.now(),
+          title:         campTitle,
+          sub:           campSub,
+          fromName:      campFrom,
+          subject:       campSubject,
+          body:          savedFormData.emailBody || selectedTemplate?.body || '',
+          emailHtml:     savedEmailHtml || '',
+          builtFromTpl:  !!selectedTemplate,
+          tplOrigin:     selectedTemplate?.name || null,
+          sentAt,
+          recipients:    importedContacts.length,
+          sent:          importedContacts.length > 0 ? importedContacts.length.toLocaleString('en-NG') : '—',
+          open: '—', click: '—', bounce: '—', unsub: '—',
+          status:        isScheduled ? 'scheduled' : 'queued',
+          color:         isScheduled ? 'var(--accent3)' : '#a855f7',
+          pct:           0,
+          resendEnabled,
+          resendStatus:  resendEnabled ? 'scheduled' : null,
+          resendDays,
+          resendSubject,
+        };
+
+        // ── Save as My Template if checkbox ticked ──
+        const saveAsTpl = document.getElementById('saveAsTemplateCheck')?.checked || false;
+        if (saveAsTpl) {
+          const tplName = document.getElementById('templateSaveName')?.value?.trim() || campTitle;
+          const tpl = {
+            id:               'mt_' + Date.now(),
+            name:             tplName,
+            subject:          campSubject,
+            body:             savedFormData.emailBody || selectedTemplate?.body || '',
+            origin:           selectedTemplate ? selectedTemplate.name : null,
+            hasDesign:        !!savedEmailHtml,
+            savedEmailHtml:   savedEmailHtml || '',
+            savedEmailDesign: savedEmailDesign || null,
+            savedAt:          new Date().toLocaleDateString('en-NG', { day:'numeric', month:'short', year:'numeric' }),
+          };
+          myTemplates.unshift(tpl);
+          persistMyTemplates();
+          renderTemplates();
+        }
+
+        campaigns.unshift(newCamp);
+        closeModal();
+        // Reset to all filter and page 1 so the new campaign is visible
+        renderCampaigns('all');
+        // Reset filter tab UI to "All"
+        document.querySelectorAll('.filter-tab').forEach((t, i) => t.classList.toggle('active', i === 0));
+
+        // Switch to Overview tab to show the campaign
+        switchPageTab(document.querySelector('.page-tab'), 'overview');
+
+        // Toast
+        const toast = document.createElement('div');
+        toast.style.cssText = 'position:fixed;bottom:2rem;right:2rem;background:#00e87a;color:#000;padding:12px 20px;border-radius:8px;font-weight:700;font-size:14px;z-index:9999;box-shadow:0 4px 20px rgba(0,232,122,.3)';
+        toast.innerHTML = `✅ <strong>${newCamp.title}</strong> ${isScheduled ? 'scheduled' : 'queued'}!${saveAsTpl ? ' <span style="font-weight:400;opacity:.8">★ Saved to My Templates.</span>' : ' <span style="font-weight:400;opacity:.8">Click the card to track status.</span>'}`;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 4000);
+      }
+
+      function exportCampaigns() {}
+
+      // ── Campaign Detail Modal ──
+      function openCampDetail(id) {
+        const c = campaigns.find(x => x.id === id);
+        if (!c) return;
+
+        // Header
+        document.getElementById('campDetailHeader').innerHTML = `
+          <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">
+            <div class="modal-title" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${c.title}</div>
+            <span class="status-pill ${c.status}" style="flex-shrink:0">${c.status.charAt(0).toUpperCase()+c.status.slice(1)}</span>
+          </div>
+          <button class="modal-close" onclick="closeCampDetail()">✕</button>`;
+
+        // Body
+        const statusNote = {
+          queued:    '⏳ Your campaign is queued and will begin sending shortly.',
+          sending:   '📤 Your campaign is currently being delivered to recipients.',
+          sent:      '✅ Campaign delivered successfully.',
+          scheduled: '📅 Campaign is scheduled and will send at the set time.',
+          draft:     '✏️ This campaign is saved as a draft.',
+          failed:    '❌ Campaign delivery failed. Please check your wallet balance.',
+        }[c.status] || '';
+
+        const resendSection = c.resendEnabled ? `
+          <div class="cd-section">
+            <div class="cd-section-title">Resend to Non-Openers</div>
+            <div class="cd-resend-box">
+              <div>
+                <div style="font-size:13px;font-weight:600;margin-bottom:3px">
+                  ${c.resendStatus === 'sent' ? '✅ Resend delivered' : c.resendStatus === 'scheduled' ? '⏰ Resend scheduled' : '—'}
+                </div>
+                <div style="font-size:11px;color:var(--muted)">
+                  Sends ${c.resendDays} day${c.resendDays > 1 ? 's' : ''} after first send to non-openers.
+                  ${c.resendSubject ? `Subject: <em>"${c.resendSubject}"</em>` : 'Using same subject line.'}
+                </div>
+              </div>
+              <span class="status-pill ${c.resendStatus === 'sent' ? 'sent' : 'scheduled'}" style="flex-shrink:0">
+                ${c.resendStatus === 'sent' ? 'Sent' : 'Scheduled'}
+              </span>
+            </div>
+          </div>` : `
+          <div class="cd-section">
+            <div class="cd-section-title">Resend to Non-Openers</div>
+            <div style="font-size:12px;color:var(--muted);background:var(--bg3);border:1px solid var(--card-border);border-radius:var(--radius-sm);padding:10px 14px">
+              Not enabled for this campaign.
+            </div>
+          </div>`;
+
+        document.getElementById('campDetailBody').innerHTML = `
+          ${statusNote ? `<div style="background:rgba(0,232,122,0.06);border:1px solid rgba(0,232,122,0.15);border-radius:var(--radius-sm);padding:10px 14px;font-size:13px;color:var(--muted);margin-bottom:1.2rem">${statusNote}</div>` : ''}
+
+          <div class="cd-meta-row">
+            <div class="cd-meta-item"><div class="cd-meta-label">From</div><div class="cd-meta-val">${c.fromName || '—'}</div></div>
+            <div class="cd-meta-item"><div class="cd-meta-label">Subject</div><div class="cd-meta-val">${c.subject || '—'}</div></div>
+            <div class="cd-meta-item"><div class="cd-meta-label">Recipients</div><div class="cd-meta-val">${c.recipients > 0 ? c.recipients.toLocaleString('en-NG') + ' contacts' : '—'}</div></div>
+            <div class="cd-meta-item"><div class="cd-meta-label">${c.status === 'scheduled' ? 'Scheduled For' : 'Sent At'}</div><div class="cd-meta-val">${c.sentAt || '—'}</div></div>
+          </div>
+
+          <div class="cd-section">
+            <div class="cd-section-title">Delivery Stats</div>
+            <div class="cd-stats">
+              <div class="cd-stat">
+                <div class="cd-stat-val text-green">${c.sent}</div>
+                <div class="cd-stat-lbl">Delivered</div>
+              </div>
+              <div class="cd-stat">
+                <div class="cd-stat-val text-blue">${c.open}</div>
+                <div class="cd-stat-lbl">Opens</div>
+              </div>
+              <div class="cd-stat">
+                <div class="cd-stat-val text-amber">${c.click}</div>
+                <div class="cd-stat-lbl">Clicks</div>
+              </div>
+              <div class="cd-stat">
+                <div class="cd-stat-val text-red">${c.bounce}</div>
+                <div class="cd-stat-lbl">Bounced</div>
+              </div>
+              <div class="cd-stat">
+                <div class="cd-stat-val" style="color:var(--muted)">${c.unsub}</div>
+                <div class="cd-stat-lbl">Unsubs</div>
+              </div>
+            </div>
+            ${c.pct > 0 ? `
+            <div style="margin-top:4px">
+              <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:4px"><span>Open Rate</span><span>${c.open}</span></div>
+              <div class="progress-bar" style="height:6px"><div class="progress-fill" style="width:${c.pct}%;background:var(--accent2)"></div></div>
+            </div>` : ''}
+          </div>
+
+          ${resendSection}
+
+          ${['queued','sending'].includes(c.status) ? `
+          <div style="background:rgba(255,184,0,0.07);border:1px solid rgba(255,184,0,0.2);border-radius:var(--radius-sm);padding:10px 14px;font-size:12px;color:var(--muted)">
+            ⚡ Stats will populate as emails are delivered and opened. Refresh this panel to see updates.
+          </div>` : ''}`;
+
+        // Footer
+        document.getElementById('campDetailFooter').innerHTML = `
+          <button class="btn-secondary" onclick="closeCampDetail()">Close</button>
+          <div style="display:flex;gap:8px">
+            ${c.status === 'draft' ? `<button class="btn-primary" onclick="closeCampDetail()">Edit & Send</button>` : ''}
+            <button class="btn-secondary" onclick="saveCampAsTemplate('${c.id}')" title="Save this campaign as a reusable template">★ Save as Template</button>
+            <button class="btn-secondary" onclick="duplicateCampaign('${c.id}')">Duplicate</button>
+          </div>`;
+
+        document.getElementById('campDetailOverlay').classList.add('open');
+      }
+
+      function closeCampDetail() {
+        document.getElementById('campDetailOverlay').classList.remove('open');
+      }
+
+      function duplicateCampaign(id) {
+        const c = campaigns.find(x => x.id === id);
+        if (!c) return;
+        const copy = { ...c, id: 'c' + Date.now(), title: c.title + ' (Copy)', status: 'draft', sent: '—', open: '—', click: '—', bounce: '—', unsub: '—', pct: 0, sentAt: null, color: 'var(--muted)' };
+        campaigns.unshift(copy);
+        closeCampDetail();
+        renderCampaigns('all');
+      }
+
+      function saveCampAsTemplate(id) {
+        const c = campaigns.find(x => x.id === id);
+        if (!c) return;
+        const tpl = {
+          id:               'mt_' + Date.now(),
+          name:             c.title,
+          subject:          c.subject  || '',
+          body:             c.body     || '',
+          origin:           c.tplOrigin || null,
+          hasDesign:        !!(c.emailHtml),
+          savedEmailHtml:   c.emailHtml || '',
+          savedEmailDesign: null,
+          savedAt:          new Date().toLocaleDateString('en-NG', { day:'numeric', month:'short', year:'numeric' }),
+        };
+        myTemplates.unshift(tpl);
+        persistMyTemplates();
+        renderTemplates();
+        closeCampDetail();
+
+        // Show toast with link to Templates tab
+        const toast = document.createElement('div');
+        toast.style.cssText = 'position:fixed;bottom:2rem;right:2rem;background:#00e87a;color:#000;padding:12px 20px;border-radius:8px;font-weight:700;font-size:14px;z-index:9999;box-shadow:0 4px 20px rgba(0,232,122,.3);cursor:pointer;display:flex;align-items:center;gap:10px';
+        toast.innerHTML = `★ <span><strong>"${escHtml(c.title)}"</strong> saved. <u style="font-weight:400">View in My Templates →</u></span>`;
+        toast.onclick = () => {
+          toast.remove();
+          switchPageTab(document.querySelectorAll('.page-tab')[2], 'templates');
+        };
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 5000);
+      }
+
+      // ── Animate stats ──
+      function animateCount(id, target) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        const inc = target / 80;
+        let c = 0;
+        const iv = setInterval(() => {
+          c = Math.min(c + inc, target);
+          el.textContent = Math.floor(c).toLocaleString('en-NG');
+          if (c >= target) clearInterval(iv);
+        }, 16);
+      }
+      setTimeout(() => animateCount('statSent', 218045), 300);
+
+      // ── Chart ──
+      const ctx = document.getElementById('emailChart').getContext('2d');
+      const chartData = {
+        '7d': { labels: ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'], opens: [38,42,45,41,49,52,48], clicks: [14,18,21,17,23,26,22] },
+        '30d': { labels: ['W1','W2','W3','W4'], opens: [41,44,40,43], clicks: [17,19,16,18] },
+        '90d': { labels: ['Jan','Feb','Mar'], opens: [39,41,43], clicks: [15,17,18] },
+      };
+      function makeGrad(c, col) {
+        const g = c.createLinearGradient(0,0,0,190);
+        g.addColorStop(0, col.replace('1)','0.15)'));
+        g.addColorStop(1, col.replace('1)','0)'));
+        return g;
+      }
+      let emailChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: chartData['7d'].labels,
+          datasets: [
+            { label: 'Opens', data: chartData['7d'].opens, borderColor: '#00BFFF', backgroundColor: makeGrad(ctx,'rgba(0,191,255,1)'), tension: 0.4, fill: true, pointRadius: 3, pointBackgroundColor: '#00BFFF', borderWidth: 2 },
+            { label: 'Clicks', data: chartData['7d'].clicks, borderColor: '#FFB800', backgroundColor: makeGrad(ctx,'rgba(255,184,0,1)'), tension: 0.4, fill: true, pointRadius: 3, pointBackgroundColor: '#FFB800', borderWidth: 2 },
+          ],
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          interaction: { mode: 'index', intersect: false },
+          plugins: {
+            legend: { display: false },
+            tooltip: { backgroundColor: '#0D1117', borderColor: 'rgba(255,255,255,0.08)', borderWidth: 1, titleColor: '#F0F4FF', bodyColor: '#8892A4', padding: 10, callbacks: { label: c => ` ${c.dataset.label}: ${c.parsed.y}%` } },
+          },
+          scales: {
+            x: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#8892A4', font: { family: 'DM Sans', size: 11 } } },
+            y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#8892A4', font: { family: 'DM Sans', size: 11 }, callback: v => v + '%' } },
+          },
+        },
+      });
+
+      // ══════════════════════════════════════════
+      // MY TEMPLATES
+      // ══════════════════════════════════════════
+      function saveAsMyTemplate() {
+        // Capture latest values from the live form first
+        const name    = document.getElementById('campName')?.value?.trim()  || savedFormData.campName?.trim()  || selectedTemplate?.name  || 'My Template';
+        const subject = document.getElementById('subject')?.value?.trim()   || savedFormData.subject?.trim()   || selectedTemplate?.subject || '';
+        const body    = document.getElementById('emailBody')?.value         || savedFormData.emailBody         || selectedTemplate?.body    || '';
+
+        const tpl = {
+          id:        'mt_' + Date.now(),
+          name,
+          subject,
+          body,
+          origin:           selectedTemplate ? selectedTemplate.name : null,
+          hasDesign:        !!savedEmailDesign,
+          savedEmailHtml:   savedEmailHtml   || '',
+          savedEmailDesign: savedEmailDesign || null,
+          savedAt:          new Date().toLocaleDateString('en-NG', { day:'numeric', month:'short', year:'numeric' }),
+        };
+
+        myTemplates.unshift(tpl);
+        persistMyTemplates();
+
+        // Toast
+        const toast = document.createElement('div');
+        toast.style.cssText = 'position:fixed;bottom:2rem;right:2rem;background:#00e87a;color:#000;padding:12px 20px;border-radius:8px;font-weight:700;font-size:14px;z-index:9999;box-shadow:0 4px 20px rgba(0,232,122,.3)';
+        toast.innerHTML = `★ <strong>"${escHtml(name)}"</strong> saved to My Templates.`;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3500);
+      }
+
+      function useMyTemplate(id) {
+        const t = myTemplates.find(x => x.id === id);
+        if (!t) return;
+        selectedTemplate = null;
+        savedFormData = {
+          campName:  t.name,
+          subject:   t.subject,
+          emailBody: t.body,
+          fromName:  savedFormData.fromName || '',
+          replyTo:   savedFormData.replyTo  || '',
+        };
+        if (t.savedEmailDesign) {
+          savedEmailDesign    = t.savedEmailDesign;
+          savedEmailHtml      = t.savedEmailHtml;
+          unlayerInitialized  = false;
+        } else {
+          savedEmailDesign   = null;
+          savedEmailHtml     = '';
+          unlayerInitialized = false;
+        }
+        currentStep = 2;
+        renderModal();
+        document.getElementById('modalOverlay').classList.add('open');
+      }
+
+      // Sample data for template previews — realistic Nigerian placeholder values
+      const TPL_SAMPLE = {
+        email: 'tunde.adeyemi@example.com', first_name: 'Tunde', last_name: 'Adeyemi',
+        phone: '08012345678', business_name: 'FairMonii', bank_name: 'GTBank',
+        amount: '1,000,000', account_number: '0123456789', month: 'March', year: '2026',
+        opening_balance: '500,000', closing_balance: '1,500,000',
+        total_credits: '1,200,000', total_debits: '200,000',
+        tenure: '12', rate: '18', monthly_payment: '91,680',
+        disbursement_date: '1 Apr 2026', deadline: '15 Apr 2026',
+        order_id: 'ORD-00123', order_date: '27 Mar 2026', order_items: 'Nike Air Max x1',
+        subtotal: '45,000', delivery_fee: '1,500', total: '46,500',
+        delivery_address: '14 Broad Street, Lagos Island',
+        estimated_delivery: '30 Mar 2026', estimated_arrival: '30 Mar 2026',
+        tracking_number: 'TRK-987654', courier_name: 'GIG Logistics',
+        tracking_link: 'https://track.example.com', support_email: 'support@fairmonii.com',
+        support_phone: '07001234567', discount: '20', hours: '24',
+        promo_code: 'SAVE20', end_date: '28 Mar 2026', end_time: '11:59 PM',
+        product_category: 'Footwear', item_1: 'Nike Air Max', old_price_1: '45,000',
+        new_price_1: '36,000', item_2: 'Adidas Slides', old_price_2: '12,000',
+        new_price_2: '9,600', item_3: 'Jordan 1s', old_price_3: '80,000', new_price_3: '64,000',
+        cart_items: 'Sneakers x1, T-Shirt x2', cart_total: '38,000',
+        delivery_estimate: '29 Mar 2026', discount_code: 'COMEBACK10',
+        discount_amount: '10', offer_expiry: '48',
+        payment_date: '27 Mar 2026', payment_method: 'Bank Transfer',
+        transaction_id: 'TXN-456789', payment_description: 'March Subscription',
+        business_address: '14 Broad Street, Lagos', application_date: '20 Mar 2026',
+        reason: 'Insufficient credit history', reapply_date: '1 Jun 2026',
+        type: 'Debit', date: '27 Mar 2026', time: '10:45 AM', last4: '4521',
+        balance: '125,000', reference: 'REF-001234',
+        parent_name: 'Mr. Adeyemi', student_name: 'David Adeyemi',
+        exam: 'First Term Examination', class: 'JSS 2', session: '2025/2026',
+        portal_link: 'https://portal.school.ng', username: 'david.adeyemi',
+        school_phone: '09012345678', school_name: 'Greenfield Academy',
+        term: 'First Term', tuition: '150,000', development_levy: '20,000',
+        exam_fee: '10,000', other_charges: '5,000', total_fees: '185,000',
+        due_date: '10 Apr 2026', account_name: 'Greenfield Academy', late_fee: '5,000',
+        profile_link: 'https://app.example.ng/profile',
+        services_link: 'https://app.example.ng/services',
+        otp_code: '847291', expiry: '10', reset_link: 'https://app.example.ng/reset',
+        from_name: 'FairMonii',
+      };
+
+      let tplPreviewDevice = 'desktop';
+      let tplPreviewCurrentId = null;
+
+      function previewMyTemplate(id) {
+        tplPreviewCurrentId = id;
+        tplPreviewDevice = 'desktop';
+        const t = myTemplates.find(x => x.id === id);
+        if (!t) return;
+
+        document.getElementById('tplPreviewTitle').textContent = t.name;
+        document.getElementById('tplPreviewMeta').textContent = `Saved ${t.savedAt}${t.origin ? '  ·  Based on: ' + t.origin : '  ·  Scratch'}`;
+        document.getElementById('tplPreviewUseBtn').onclick = () => { closeTplPreview(); useMyTemplate(id); };
+
+        document.getElementById('tplPreviewOverlay').classList.add('open');
+        buildTplPreview(t);
+      }
+
+      function buildTplPreview(t) {
+        const isMobile = tplPreviewDevice === 'mobile';
+        const subject  = applyMergeTags(t.subject || '(No subject)', TPL_SAMPLE);
+        const bodyText = applyMergeTags(t.body || '', TPL_SAMPLE);
+
+        const bodyHtml = bodyText
+          .replace(/\n\n/g, '</p><p>')
+          .replace(/\n/g, '<br>');
+
+        const maxWidth = isMobile ? '375px' : '600px';
+        const padding  = isMobile ? '20px 16px' : '28px 32px';
+
+        const emailContent = t.savedEmailHtml
+          ? applyMergeTags(t.savedEmailHtml, TPL_SAMPLE)
+          : `<!DOCTYPE html><html><body style="margin:0;font-family:Arial,sans-serif;background:#f4f4f4">
+              <div style="max-width:${maxWidth};margin:0 auto;background:#fff;padding:${padding}">
+                <div style="text-align:center;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid #eee">
+                  <span style="font-size:${isMobile?'18px':'22px'};font-weight:800;color:#07090f">${escHtml(TPL_SAMPLE.business_name)}</span>
+                </div>
+                <h2 style="font-size:${isMobile?'16px':'20px'};color:#07090f;margin-bottom:14px">${subject}</h2>
+                <div style="font-size:14px;line-height:1.7;color:#333">${bodyHtml}</div>
+                <div style="margin-top:24px;padding-top:16px;border-top:1px solid #eee;font-size:11px;color:#999;text-align:center">
+                  You received this because you subscribed to <strong>${escHtml(TPL_SAMPLE.business_name)}</strong>.<br>
+                  <a href="#" style="color:#00a854">Unsubscribe</a>
+                </div>
+              </div></body></html>`;
+
+        const wrapStyle = isMobile
+          ? 'width:375px;margin:0 auto;border-radius:24px;border:8px solid #1a1a2e;box-shadow:0 8px 32px rgba(0,0,0,.5);overflow:hidden;'
+          : 'width:100%;border-radius:var(--radius-sm);border:1px solid var(--card-border);overflow:hidden;';
+
+        document.getElementById('tplPreviewBody').innerHTML = `
+          <!-- Toolbar -->
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;gap:8px;flex-wrap:wrap">
+            <div style="font-size:11px;color:var(--muted);background:rgba(255,184,0,0.08);border:1px solid rgba(255,184,0,0.2);border-radius:4px;padding:4px 10px">
+              👤 Sample data — <strong style="color:var(--text)">${TPL_SAMPLE.first_name} ${TPL_SAMPLE.last_name}</strong>
+            </div>
+            <div style="display:flex;gap:4px;background:var(--bg3);border:1px solid var(--card-border);border-radius:var(--radius-sm);padding:3px;flex-shrink:0">
+              <button onclick="tplPreviewSetDevice('desktop')" style="padding:5px 12px;border-radius:4px;border:none;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font-body);transition:all .15s;${tplPreviewDevice==='desktop'?'background:var(--accent);color:#000;':'background:none;color:var(--muted);'}">🖥 Desktop</button>
+              <button onclick="tplPreviewSetDevice('mobile')" style="padding:5px 12px;border-radius:4px;border:none;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font-body);transition:all .15s;${tplPreviewDevice==='mobile'?'background:var(--accent);color:#000;':'background:none;color:var(--muted);'}">📱 Mobile</button>
+            </div>
+          </div>
+
+          <!-- Subject bar -->
+          <div style="background:var(--bg3);border:1px solid var(--card-border);border-radius:var(--radius-sm);padding:10px 14px;margin-bottom:1rem;font-size:13px">
+            <div style="display:flex;gap:8px"><span style="color:var(--muted);min-width:52px">Subject:</span><span style="font-weight:600">${subject}</span></div>
+          </div>
+
+          <!-- Phone bezel for mobile -->
+          <div style="${wrapStyle}">
+            ${isMobile ? '<div style="background:#1a1a2e;height:28px;display:flex;align-items:center;justify-content:center"><div style="width:60px;height:5px;background:rgba(255,255,255,.2);border-radius:10px"></div></div>' : ''}
+            <iframe id="tplPreviewFrame" srcdoc="" style="width:100%;height:440px;border:none;display:block" sandbox="allow-same-origin"></iframe>
+          </div>`;
+
+        requestAnimationFrame(() => {
+          const iframe = document.getElementById('tplPreviewFrame');
+          if (iframe) iframe.srcdoc = emailContent;
+        });
+      }
+
+      function tplPreviewSetDevice(device) {
+        tplPreviewDevice = device;
+        const t = myTemplates.find(x => x.id === tplPreviewCurrentId);
+        if (t) buildTplPreview(t);
+      }
+
+      function closeTplPreview() {
+        document.getElementById('tplPreviewOverlay').classList.remove('open');
+      }
+
+      function deleteMyTemplate(id) {
+        if (!confirm('Delete this template? This cannot be undone.')) return;
+        myTemplates = myTemplates.filter(x => x.id !== id);
+        persistMyTemplates();
+        renderTemplates();
+      }
+
+      // ══════════════════════════════════════════
+      // UNLAYER EMAIL DESIGNER
+      // ══════════════════════════════════════════
+      function openEmailDesigner() {
+        // Always capture the latest From Name before opening so the footer is correct
+        const currentFromName = document.getElementById('fromName')?.value?.trim() || savedFormData.fromName || '';
+        if (currentFromName) savedFormData.fromName = currentFromName;
+
+        document.getElementById('unlayerOverlay').classList.add('open');
+
+        if (!unlayerInitialized) {
+          const mergeTags = selectedTemplate
+            ? selectedTemplate.mergeTags.map(tag => ({
+                name: tag.replace(/\{\{|\}\}/g, '').replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+                value: tag,
+                sample: tag.replace(/\{\{|\}\}/g, '')
+              }))
+            : [];
+
+          unlayer.init({
+            id: 'unlayer-container',
+            displayMode: 'email',
+            appearance: {
+              theme: 'dark',
+              panels: { tools: { dock: 'right' } }
+            },
+            features: { preview: true, imageEditor: true },
+            mergeTags,
+            tools: {
+              image: { enabled: true },
+              button: { enabled: true },
+              divider: { enabled: true },
+              social: { enabled: true },
+              html: { enabled: true }
+            }
+          });
+          unlayerInitialized = true;
+
+          // Load saved design or convert template body to initial content
+          if (savedEmailDesign) {
+            unlayer.loadDesign(savedEmailDesign);
+          } else if (selectedTemplate) {
+            const bodyHtml = selectedTemplate.body
+              .replace(/\n\n/g, '</p><p style="margin:0 0 12px">')
+              .replace(/\n/g, '<br>');
+            unlayer.loadDesign(buildInitialDesign(bodyHtml, savedFormData.fromName || currentFromName || 'Your Business'));
+          }
+        } else if (savedEmailDesign) {
+          unlayer.loadDesign(savedEmailDesign);
+        }
+      }
+
+      function buildInitialDesign(bodyHtml, brandName) {
+        return {
+          body: {
+            rows: [
+              {
+                cells: [1],
+                columns: [{
+                  contents: [{
+                    type: 'image',
+                    values: {
+                      src: { url: '', width: 'auto', height: '60px' },
+                      altText: `${brandName} Logo`,
+                      href: { name: 'web', values: { href: '', target: '_blank' } },
+                      textAlign: 'center',
+                      containerPadding: '20px 20px 10px'
+                    }
+                  }]
+                }],
+                values: { backgroundColor: '#00e87a', padding: '0' }
+              },
+              {
+                cells: [1],
+                columns: [{
+                  contents: [
+                    {
+                      type: 'text',
+                      values: {
+                        text: `<p style="margin:0 0 12px">${bodyHtml}</p>`,
+                        fontSize: '14px',
+                        lineHeight: '1.7',
+                        color: '#333333',
+                        fontFamily: { label: 'Arial', value: 'Arial,Helvetica,sans-serif' },
+                        containerPadding: '24px 32px'
+                      }
+                    }
+                  ]
+                }],
+                values: { backgroundColor: '#ffffff' }
+              },
+              {
+                cells: [1],
+                columns: [{
+                  contents: [{
+                    type: 'text',
+                    values: {
+                      text: `<p style="text-align:center;font-size:11px;color:#999;margin:0">You received this email because you subscribed to <strong>${brandName}</strong>.<br><a href="{{unsubscribe_link}}" style="color:#00a854">Unsubscribe</a> &middot; <a href="#" style="color:#00a854">View in browser</a></p>`,
+                      containerPadding: '16px 32px 24px'
+                    }
+                  }]
+                }],
+                values: { backgroundColor: '#f4f4f4' }
+              }
+            ],
+            values: {
+              backgroundColor: '#f4f4f4',
+              contentWidth: '600px',
+              fontFamily: { label: 'Arial', value: 'Arial,Helvetica,sans-serif' }
+            }
+          }
+        };
+      }
+
+      function closeUnlayer() {
+        document.getElementById('unlayerOverlay').classList.remove('open');
+      }
+
+      function saveUnlayerDesign() {
+        unlayer.exportHtml(data => {
+          savedEmailDesign = data.design;
+          savedEmailHtml = data.html;
+          closeUnlayer();
+          // Refresh Step 2 to show "design saved" status
+          if (currentStep === 2) renderModal();
+        });
+      }
+
+      // ══════════════════════════════════════════
+      // CONTACTS — CSV IMPORT (Mailchimp-style)
+      // ══════════════════════════════════════════
+      let importedContacts = [];
+      let importedColumns = [];
+      let importStep = 1;
+      let parsedPreview = null;
+
+      // ── Download CSV Template ──
+      function downloadCSVTemplate() {
+        const rows = [
+          ['email','first_name','last_name','phone','company','custom_1','custom_2'],
+          ['tunde@example.com','Tunde','Adeyemi','08012345678','TechLagos','',''],
+          ['amaka@example.ng','Amaka','Obi','09087654321','FoodHub NG','',''],
+        ];
+        const csv = rows.map(r => r.join(',')).join('\r\n');
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = 'notifypro-contacts-template.csv'; a.click();
+        URL.revokeObjectURL(url);
+      }
+
+      // ── Parse CSV ──
+      function parseCSV(text) {
+        const lines = text.trim().split(/\r?\n/);
+        const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, '').toLowerCase());
+        const rows = lines.slice(1).map(line => {
+          const vals = line.split(',').map(v => v.trim().replace(/^"|"$/g, ''));
+          const obj = {};
+          headers.forEach((h, i) => { obj[h] = vals[i] || ''; });
+          return obj;
+        }).filter(r => r.email && r.email.includes('@'));
+        return { headers, rows };
+      }
+
+      // ── Import Modal ──
+      function openImportModal() {
+        importStep = 1; parsedPreview = null;
+        renderImportModal();
+        document.getElementById('importOverlay').classList.add('open');
+      }
+      function closeImportModal() {
+        document.getElementById('importOverlay').classList.remove('open');
+      }
+      function renderImportModal() {
+        const titles = ['','Download Template','Upload CSV','Preview & Confirm'];
+        document.getElementById('importTitle').textContent = titles[importStep];
+        renderImportBody();
+        renderImportFooter();
+      }
+
+      function renderImportBody() {
+        const body = document.getElementById('importBody');
+        if (importStep === 1) {
+          body.innerHTML = `
+            <div class="import-info-box">
+              Download the CSV template, fill it with your contacts in <strong>Excel</strong> or <strong>Google Sheets</strong>, then upload it on the next step. The column headers become your available <span style="color:var(--accent)">{{merge_tags}}</span>.
+            </div>
+            <div style="background:var(--bg3);border:1px solid var(--card-border);border-radius:var(--radius-sm);padding:1rem;margin-bottom:1.2rem">
+              <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:8px">Template Columns</div>
+              <div style="display:flex;flex-wrap:wrap;gap:5px">
+                ${['email ✱','first_name','last_name','phone','company','custom_1','custom_2'].map(c => `<span class="merge-tag">${c}</span>`).join('')}
+              </div>
+              <div style="font-size:11px;color:var(--muted);margin-top:8px">✱ Required. Only include columns relevant to your campaign.</div>
+            </div>
+            <button class="tpl-btn-use" style="width:100%;padding:12px;font-size:14px" onclick="downloadCSVTemplate()">⬇️ Download CSV Template</button>`;
+        } else if (importStep === 2) {
+          body.innerHTML = `
+            <div class="upload-zone" id="uploadZone"
+              onclick="document.getElementById('csvFileInput').click()"
+              ondragover="event.preventDefault();this.classList.add('drag-over')"
+              ondragleave="this.classList.remove('drag-over')"
+              ondrop="handleFileDrop(event)">
+              <div class="upload-zone-icon">📂</div>
+              <div class="upload-zone-text">Drag & drop your CSV here, or <strong>browse files</strong></div>
+              <div style="font-size:11px;color:var(--muted);margin-top:6px">Supports .csv files · Max 10MB</div>
+              <input type="file" id="csvFileInput" accept=".csv" onchange="handleFileSelect(this)">
+            </div>
+            <div id="uploadFeedback" style="margin-top:12px;font-size:13px;color:var(--muted);text-align:center"></div>`;
+        } else if (importStep === 3 && parsedPreview) {
+          const { headers, rows } = parsedPreview;
+          const preview = rows.slice(0, 5);
+          body.innerHTML = `
+            <div class="import-info-box">
+              ✅ Found <strong style="color:var(--text)">${rows.length.toLocaleString('en-NG')} valid contacts</strong>. These columns will become your merge tags:
+              <div class="detected-tags">${headers.map(h => `<span class="merge-tag">{{${h}}}</span>`).join('')}</div>
+            </div>
+            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:6px">Preview (first ${preview.length} rows)</div>
+            <div class="preview-table-wrap">
+              <table class="preview-table">
+                <thead><tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr></thead>
+                <tbody>${preview.map(r => `<tr>${headers.map(h => `<td>${r[h]||'—'}</td>`).join('')}</tr>`).join('')}</tbody>
+              </table>
+            </div>`;
+        }
+      }
+
+      function renderImportFooter() {
+        const f = document.getElementById('importFooter');
+        const isFirst = importStep === 1;
+        const isLast = importStep === 3;
+        const canContinue = importStep !== 2 || parsedPreview !== null;
+        f.innerHTML = `
+          <button class="btn-secondary" onclick="${isFirst ? 'closeImportModal()' : 'importPrev()'}">${isFirst ? 'Cancel' : '← Back'}</button>
+          <button class="btn-primary" style="${canContinue ? '' : 'opacity:.45;cursor:not-allowed;pointer-events:none'}"
+            onclick="${isLast ? 'confirmImport()' : 'importNext()'}">${isLast ? '✅ Import Contacts' : 'Continue →'}</button>`;
+      }
+
+      function importNext() { if (importStep < 3) { importStep++; renderImportModal(); } }
+      function importPrev() { if (importStep > 1) { importStep--; renderImportModal(); } }
+
+      function handleFileSelect(input) {
+        const file = input.files[0];
+        if (file) readCSVFile(file);
+      }
+      function handleFileDrop(e) {
+        e.preventDefault();
+        document.getElementById('uploadZone').classList.remove('drag-over');
+        const file = e.dataTransfer.files[0];
+        if (file && file.name.toLowerCase().endsWith('.csv')) readCSVFile(file);
+        else document.getElementById('uploadFeedback').innerHTML = '<span style="color:var(--accent4)">❌ Please upload a .csv file.</span>';
+      }
+      function readCSVFile(file) {
+        const reader = new FileReader();
+        reader.onload = e => {
+          const result = parseCSV(e.target.result);
+          if (!result.headers.includes('email')) {
+            document.getElementById('uploadFeedback').innerHTML = '<span style="color:var(--accent4)">❌ No "email" column found. Please use the template.</span>';
+            return;
+          }
+          if (result.rows.length === 0) {
+            document.getElementById('uploadFeedback').innerHTML = '<span style="color:var(--accent4)">❌ No valid contacts found. Check that emails are correct.</span>';
+            return;
+          }
+          parsedPreview = result;
+          document.getElementById('uploadFeedback').innerHTML = `<span style="color:var(--accent)">✅ ${result.rows.length} contacts found — click Continue to preview.</span>`;
+          renderImportFooter();
+        };
+        reader.onerror = () => {
+          document.getElementById('uploadFeedback').innerHTML = '<span style="color:var(--accent4)">❌ Could not read file. Try again.</span>';
+        };
+        reader.readAsText(file);
+      }
+
+      function confirmImport() {
+        if (!parsedPreview) return;
+        importedContacts = parsedPreview.rows;
+        importedColumns = parsedPreview.headers;
+        closeImportModal();
+        updateContactsStats();
+        renderContactsTable();
+        // Switch to contacts tab to show the result
+        const contactsTabBtn = document.querySelectorAll('.page-tab')[1];
+        switchPageTab(contactsTabBtn, 'contacts');
+      }
+
+      function updateContactsStats() {
+        const total = importedContacts.length;
+        document.getElementById('cStatTotal').textContent = total.toLocaleString('en-NG');
+        document.getElementById('cStatActive').textContent = total.toLocaleString('en-NG');
+        document.getElementById('cStatUnsub').textContent = '0';
+        document.getElementById('cStatBounced').textContent = '0';
+      }
+
+      function renderContactsTable() {
+        const wrap = document.getElementById('contactsTableWrap');
+        const empty = document.getElementById('contactsEmpty');
+        if (!importedContacts.length) {
+          empty.style.display = ''; wrap.style.display = 'none'; return;
+        }
+        empty.style.display = 'none'; wrap.style.display = '';
+        const showPhone = importedColumns.includes('phone');
+        const showCompany = importedColumns.includes('company');
+        wrap.innerHTML = `
+          <div class="contacts-toolbar">
+            <input class="contacts-search" placeholder="🔍  Search by name, email or company..." oninput="filterContacts(this.value)" />
+            <div style="display:flex;gap:8px;align-items:center;flex-shrink:0">
+              <span style="font-size:12px;color:var(--muted)">${importedContacts.length.toLocaleString('en-NG')} contacts</span>
+              <button class="btn-secondary" onclick="downloadCSVTemplate()">⬇️ Template</button>
+              <button class="btn-primary" onclick="openImportModal()">Import More</button>
+            </div>
+          </div>
+          <div style="overflow-x:auto">
+            <table class="contacts-table">
+              <thead>
+                <tr>
+                  <th>Contact</th>
+                  <th>Email</th>
+                  ${showPhone ? '<th>Phone</th>' : ''}
+                  ${showCompany ? '<th>Company</th>' : ''}
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="contactsTableBody">${buildContactRows(importedContacts, showPhone, showCompany)}</tbody>
+            </table>
+          </div>`;
+      }
+
+      function buildContactRows(contacts, showPhone, showCompany) {
+        if (!contacts.length) return `<tr><td colspan="10" style="text-align:center;color:var(--muted);padding:2rem">No contacts match your search.</td></tr>`;
+        return contacts.map(c => {
+          const initial = ((c.first_name||'')[0] || c.email[0] || '?').toUpperCase();
+          const name = [c.first_name, c.last_name].filter(Boolean).join(' ') || '—';
+          return `<tr>
+            <td><div class="contact-name-cell"><div class="contact-avatar">${initial}</div><div class="contact-name">${name}</div></div></td>
+            <td style="color:var(--muted);font-size:12px">${c.email}</td>
+            ${showPhone ? `<td style="color:var(--muted);font-size:12px">${c.phone||'—'}</td>` : ''}
+            ${showCompany ? `<td style="font-size:12px">${c.company||'—'}</td>` : ''}
+            <td><span class="status-dot"></span><span style="font-size:12px;color:var(--muted)">Active</span></td>
+          </tr>`;
+        }).join('');
+      }
+
+      function filterContacts(q) {
+        const query = q.toLowerCase();
+        const showPhone = importedColumns.includes('phone');
+        const showCompany = importedColumns.includes('company');
+        const filtered = importedContacts.filter(c =>
+          c.email.toLowerCase().includes(query) ||
+          (c.first_name||'').toLowerCase().includes(query) ||
+          (c.last_name||'').toLowerCase().includes(query) ||
+          (c.company||'').toLowerCase().includes(query)
+        );
+        const tbody = document.getElementById('contactsTableBody');
+        if (tbody) tbody.innerHTML = buildContactRows(filtered, showPhone, showCompany);
+      }
+
+      function switchEmailTab(btn, key) {
+        document.querySelectorAll('.chart-tab').forEach(t => t.classList.remove('active'));
+        btn.classList.add('active');
+        emailChart.data.labels = chartData[key].labels;
+        emailChart.data.datasets[0].data = chartData[key].opens;
+        emailChart.data.datasets[1].data = chartData[key].clicks;
+        emailChart.update('active');
+      }
+    </script>
+  </body>
+</html>

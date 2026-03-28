@@ -1,0 +1,25 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(BASE=\"c:/Users/USER/Documents/NotifyPro Web App\")",
+      "Bash(mv \"$BASE/CSS/style.css\" \"$BASE/assets/css/style.css\")",
+      "Bash(mv \"$BASE/CSS/signup.css\" \"$BASE/assets/css/signup.css\")",
+      "Bash(mv \"$BASE/dashboard.css\" \"$BASE/assets/css/dashboard.css\")",
+      "Bash(mv \"$BASE/JS/main.js\" \"$BASE/assets/js/main.js\")",
+      "Bash(BASE=\"c:/Users/USER/Documents/NotifyPro Web App/pages\")",
+      "Bash(for f:*)",
+      "Bash(do)",
+      "Bash(sed -i 's|../css/dashboard.css|../assets/css/dashboard.css|g; s|../js/sidebar.js|../assets/js/sidebar.js|g; s|../js/topbar.js|../assets/js/topbar.js|g' \"$BASE/$f\")",
+      "Bash(done)",
+      "Bash(python3.12 -:*)",
+      "Bash(where python:*)",
+      "Bash(/c/Python313/python.exe -:*)",
+      "Bash(python -c \":*)",
+      "WebSearch",
+      "WebFetch(domain:birdsend.com)",
+      "WebFetch(domain:birdsend.co)",
+      "WebFetch(domain:www.emailcrush.com)",
+      "WebFetch(domain:kyleschmitt.com)"
+    ]
+  }
+}

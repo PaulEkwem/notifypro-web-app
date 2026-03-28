@@ -1,0 +1,2075 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard — NotifyPro</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../assets/css/dashboard.css" />
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      :root {
+        --bg: #07090f;
+        --bg2: #0d1117;
+        --bg3: #111820;
+        --accent: #00e87a;
+        --accent2: #00bfff;
+        --accent3: #ffb800;
+        --accent4: #ff4d6d;
+        --text: #f0f4ff;
+        --muted: #8892a4;
+        --border: rgba(255, 255, 255, 0.07);
+        --card-bg: rgba(255, 255, 255, 0.03);
+        --card-border: rgba(255, 255, 255, 0.08);
+        --font-display: "Syne", sans-serif;
+        --font-body: "DM Sans", sans-serif;
+        --radius-sm: 6px;
+        --radius-md: 12px;
+        --radius-lg: 20px;
+        --radius-xl: 28px;
+        --sidebar-w: 248px;
+      }
+      html {
+        scroll-behavior: smooth;
+      }
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: var(--font-body);
+        font-size: 15px;
+        line-height: 1.6;
+        overflow-x: hidden;
+        min-height: 100vh;
+      }
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+        pointer-events: none;
+        z-index: 0;
+        opacity: 0.4;
+      }
+      .dash-layout {
+        display: flex;
+        min-height: 100vh;
+        position: relative;
+        z-index: 1;
+      }
+
+      /* ── SIDEBAR ── */
+      .sidebar {
+        width: var(--sidebar-w);
+        background: var(--bg2);
+        border-right: 1px solid var(--card-border);
+        display: flex;
+        flex-direction: column;
+        position: fixed;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        z-index: 50;
+        transition: transform 0.3s ease;
+      }
+      .sidebar-logo {
+        padding: 0 1.5rem;
+        height: 64px;
+        display: flex;
+        align-items: center;
+        border-bottom: 1px solid var(--card-border);
+        text-decoration: none;
+        font-family: var(--font-display);
+        font-size: 20px;
+        font-weight: 800;
+        letter-spacing: -0.5px;
+        color: var(--text);
+        flex-shrink: 0;
+      }
+      .sidebar-logo span {
+        color: var(--accent);
+      }
+      .sidebar-nav {
+        flex: 1;
+        padding: 1.2rem 0.75rem;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        overflow-y: auto;
+      }
+      .nav-section-label {
+        font-size: 10px;
+        font-weight: 600;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--muted);
+        padding: 0 0.75rem;
+        margin: 0.9rem 0 0.4rem;
+      }
+      .nav-section-label:first-child {
+        margin-top: 0;
+      }
+      .nav-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 9px 12px;
+        border-radius: var(--radius-sm);
+        color: var(--muted);
+        text-decoration: none;
+        font-size: 13.5px;
+        font-weight: 400;
+        transition:
+          background 0.2s,
+          color 0.2s;
+        cursor: pointer;
+        border: none;
+        background: none;
+        width: 100%;
+        text-align: left;
+      }
+      .nav-item:hover {
+        background: rgba(255, 255, 255, 0.04);
+        color: var(--text);
+      }
+      .nav-item.active {
+        background: rgba(0, 232, 122, 0.08);
+        color: var(--accent);
+        font-weight: 500;
+      }
+      .nav-icon {
+        width: 16px;
+        height: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+      }
+      .nav-badge {
+        margin-left: auto;
+        background: rgba(0, 232, 122, 0.12);
+        color: var(--accent);
+        font-size: 10px;
+        font-weight: 700;
+        padding: 1px 7px;
+        border-radius: 100px;
+      }
+
+      /* SIDEBAR FOOTER */
+      .sidebar-footer {
+        border-top: 1px solid var(--card-border);
+        padding: 1rem 0.75rem;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .wallet-chip {
+        background: linear-gradient(
+          135deg,
+          rgba(0, 232, 122, 0.1),
+          rgba(0, 191, 255, 0.05)
+        );
+        border: 1px solid rgba(0, 232, 122, 0.2);
+        border-radius: var(--radius-md);
+        padding: 12px 14px;
+      }
+      .wallet-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 6px;
+      }
+      .wallet-label {
+        font-size: 10px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--muted);
+      }
+      .wallet-topup {
+        font-size: 11px;
+        color: var(--accent);
+        cursor: pointer;
+        font-weight: 600;
+        text-decoration: none;
+        transition: opacity 0.2s;
+      }
+      .wallet-topup:hover {
+        opacity: 0.7;
+      }
+      .wallet-amount {
+        font-family: var(--font-display);
+        font-size: 21px;
+        font-weight: 800;
+        color: var(--text);
+        letter-spacing: -0.5px;
+      }
+      .wallet-amount em {
+        font-style: normal;
+        font-size: 13px;
+        color: var(--accent);
+      }
+      .wallet-est {
+        font-size: 11px;
+        color: var(--muted);
+        margin-top: 2px;
+      }
+      .usage-wrap {
+        padding: 0 2px;
+      }
+      .usage-top {
+        display: flex;
+        justify-content: space-between;
+        font-size: 11px;
+        color: var(--muted);
+        margin-bottom: 5px;
+      }
+      .usage-top strong {
+        color: var(--text);
+        font-weight: 500;
+      }
+      .usage-track {
+        height: 4px;
+        background: rgba(255, 255, 255, 0.06);
+        border-radius: 3px;
+        overflow: hidden;
+      }
+      .usage-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--accent), var(--accent2));
+        border-radius: 3px;
+        width: 0%;
+        transition: width 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+      .usage-note {
+        font-size: 10px;
+        color: var(--muted);
+        margin-top: 3px;
+        text-align: right;
+      }
+      .user-card {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 10px;
+        border-radius: var(--radius-sm);
+        cursor: pointer;
+        transition: background 0.2s;
+      }
+      .user-card:hover {
+        background: rgba(255, 255, 255, 0.04);
+      }
+      .user-avatar {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--accent), var(--accent2));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: var(--font-display);
+        font-size: 12px;
+        font-weight: 800;
+        color: #000;
+        flex-shrink: 0;
+      }
+      .user-name {
+        font-size: 13px;
+        font-weight: 500;
+      }
+      .user-plan {
+        font-size: 11px;
+        color: var(--muted);
+      }
+
+      /* ── MAIN ── */
+      .main {
+        margin-left: var(--sidebar-w);
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+      }
+      .topbar {
+        height: 64px;
+        background: rgba(7, 9, 15, 0.9);
+        backdrop-filter: blur(20px);
+        border-bottom: 1px solid var(--card-border);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 2rem;
+        position: sticky;
+        top: 0;
+        z-index: 40;
+        gap: 1rem;
+      }
+      .topbar-left {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      }
+      .menu-toggle {
+        display: none;
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: var(--muted);
+        padding: 4px;
+      }
+      .topbar-title {
+        font-family: var(--font-display);
+        font-size: 17px;
+        font-weight: 700;
+      }
+      .search-bar {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: var(--bg3);
+        border: 1px solid var(--card-border);
+        border-radius: var(--radius-sm);
+        padding: 8px 14px;
+        width: 240px;
+        transition:
+          border-color 0.2s,
+          box-shadow 0.2s;
+      }
+      .search-bar:focus-within {
+        border-color: rgba(0, 232, 122, 0.3);
+        box-shadow: 0 0 0 3px rgba(0, 232, 122, 0.06);
+      }
+      .search-bar input {
+        background: none;
+        border: none;
+        outline: none;
+        color: var(--text);
+        font-family: var(--font-body);
+        font-size: 13px;
+        width: 100%;
+      }
+      .search-bar input::placeholder {
+        color: var(--muted);
+      }
+      .topbar-right {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .icon-btn {
+        width: 36px;
+        height: 36px;
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: var(--radius-sm);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        color: var(--muted);
+        font-size: 15px;
+        transition:
+          border-color 0.2s,
+          color 0.2s;
+        position: relative;
+      }
+      .icon-btn:hover {
+        border-color: rgba(255, 255, 255, 0.2);
+        color: var(--text);
+      }
+      .notif-dot {
+        position: absolute;
+        top: 7px;
+        right: 7px;
+        width: 7px;
+        height: 7px;
+        background: var(--accent4);
+        border-radius: 50%;
+        border: 2px solid var(--bg);
+      }
+      .btn-new {
+        background: var(--accent);
+        color: #000;
+        font-family: var(--font-display);
+        font-weight: 700;
+        font-size: 13px;
+        padding: 8px 18px;
+        border-radius: var(--radius-sm);
+        border: none;
+        cursor: pointer;
+        letter-spacing: 0.01em;
+        transition:
+          transform 0.2s,
+          box-shadow 0.2s;
+        white-space: nowrap;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+      }
+      .btn-new:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 8px 28px rgba(0, 232, 122, 0.25);
+      }
+
+      /* PAGE */
+      .page-content {
+        padding: 1.75rem 2rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1.4rem;
+        animation: fadeUp 0.4s ease both;
+      }
+
+      /* GREETING ROW */
+      .greeting-row {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 1rem;
+      }
+      .greeting h1 {
+        font-family: var(--font-display);
+        font-size: 23px;
+        font-weight: 800;
+        letter-spacing: -0.5px;
+        line-height: 1.2;
+      }
+      .greeting p {
+        color: var(--muted);
+        font-size: 13.5px;
+        margin-top: 4px;
+      }
+      .highlight {
+        color: var(--accent);
+      }
+      .next-scheduled {
+        background: var(--bg2);
+        border: 1px solid var(--card-border);
+        border-radius: var(--radius-md);
+        padding: 12px 16px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-width: 280px;
+        transition: border-color 0.2s;
+        text-decoration: none;
+        cursor: pointer;
+      }
+      .next-scheduled:hover {
+        border-color: rgba(255, 255, 255, 0.15);
+      }
+      .sched-icon {
+        font-size: 20px;
+        flex-shrink: 0;
+      }
+      .sched-info {
+        flex: 1;
+        min-width: 0;
+      }
+      .sched-label {
+        font-size: 10px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--muted);
+        margin-bottom: 2px;
+      }
+      .sched-name {
+        font-size: 13px;
+        font-weight: 600;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        color: var(--text);
+      }
+      .sched-meta {
+        font-size: 11px;
+        color: var(--muted);
+        margin-top: 1px;
+      }
+      .sched-time {
+        font-family: var(--font-display);
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--accent3);
+        white-space: nowrap;
+        flex-shrink: 0;
+        text-align: right;
+      }
+
+      /* TOP CAMPAIGN */
+      .top-camp {
+        background: linear-gradient(
+          135deg,
+          rgba(0, 232, 122, 0.07),
+          rgba(0, 191, 255, 0.04)
+        );
+        border: 1px solid rgba(0, 232, 122, 0.2);
+        border-radius: var(--radius-md);
+        padding: 1rem 1.4rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        flex-wrap: wrap;
+      }
+      .top-camp-label {
+        font-size: 10px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--accent);
+        margin-bottom: 3px;
+      }
+      .top-camp-name {
+        font-family: var(--font-display);
+        font-size: 15px;
+        font-weight: 700;
+      }
+      .top-camp-meta {
+        font-size: 12px;
+        color: var(--muted);
+        margin-top: 2px;
+      }
+      .top-stats {
+        display: flex;
+        gap: 1.5rem;
+      }
+      .top-stat {
+        text-align: center;
+      }
+      .top-stat-val {
+        font-family: var(--font-display);
+        font-size: 18px;
+        font-weight: 800;
+      }
+      .top-stat-val.green {
+        color: var(--accent);
+      }
+      .top-stat-val.blue {
+        color: var(--accent2);
+      }
+      .top-stat-val.amber {
+        color: var(--accent3);
+      }
+      .top-stat-lbl {
+        font-size: 10px;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+      }
+
+      /* STAT CARDS */
+      .stats-row {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1rem;
+      }
+      .stat-card {
+        background: var(--bg2);
+        border: 1px solid var(--card-border);
+        border-radius: var(--radius-md);
+        padding: 1.3rem;
+        transition:
+          border-color 0.2s,
+          transform 0.2s;
+        position: relative;
+        overflow: hidden;
+      }
+      .stat-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 1px;
+      }
+      .stat-card.green::before {
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(0, 232, 122, 0.4),
+          transparent
+        );
+      }
+      .stat-card.blue::before {
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(0, 191, 255, 0.4),
+          transparent
+        );
+      }
+      .stat-card.amber::before {
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(255, 184, 0, 0.4),
+          transparent
+        );
+      }
+      .stat-card.red::before {
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(255, 77, 109, 0.4),
+          transparent
+        );
+      }
+      .stat-card:hover {
+        border-color: rgba(255, 255, 255, 0.15);
+        transform: translateY(-2px);
+      }
+      .stat-card-top {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        margin-bottom: 0.85rem;
+      }
+      .stat-label {
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+      .stat-icon {
+        width: 30px;
+        height: 30px;
+        border-radius: var(--radius-sm);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        flex-shrink: 0;
+      }
+      .stat-icon.green {
+        background: rgba(0, 232, 122, 0.1);
+      }
+      .stat-icon.blue {
+        background: rgba(0, 191, 255, 0.1);
+      }
+      .stat-icon.amber {
+        background: rgba(255, 184, 0, 0.1);
+      }
+      .stat-icon.red {
+        background: rgba(255, 77, 109, 0.1);
+      }
+      .stat-val {
+        font-family: var(--font-display);
+        font-size: 26px;
+        font-weight: 800;
+        letter-spacing: -0.5px;
+        line-height: 1;
+      }
+      .stat-val.green {
+        color: var(--accent);
+      }
+      .stat-val.blue {
+        color: var(--accent2);
+      }
+      .stat-val.amber {
+        color: var(--accent3);
+      }
+      .stat-val.red {
+        color: var(--accent4);
+      }
+      .stat-change {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 12px;
+        margin-top: 5px;
+        font-weight: 500;
+      }
+      .stat-change.up {
+        color: var(--accent);
+      }
+      .stat-change.down {
+        color: var(--accent4);
+      }
+      .stat-change span {
+        color: var(--muted);
+        font-weight: 400;
+      }
+
+      /* CARD */
+      .card {
+        background: var(--bg2);
+        border: 1px solid var(--card-border);
+        border-radius: var(--radius-md);
+        padding: 1.4rem;
+      }
+      .card-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1.1rem;
+      }
+      .card-title {
+        font-family: var(--font-display);
+        font-size: 15px;
+        font-weight: 700;
+        letter-spacing: -0.2px;
+      }
+      .card-subtitle {
+        font-size: 12px;
+        color: var(--muted);
+        margin-top: 2px;
+      }
+      .card-action {
+        font-size: 12px;
+        color: var(--accent);
+        text-decoration: none;
+        cursor: pointer;
+        transition: opacity 0.2s;
+      }
+      .card-action:hover {
+        opacity: 0.7;
+      }
+
+      /* CHART */
+      .chart-tabs {
+        display: flex;
+        gap: 3px;
+        background: var(--bg3);
+        border-radius: var(--radius-sm);
+        padding: 3px;
+      }
+      .chart-tab {
+        padding: 5px 11px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: 500;
+        color: var(--muted);
+        cursor: pointer;
+        transition:
+          background 0.2s,
+          color 0.2s;
+        border: none;
+        background: none;
+      }
+      .chart-tab.active {
+        background: var(--bg2);
+        color: var(--text);
+      }
+      .chart-area {
+        position: relative;
+        height: 185px;
+        margin-top: 1rem;
+      }
+      .chart-legend {
+        display: flex;
+        gap: 1.2rem;
+        margin-top: 0.8rem;
+        flex-wrap: wrap;
+      }
+      .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 12px;
+        color: var(--muted);
+      }
+      .legend-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+      }
+
+      /* MID ROW */
+      .mid-row {
+        display: grid;
+        grid-template-columns: 1fr 320px;
+        gap: 1rem;
+      }
+
+      /* BREAKDOWN */
+      .breakdown-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.85rem;
+      }
+      .breakdown-top {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 5px;
+      }
+      .breakdown-icon {
+        width: 26px;
+        height: 26px;
+        border-radius: var(--radius-sm);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        flex-shrink: 0;
+      }
+      .breakdown-name {
+        font-size: 13px;
+        font-weight: 500;
+        flex: 1;
+      }
+      .breakdown-pct {
+        font-size: 13px;
+        font-weight: 700;
+        font-family: var(--font-display);
+      }
+      .breakdown-pct.green {
+        color: var(--accent);
+      }
+      .breakdown-pct.blue {
+        color: var(--accent2);
+      }
+      .breakdown-pct.amber {
+        color: var(--accent3);
+      }
+      .breakdown-pct.red {
+        color: var(--accent4);
+      }
+      .breakdown-bar-track {
+        height: 4px;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 3px;
+        overflow: hidden;
+      }
+      .breakdown-bar-fill {
+        height: 100%;
+        border-radius: 3px;
+      }
+      .breakdown-count {
+        font-size: 11px;
+        color: var(--muted);
+        margin-top: 2px;
+      }
+      .network-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 7px;
+      }
+      .network-item {
+        background: var(--bg3);
+        border: 1px solid var(--card-border);
+        border-radius: var(--radius-sm);
+        padding: 10px;
+      }
+      .network-name {
+        font-size: 12px;
+        font-weight: 600;
+        margin-bottom: 3px;
+      }
+      .network-rate {
+        font-family: var(--font-display);
+        font-size: 17px;
+        font-weight: 800;
+      }
+      .network-rate.green {
+        color: var(--accent);
+      }
+      .network-rate.amber {
+        color: var(--accent3);
+      }
+      .network-status {
+        font-size: 10px;
+        color: var(--muted);
+        margin-top: 1px;
+      }
+
+      /* BOTTOM ROW */
+      .bottom-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr 288px;
+        gap: 1rem;
+      }
+      .campaign-name {
+        font-size: 13px;
+        font-weight: 500;
+      }
+      .campaign-sub {
+        font-size: 11px;
+        color: var(--muted);
+        margin-top: 1px;
+      }
+      .status-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 11px;
+        font-weight: 600;
+        padding: 3px 9px;
+        border-radius: 100px;
+        white-space: nowrap;
+      }
+      .status-pill::before {
+        content: "";
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+      }
+      .status-pill.sent {
+        background: rgba(0, 232, 122, 0.1);
+        color: var(--accent);
+      }
+      .status-pill.sent::before {
+        background: var(--accent);
+      }
+      .status-pill.sending {
+        background: rgba(0, 191, 255, 0.1);
+        color: var(--accent2);
+      }
+      .status-pill.sending::before {
+        background: var(--accent2);
+        animation: blink 1s infinite;
+      }
+      .status-pill.draft {
+        background: rgba(255, 255, 255, 0.05);
+        color: var(--muted);
+      }
+      .status-pill.draft::before {
+        background: var(--muted);
+      }
+      .status-pill.failed {
+        background: rgba(255, 77, 109, 0.1);
+        color: var(--accent4);
+      }
+      .status-pill.failed::before {
+        background: var(--accent4);
+      }
+
+      /* QUICK SEND */
+      .qs-label {
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--muted);
+        margin-bottom: 5px;
+        display: block;
+      }
+      .qs-input,
+      .qs-textarea {
+        width: 100%;
+        background: var(--bg3);
+        border: 1px solid var(--card-border);
+        border-radius: var(--radius-sm);
+        padding: 10px 13px;
+        color: var(--text);
+        font-family: var(--font-body);
+        font-size: 13px;
+        outline: none;
+        transition:
+          border-color 0.2s,
+          box-shadow 0.2s;
+      }
+      .qs-input:focus,
+      .qs-textarea:focus {
+        border-color: rgba(0, 232, 122, 0.35);
+        box-shadow: 0 0 0 3px rgba(0, 232, 122, 0.06);
+      }
+      .qs-input::placeholder,
+      .qs-textarea::placeholder {
+        color: rgba(136, 146, 164, 0.5);
+      }
+      .qs-textarea {
+        resize: none;
+        min-height: 70px;
+        line-height: 1.5;
+      }
+      .qs-char-count {
+        display: flex;
+        justify-content: flex-end;
+        font-size: 11px;
+        color: var(--muted);
+        margin-top: -3px;
+      }
+      .channel-pills {
+        display: flex;
+        gap: 5px;
+        flex-wrap: wrap;
+      }
+      .channel-pill {
+        padding: 5px 11px;
+        border-radius: 100px;
+        border: 1px solid var(--card-border);
+        font-size: 12px;
+        font-weight: 500;
+        color: var(--muted);
+        cursor: pointer;
+        transition: all 0.2s;
+        background: none;
+      }
+      .channel-pill.active {
+        border-color: var(--accent);
+        color: var(--accent);
+        background: rgba(0, 232, 122, 0.06);
+      }
+      .btn-send {
+        width: 100%;
+        background: var(--accent);
+        color: #000;
+        font-family: var(--font-display);
+        font-weight: 700;
+        font-size: 14px;
+        padding: 11px;
+        border-radius: var(--radius-sm);
+        border: none;
+        cursor: pointer;
+        transition:
+          transform 0.2s,
+          box-shadow 0.2s;
+      }
+      .btn-send:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 32px rgba(0, 232, 122, 0.25);
+      }
+      .quick-send-form {
+        display: flex;
+        flex-direction: column;
+        gap: 0.85rem;
+      }
+
+      /* LIVE FEED */
+      .live-badge {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 11px;
+        color: var(--accent);
+        font-weight: 600;
+      }
+      .live-dot {
+        width: 7px;
+        height: 7px;
+        background: var(--accent);
+        border-radius: 50%;
+        animation: pulse 1.5s infinite;
+      }
+      .feed-list {
+        display: flex;
+        flex-direction: column;
+      }
+      .feed-item {
+        display: flex;
+        gap: 10px;
+        padding: 0.65rem 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+        align-items: flex-start;
+        animation: slideIn 0.4s ease both;
+      }
+      .feed-item:last-child {
+        border-bottom: none;
+      }
+      .feed-channel {
+        width: 24px;
+        height: 24px;
+        border-radius: var(--radius-sm);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        flex-shrink: 0;
+        margin-top: 1px;
+      }
+      .feed-text {
+        font-size: 12px;
+        line-height: 1.4;
+        flex: 1;
+      }
+      .feed-text strong {
+        font-weight: 500;
+        color: var(--text);
+      }
+      .feed-meta {
+        font-size: 11px;
+        color: var(--muted);
+        margin-top: 1px;
+      }
+      .feed-time {
+        font-size: 11px;
+        color: var(--muted);
+        flex-shrink: 0;
+        white-space: nowrap;
+        margin-top: 2px;
+      }
+
+      /* API HEALTH */
+      .api-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .api-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        flex-shrink: 0;
+      }
+      .api-dot.up {
+        background: var(--accent);
+        box-shadow: 0 0 6px rgba(0, 232, 122, 0.5);
+      }
+      .api-label {
+        font-size: 13px;
+      }
+      .api-sub {
+        font-size: 11px;
+        color: var(--muted);
+      }
+
+      @keyframes fadeUp {
+        from {
+          opacity: 0;
+          transform: translateY(16px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+          transform: scale(1);
+        }
+        50% {
+          opacity: 0.4;
+          transform: scale(0.8);
+        }
+      }
+      @keyframes blink {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.3;
+        }
+      }
+      @keyframes slideIn {
+        from {
+          opacity: 0;
+          transform: translateX(-8px);
+        }
+        to {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
+      ::-webkit-scrollbar {
+        width: 5px;
+      }
+      ::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 3px;
+      }
+
+      @media (max-width: 1100px) {
+        .bottom-row {
+          grid-template-columns: 1fr 1fr;
+        }
+        .live-card {
+          display: none;
+        }
+      }
+      @media (max-width: 900px) {
+        .stats-row {
+          grid-template-columns: 1fr 1fr;
+        }
+        .mid-row {
+          grid-template-columns: 1fr;
+        }
+        .bottom-row {
+          grid-template-columns: 1fr;
+        }
+        .sidebar {
+          transform: translateX(-100%);
+        }
+        .sidebar.open {
+          transform: translateX(0);
+        }
+        .main {
+          margin-left: 0;
+        }
+        .menu-toggle {
+          display: flex;
+        }
+      }
+      @media (max-width: 600px) {
+        .search-bar {
+          display: none;
+        }
+        .greeting h1 {
+          font-size: 20px;
+        }
+        .page-content {
+          padding: 1rem;
+        }
+        .next-scheduled {
+          min-width: unset;
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="dash-layout">
+
+      <div class="main">
+        <header class="topbar">
+          <div class="topbar-left">
+            <button class="menu-toggle" id="menuToggle">
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <line x1="3" y1="6" x2="21" y2="6" />
+                <line x1="3" y1="12" x2="21" y2="12" />
+                <line x1="3" y1="18" x2="21" y2="18" />
+              </svg>
+            </button>
+            <div class="topbar-title">Dashboard</div>
+          </div>
+          <div class="search-bar">
+            <svg
+              width="13"
+              height="13"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              style="color: var(--muted); flex-shrink: 0"
+            >
+              <circle cx="11" cy="11" r="8" />
+              <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+            <input type="text" placeholder="Search campaigns, logs…" />
+          </div>
+          <div class="topbar-right">
+            <button class="icon-btn">🔔<span class="notif-dot"></span></button>
+            <button class="icon-btn">?</button>
+            <a href="bulk-sms.html" class="btn-new">+ New Campaign</a>
+          </div>
+        </header>
+
+        <main class="page-content">
+          <!-- GREETING + NEXT SCHEDULED -->
+          <div class="greeting-row">
+            <div class="greeting">
+              <h1>Good morning, <span class="highlight">Emeka</span> 👋</h1>
+              <p>Here's your platform snapshot for today.</p>
+            </div>
+            <a class="next-scheduled" href="bulk-sms.html">
+              <div class="sched-icon">📅</div>
+              <div class="sched-info">
+                <div class="sched-label">Next Scheduled Campaign</div>
+                <div class="sched-name">Easter Flash Sale — Bulk SMS</div>
+                <div class="sched-meta">
+                  24,000 recipients · MTN, Airtel, Glo
+                </div>
+              </div>
+              <div class="sched-time">Tomorrow<br />9:00 AM</div>
+            </a>
+          </div>
+
+          <!-- TOP CAMPAIGN -->
+          <div class="top-camp">
+            <div>
+              <div class="top-camp-label">
+                🏆 Top Performing Campaign This Month
+              </div>
+              <div class="top-camp-name">Ramadan Promo Blast</div>
+              <div class="top-camp-meta">
+                Bulk SMS · Sent Mar 14 · 24,000 recipients
+              </div>
+            </div>
+            <div class="top-stats">
+              <div class="top-stat">
+                <div class="top-stat-val green">98.2%</div>
+                <div class="top-stat-lbl">Delivered</div>
+              </div>
+              <div class="top-stat">
+                <div class="top-stat-val blue">34.1%</div>
+                <div class="top-stat-lbl">Click Rate</div>
+              </div>
+              <div class="top-stat">
+                <div class="top-stat-val amber">₦28,800</div>
+                <div class="top-stat-lbl">Total Cost</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- STATS -->
+          <div class="stats-row">
+            <div class="stat-card green">
+              <div class="stat-card-top">
+                <div class="stat-label">SMS Sent Today</div>
+                <div class="stat-icon green">💬</div>
+              </div>
+              <div class="stat-val green" id="smsStat">0</div>
+              <div class="stat-change up">
+                ↑ 12.4% <span>vs yesterday</span>
+              </div>
+            </div>
+            <div class="stat-card blue">
+              <div class="stat-card-top">
+                <div class="stat-label">Emails Delivered</div>
+                <div class="stat-icon blue">📧</div>
+              </div>
+              <div class="stat-val blue" id="emailStat">0</div>
+              <div class="stat-change up">↑ 8.1% <span>vs yesterday</span></div>
+            </div>
+            <div class="stat-card amber">
+              <div class="stat-card-top">
+                <div class="stat-label">OTPs Verified</div>
+                <div class="stat-icon amber">🔐</div>
+              </div>
+              <div class="stat-val amber" id="otpStat">0</div>
+              <div class="stat-change up">↑ 3.7% <span>vs yesterday</span></div>
+            </div>
+            <div class="stat-card red">
+              <div class="stat-card-top">
+                <div class="stat-label">Failed Deliveries</div>
+                <div class="stat-icon red">⚠️</div>
+              </div>
+              <div class="stat-val red" id="failStat">0</div>
+              <div class="stat-change down">
+                ↓ 2.1% <span>vs yesterday</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- CHART + BREAKDOWN -->
+          <div class="mid-row">
+            <div class="card">
+              <div class="card-header">
+                <div>
+                  <div class="card-title">Delivery Performance</div>
+                  <div class="card-subtitle">Messages sent — last 7 days</div>
+                </div>
+                <div class="chart-tabs">
+                  <button
+                    class="chart-tab active"
+                    onclick="switchTab(this, '7d')"
+                  >
+                    7D
+                  </button>
+                  <button class="chart-tab" onclick="switchTab(this, '30d')">
+                    30D
+                  </button>
+                  <button class="chart-tab" onclick="switchTab(this, '90d')">
+                    90D
+                  </button>
+                </div>
+              </div>
+              <div class="chart-area"><canvas id="deliveryChart"></canvas></div>
+              <div class="chart-legend">
+                <div class="legend-item">
+                  <div
+                    class="legend-dot"
+                    style="background: var(--accent)"
+                  ></div>
+                  SMS
+                </div>
+                <div class="legend-item">
+                  <div
+                    class="legend-dot"
+                    style="background: var(--accent2)"
+                  ></div>
+                  Email
+                </div>
+                <div class="legend-item">
+                  <div
+                    class="legend-dot"
+                    style="background: var(--accent3)"
+                  ></div>
+                  OTP
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-header">
+                <div>
+                  <div class="card-title">Channel Breakdown</div>
+                  <div class="card-subtitle">Delivery success rate</div>
+                </div>
+                <a class="card-action" href="#">View →</a>
+              </div>
+              <div class="breakdown-list">
+                <div>
+                  <div class="breakdown-top">
+                    <div
+                      class="breakdown-icon"
+                      style="background: rgba(0, 232, 122, 0.1)"
+                    >
+                      💬
+                    </div>
+                    <div class="breakdown-name">Bulk SMS</div>
+                    <div class="breakdown-pct green">98.2%</div>
+                  </div>
+                  <div class="breakdown-bar-track">
+                    <div
+                      class="breakdown-bar-fill"
+                      style="width: 98.2%; background: var(--accent)"
+                    ></div>
+                  </div>
+                  <div class="breakdown-count">842,310 messages</div>
+                </div>
+                <div>
+                  <div class="breakdown-top">
+                    <div
+                      class="breakdown-icon"
+                      style="background: rgba(0, 191, 255, 0.1)"
+                    >
+                      📧
+                    </div>
+                    <div class="breakdown-name">Email</div>
+                    <div class="breakdown-pct blue">94.7%</div>
+                  </div>
+                  <div class="breakdown-bar-track">
+                    <div
+                      class="breakdown-bar-fill"
+                      style="width: 94.7%; background: var(--accent2)"
+                    ></div>
+                  </div>
+                  <div class="breakdown-count">218,045 emails</div>
+                </div>
+                <div>
+                  <div class="breakdown-top">
+                    <div
+                      class="breakdown-icon"
+                      style="background: rgba(255, 184, 0, 0.1)"
+                    >
+                      🔐
+                    </div>
+                    <div class="breakdown-name">OTP</div>
+                    <div class="breakdown-pct amber">99.1%</div>
+                  </div>
+                  <div class="breakdown-bar-track">
+                    <div
+                      class="breakdown-bar-fill"
+                      style="width: 99.1%; background: var(--accent3)"
+                    ></div>
+                  </div>
+                  <div class="breakdown-count">12,481 verifications</div>
+                </div>
+                <div>
+                  <div class="breakdown-top">
+                    <div
+                      class="breakdown-icon"
+                      style="background: rgba(255, 77, 109, 0.1)"
+                    >
+                      🛡️
+                    </div>
+                    <div class="breakdown-name">2FA</div>
+                    <div class="breakdown-pct red">97.8%</div>
+                  </div>
+                  <div class="breakdown-bar-track">
+                    <div
+                      class="breakdown-bar-fill"
+                      style="width: 97.8%; background: var(--accent4)"
+                    ></div>
+                  </div>
+                  <div class="breakdown-count">4,920 authentications</div>
+                </div>
+                <div style="margin-top: 0.4rem">
+                  <div
+                    style="
+                      font-size: 12px;
+                      font-weight: 600;
+                      margin-bottom: 0.55rem;
+                      font-family: var(--font-display);
+                    "
+                  >
+                    🇳🇬 Network Status
+                  </div>
+                  <div class="network-grid">
+                    <div class="network-item">
+                      <div class="network-name">MTN</div>
+                      <div class="network-rate green">99.4%</div>
+                      <div class="network-status">● Operational</div>
+                    </div>
+                    <div class="network-item">
+                      <div class="network-name">Airtel</div>
+                      <div class="network-rate green">98.8%</div>
+                      <div class="network-status">● Operational</div>
+                    </div>
+                    <div class="network-item">
+                      <div class="network-name">Glo</div>
+                      <div class="network-rate amber">96.1%</div>
+                      <div class="network-status">● Degraded</div>
+                    </div>
+                    <div class="network-item">
+                      <div class="network-name">9mobile</div>
+                      <div class="network-rate green">97.9%</div>
+                      <div class="network-status">● Operational</div>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  style="
+                    padding-top: 0.6rem;
+                    border-top: 1px solid var(--card-border);
+                  "
+                >
+                  <div
+                    style="
+                      font-size: 12px;
+                      font-weight: 600;
+                      margin-bottom: 0.5rem;
+                      font-family: var(--font-display);
+                    "
+                  >
+                    ⚡ API Health
+                  </div>
+                  <div class="api-row">
+                    <div class="api-dot up"></div>
+                    <div>
+                      <div class="api-label">REST API — All systems go</div>
+                      <div class="api-sub">Avg 84ms · Uptime 99.9%</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- BOTTOM ROW -->
+          <div class="bottom-row">
+            <div class="card">
+              <div class="card-header">
+                <div>
+                  <div class="card-title">Recent Campaigns</div>
+                  <div class="card-subtitle">Last 5 activities</div>
+                </div>
+                <a class="card-action" href="#">View all →</a>
+              </div>
+              <table style="width: 100%; border-collapse: collapse">
+                <thead>
+                  <tr>
+                    <th
+                      style="
+                        text-align: left;
+                        padding-bottom: 0.55rem;
+                        border-bottom: 1px solid var(--card-border);
+                        font-size: 10px;
+                        font-weight: 600;
+                        text-transform: uppercase;
+                        letter-spacing: 0.08em;
+                        color: var(--muted);
+                      "
+                    >
+                      Campaign
+                    </th>
+                    <th
+                      style="
+                        text-align: left;
+                        padding-bottom: 0.55rem;
+                        border-bottom: 1px solid var(--card-border);
+                        font-size: 10px;
+                        font-weight: 600;
+                        text-transform: uppercase;
+                        letter-spacing: 0.08em;
+                        color: var(--muted);
+                      "
+                    >
+                      Ch.
+                    </th>
+                    <th
+                      style="
+                        text-align: left;
+                        padding-bottom: 0.55rem;
+                        border-bottom: 1px solid var(--card-border);
+                        font-size: 10px;
+                        font-weight: 600;
+                        text-transform: uppercase;
+                        letter-spacing: 0.08em;
+                        color: var(--muted);
+                      "
+                    >
+                      Sent
+                    </th>
+                    <th
+                      style="
+                        text-align: left;
+                        padding-bottom: 0.55rem;
+                        border-bottom: 1px solid var(--card-border);
+                        font-size: 10px;
+                        font-weight: 600;
+                        text-transform: uppercase;
+                        letter-spacing: 0.08em;
+                        color: var(--muted);
+                      "
+                    >
+                      Rate
+                    </th>
+                    <th
+                      style="
+                        text-align: left;
+                        padding-bottom: 0.55rem;
+                        border-bottom: 1px solid var(--card-border);
+                        font-size: 10px;
+                        font-weight: 600;
+                        text-transform: uppercase;
+                        letter-spacing: 0.08em;
+                        color: var(--muted);
+                      "
+                    >
+                      Status
+                    </th>
+                  </tr>
+                </thead>
+                <tbody id="campaignsBody"></tbody>
+              </table>
+            </div>
+            <div class="card">
+              <div class="card-header">
+                <div>
+                  <div class="card-title">Quick Send</div>
+                  <div class="card-subtitle">Fire a message instantly</div>
+                </div>
+              </div>
+              <div class="quick-send-form">
+                <div>
+                  <span class="qs-label">Channel</span>
+                  <div class="channel-pills">
+                    <button
+                      class="channel-pill active"
+                      onclick="selectChannel(this, 'SMS')"
+                    >
+                      💬 SMS</button
+                    ><button
+                      class="channel-pill"
+                      onclick="selectChannel(this, 'Email')"
+                    >
+                      📧 Email</button
+                    ><button
+                      class="channel-pill"
+                      onclick="selectChannel(this, 'OTP')"
+                    >
+                      🔐 OTP
+                    </button>
+                  </div>
+                </div>
+                <div>
+                  <span class="qs-label">Recipient</span
+                  ><input
+                    class="qs-input"
+                    id="quickSendRecipient"
+                    type="text"
+                    placeholder="+234 800 000 0000"
+                  />
+                </div>
+                <div>
+                  <span class="qs-label">Message</span
+                  ><textarea
+                    class="qs-textarea"
+                    id="quickSendMsg"
+                    placeholder="Type your message…"
+                    oninput="countChars(this)"
+                  ></textarea>
+                  <div class="qs-char-count">
+                    <span id="charCount">0</span>/160
+                  </div>
+                </div>
+                <div>
+                  <span class="qs-label">Sender ID</span
+                  ><input class="qs-input" type="text" value="NotifyPro" />
+                </div>
+                <button class="btn-send" onclick="quickSend()">
+                  Send Now →
+                </button>
+              </div>
+            </div>
+            <div class="card live-card">
+              <div class="card-header">
+                <div>
+                  <div class="card-title">Live Feed</div>
+                  <div class="card-subtitle">Real-time events</div>
+                </div>
+                <div class="live-badge">
+                  <div class="live-dot"></div>
+                  Live
+                </div>
+              </div>
+              <div class="feed-list" id="feedList"></div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script>
+      document
+        .getElementById("menuToggle")
+        .addEventListener("click", () =>
+          document.getElementById("sidebar").classList.toggle("open"),
+        );
+      setTimeout(
+        () => (document.getElementById("usageFill").style.width = "61.3%"),
+        400,
+      );
+      function animateCount(id, target) {
+        const el = document.getElementById(id),
+          inc = target / 87;
+        let c = 0;
+        const iv = setInterval(() => {
+          c = Math.min(c + inc, target);
+          el.textContent = Math.floor(c).toLocaleString("en-NG");
+          if (c >= target) clearInterval(iv);
+        }, 16);
+      }
+      setTimeout(() => {
+        animateCount("smsStat", 842310);
+        animateCount("emailStat", 218045);
+        animateCount("otpStat", 12481);
+        animateCount("failStat", 1247);
+      }, 300);
+      const ctx = document.getElementById("deliveryChart").getContext("2d");
+      const CD = {
+        "7d": {
+          labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+          sms: [120000, 145000, 132000, 98000, 156000, 178000, 842310],
+          email: [30000, 42000, 38000, 25000, 51000, 64000, 218045],
+          otp: [1800, 2100, 1950, 1400, 2200, 2800, 12481],
+        },
+        "30d": {
+          labels: ["W1", "W2", "W3", "W4"],
+          sms: [820000, 910000, 775000, 842310],
+          email: [190000, 220000, 205000, 218045],
+          otp: [42000, 51000, 48000, 12481],
+        },
+        "90d": {
+          labels: ["Jan", "Feb", "Mar"],
+          sms: [2400000, 2650000, 2510000],
+          email: [610000, 680000, 654000],
+          otp: [140000, 155000, 148000],
+        },
+      };
+      function mg(c, col) {
+        const g = c.createLinearGradient(0, 0, 0, 190);
+        g.addColorStop(0, col.replace("1)", "0.18)"));
+        g.addColorStop(1, col.replace("1)", "0)"));
+        return g;
+      }
+      function bd(k) {
+        const d = CD[k];
+        return {
+          labels: d.labels,
+          datasets: [
+            {
+              label: "SMS",
+              data: d.sms,
+              borderColor: "#00E87A",
+              backgroundColor: mg(ctx, "rgba(0,232,122,1)"),
+              tension: 0.4,
+              fill: true,
+              pointRadius: 3,
+              pointBackgroundColor: "#00E87A",
+              borderWidth: 2,
+            },
+            {
+              label: "Email",
+              data: d.email,
+              borderColor: "#00BFFF",
+              backgroundColor: mg(ctx, "rgba(0,191,255,1)"),
+              tension: 0.4,
+              fill: true,
+              pointRadius: 3,
+              pointBackgroundColor: "#00BFFF",
+              borderWidth: 2,
+            },
+            {
+              label: "OTP",
+              data: d.otp,
+              borderColor: "#FFB800",
+              backgroundColor: mg(ctx, "rgba(255,184,0,1)"),
+              tension: 0.4,
+              fill: true,
+              pointRadius: 3,
+              pointBackgroundColor: "#FFB800",
+              borderWidth: 2,
+            },
+          ],
+        };
+      }
+      let chart = new Chart(ctx, {
+        type: "line",
+        data: bd("7d"),
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: { mode: "index", intersect: false },
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: "#0D1117",
+              borderColor: "rgba(255,255,255,0.08)",
+              borderWidth: 1,
+              titleColor: "#F0F4FF",
+              bodyColor: "#8892A4",
+              padding: 10,
+              callbacks: {
+                label: (c) =>
+                  ` ${c.dataset.label}: ${c.parsed.y.toLocaleString("en-NG")}`,
+              },
+            },
+          },
+          scales: {
+            x: {
+              grid: { color: "rgba(255,255,255,0.04)" },
+              ticks: {
+                color: "#8892A4",
+                font: { family: "DM Sans", size: 11 },
+              },
+            },
+            y: {
+              grid: { color: "rgba(255,255,255,0.04)" },
+              ticks: {
+                color: "#8892A4",
+                font: { family: "DM Sans", size: 11 },
+                callback: (v) =>
+                  v >= 1000000
+                    ? (v / 1000000).toFixed(1) + "M"
+                    : v >= 1000
+                      ? (v / 1000).toFixed(0) + "K"
+                      : v,
+              },
+            },
+          },
+        },
+      });
+      function switchTab(btn, k) {
+        document
+          .querySelectorAll(".chart-tab")
+          .forEach((t) => t.classList.remove("active"));
+        btn.classList.add("active");
+        chart.data = bd(k);
+        chart.update("active");
+      }
+      const campaigns = [
+        {
+          name: "Ramadan Promo Blast",
+          sub: "Bulk SMS",
+          ch: "💬",
+          sent: "24,000",
+          rate: "98.2%",
+          status: "sent",
+        },
+        {
+          name: "Newsletter — March",
+          sub: "Email",
+          ch: "📧",
+          sent: "8,500",
+          rate: "94.7%",
+          status: "sent",
+        },
+        {
+          name: "OTP Login Flow",
+          sub: "Verification",
+          ch: "🔐",
+          sent: "3,210",
+          rate: "99.1%",
+          status: "sending",
+        },
+        {
+          name: "Flash Sale Alert",
+          sub: "Bulk SMS",
+          ch: "💬",
+          sent: "15,000",
+          rate: "97.5%",
+          status: "sent",
+        },
+        {
+          name: "Welcome Email Series",
+          sub: "Email",
+          ch: "📧",
+          sent: "—",
+          rate: "—",
+          status: "draft",
+        },
+      ];
+      const tb = document.getElementById("campaignsBody");
+      campaigns.forEach((c) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td style="padding:0.65rem 0;border-bottom:1px solid rgba(255,255,255,0.04)"><div class="campaign-name">${c.name}</div><div class="campaign-sub">${c.sub}</div></td><td style="padding:0.65rem 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:14px">${c.ch}</td><td style="padding:0.65rem 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:13px">${c.sent}</td><td style="padding:0.65rem 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:13px;font-weight:600">${c.rate}</td><td style="padding:0.65rem 0;border-bottom:1px solid rgba(255,255,255,0.04)"><span class="status-pill ${c.status}">${c.status.charAt(0).toUpperCase() + c.status.slice(1)}</span></td>`;
+        tb.appendChild(tr);
+      });
+      function selectChannel(btn, ch) {
+        document
+          .querySelectorAll(".channel-pill")
+          .forEach((p) => p.classList.remove("active"));
+        btn.classList.add("active");
+        const i = document.getElementById("quickSendRecipient");
+        i.placeholder =
+          ch === "Email" ? "hello@business.ng" : "+234 800 000 0000";
+      }
+      function countChars(el) {
+        document.getElementById("charCount").textContent = el.value.length;
+      }
+      function quickSend() {
+        const r = document.getElementById("quickSendRecipient").value.trim(),
+          m = document.getElementById("quickSendMsg").value.trim();
+        if (!r || !m) {
+          alert("Fill in recipient and message.");
+          return;
+        }
+        addFeedItem(
+          "💬",
+          "rgba(0,232,122,0.1)",
+          r,
+          "Queued for delivery",
+          "Just now",
+        );
+        document.getElementById("quickSendMsg").value = "";
+        document.getElementById("charCount").textContent = "0";
+        document.getElementById("quickSendRecipient").value = "";
+      }
+      const fl = document.getElementById("feedList");
+      [
+        {
+          icon: "💬",
+          bg: "rgba(0,232,122,0.1)",
+          to: "+234 803 XXX XXXX",
+          desc: "SMS delivered — Ramadan Promo",
+          time: "2m",
+        },
+        {
+          icon: "📧",
+          bg: "rgba(0,191,255,0.1)",
+          to: "k.adamu@mail.com",
+          desc: "Email opened · Newsletter March",
+          time: "4m",
+        },
+        {
+          icon: "🔐",
+          bg: "rgba(255,184,0,0.1)",
+          to: "+234 706 XXX XXXX",
+          desc: "OTP verified in 1.8s",
+          time: "6m",
+        },
+        {
+          icon: "💬",
+          bg: "rgba(0,232,122,0.1)",
+          to: "+234 810 XXX XXXX",
+          desc: "SMS delivered — Flash Sale",
+          time: "9m",
+        },
+        {
+          icon: "🛡️",
+          bg: "rgba(255,77,109,0.1)",
+          to: "app@fintech.ng",
+          desc: "2FA auth success",
+          time: "11m",
+        },
+      ].forEach((e) => addFeedItem(e.icon, e.bg, e.to, e.desc, e.time));
+      function addFeedItem(icon, bg, to, desc, time) {
+        const item = document.createElement("div");
+        item.className = "feed-item";
+        item.innerHTML = `<div class="feed-channel" style="background:${bg}">${icon}</div><div class="feed-text"><strong>${to}</strong><div class="feed-meta">${desc}</div></div><div class="feed-time">${time}</div>`;
+        fl.prepend(item);
+        if (fl.children.length > 8) fl.lastChild.remove();
+      }
+      const live = [
+        {
+          icon: "💬",
+          bg: "rgba(0,232,122,0.1)",
+          desc: "SMS delivered to MTN subscriber",
+        },
+        {
+          icon: "📧",
+          bg: "rgba(0,191,255,0.1)",
+          desc: "Email opened · click recorded",
+        },
+        { icon: "🔐", bg: "rgba(255,184,0,0.1)", desc: "OTP sent & verified" },
+        { icon: "🛡️", bg: "rgba(255,77,109,0.1)", desc: "2FA auth success" },
+      ];
+      const phs = ["+234 802", "+234 703", "+234 816", "+234 909", "+234 811"];
+      setInterval(() => {
+        const t = live[Math.floor(Math.random() * live.length)];
+        addFeedItem(
+          t.icon,
+          t.bg,
+          phs[Math.floor(Math.random() * phs.length)] + " XXX XXXX",
+          t.desc,
+          "now",
+        );
+      }, 4500);
+    </script>
+    <script>window.NP_PAGE = 'dashboard';</script>
+    <script src="../assets/js/sidebar.js"></script>
+    <script type="module" src="../assets/js/auth-guard.js"></script>
+    <script type="module">
+      import { supabase } from "../assets/js/supabase-config.js";
+
+      // Define logout IMMEDIATELY — before any awaits so it's always available
+      window.npLogout = async function () {
+        await supabase.auth.signOut();
+        window.location.href = "../login.html";
+      };
+
+      // Guard + populate sidebar
+      (async () => {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) { window.location.href = "../login.html"; return; }
+
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("first_name, last_name, business_name, plan, wallet_balance, sms_used, sms_limit")
+          .eq("id", session.user.id)
+          .maybeSingle();
+
+        if (!profile) return;
+
+        const fullName  = [profile.first_name, profile.last_name].filter(Boolean).join(" ") || session.user.email;
+        const initials  = fullName.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2);
+        const planLabel = { starter: "Starter Plan", business: "Business Plan", enterprise: "Enterprise Plan" };
+        const smsUsed   = profile.sms_used  ?? 0;
+        const smsLimit  = profile.sms_limit ?? 5000;
+        const smsPct    = smsLimit > 0 ? Math.min((smsUsed / smsLimit) * 100, 100).toFixed(1) : 0;
+        const smsRemain = smsLimit > 0 ? smsLimit - smsUsed : "∞";
+
+        const avatarEl = document.getElementById("userAvatar");
+        if (avatarEl) avatarEl.textContent = initials;
+        const nameEl = document.getElementById("userName");
+        if (nameEl) nameEl.textContent = fullName;
+        const planEl = document.querySelector(".user-plan");
+        if (planEl) planEl.textContent = planLabel[profile.plan] || "Starter Plan";
+        const balanceEl = document.getElementById("walletBalance");
+        if (balanceEl) balanceEl.textContent = Number(profile.wallet_balance ?? 0).toLocaleString("en-NG");
+        const estEl = document.getElementById("walletEst");
+        if (estEl) estEl.textContent = `≈ ${Number(smsRemain).toLocaleString("en-NG")} SMS remaining`;
+        const fillEl = document.getElementById("usageFill");
+        if (fillEl) fillEl.style.width = smsPct + "%";
+        const noteEl = document.querySelector(".usage-note");
+        if (noteEl) noteEl.textContent = `${smsPct}% used · resets in 11 days`;
+        const topEl = document.querySelector(".usage-top strong");
+        if (topEl) topEl.textContent = `${smsUsed.toLocaleString()} / ${smsLimit > 0 ? smsLimit.toLocaleString() : "∞"}`;
+      })();
+    </script>
+  </body>
+</html>
