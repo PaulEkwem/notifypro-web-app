@@ -1279,7 +1279,7 @@
           <!-- GREETING + NEXT SCHEDULED -->
           <div class="greeting-row">
             <div class="greeting">
-              <h1>Good morning, <span class="highlight">Emeka</span> 👋</h1>
+              <h1 id="dashGreeting">Good morning, <span class="highlight" id="dashName">there</span> 👋</h1>
               <p>Here's your platform snapshot for today.</p>
             </div>
             <a class="next-scheduled" href="bulk-sms.html">
@@ -2044,6 +2044,15 @@
           .maybeSingle();
 
         if (!profile) return;
+
+        // Update greeting with real name
+        const firstName = profile.first_name || session.user.email.split('@')[0];
+        const hour = new Date().getHours();
+        const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+        const greetEl = document.getElementById('dashGreeting');
+        const nameEl  = document.getElementById('dashName');
+        if (greetEl) greetEl.childNodes[0].textContent = greeting + ', ';
+        if (nameEl)  nameEl.textContent = firstName;
 
         const fullName  = [profile.first_name, profile.last_name].filter(Boolean).join(" ") || session.user.email;
         const initials  = fullName.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2);
