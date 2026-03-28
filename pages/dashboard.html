@@ -1282,43 +1282,44 @@
               <h1 id="dashGreeting">Good morning, <span class="highlight" id="dashName">there</span> 👋</h1>
               <p>Here's your platform snapshot for today.</p>
             </div>
-            <a class="next-scheduled" href="bulk-sms.html">
+            <div class="next-scheduled" id="nextSchedCard" style="display:none">
               <div class="sched-icon">📅</div>
               <div class="sched-info">
                 <div class="sched-label">Next Scheduled Campaign</div>
-                <div class="sched-name">Easter Flash Sale — Bulk SMS</div>
-                <div class="sched-meta">
-                  24,000 recipients · MTN, Airtel, Glo
-                </div>
+                <div class="sched-name" id="nextSchedName">—</div>
+                <div class="sched-meta" id="nextSchedMeta">—</div>
               </div>
-              <div class="sched-time">Tomorrow<br />9:00 AM</div>
-            </a>
+              <div class="sched-time" id="nextSchedTime">—</div>
+            </div>
           </div>
 
           <!-- TOP CAMPAIGN -->
-          <div class="top-camp">
+          <div class="top-camp" id="topCampCard" style="display:none">
             <div>
-              <div class="top-camp-label">
-                🏆 Top Performing Campaign This Month
-              </div>
-              <div class="top-camp-name">Ramadan Promo Blast</div>
-              <div class="top-camp-meta">
-                Bulk SMS · Sent Mar 14 · 24,000 recipients
-              </div>
+              <div class="top-camp-label">🏆 Top Performing Campaign This Month</div>
+              <div class="top-camp-name" id="topCampName">—</div>
+              <div class="top-camp-meta" id="topCampMeta">—</div>
             </div>
             <div class="top-stats">
               <div class="top-stat">
-                <div class="top-stat-val green">98.2%</div>
+                <div class="top-stat-val green" id="topCampDelivered">—</div>
                 <div class="top-stat-lbl">Delivered</div>
               </div>
               <div class="top-stat">
-                <div class="top-stat-val blue">34.1%</div>
-                <div class="top-stat-lbl">Click Rate</div>
-              </div>
-              <div class="top-stat">
-                <div class="top-stat-val amber">₦28,800</div>
+                <div class="top-stat-val amber" id="topCampCost">—</div>
                 <div class="top-stat-lbl">Total Cost</div>
               </div>
+              <div class="top-stat">
+                <div class="top-stat-val blue" id="topCampRecipients">—</div>
+                <div class="top-stat-lbl">Recipients</div>
+              </div>
+            </div>
+          </div>
+          <!-- Empty state when no campaigns -->
+          <div class="top-camp" id="topCampEmpty" style="justify-content:center;text-align:center;padding:1.5rem">
+            <div>
+              <div class="top-camp-label">🏆 Top Performing Campaign This Month</div>
+              <div style="color:var(--muted);font-size:14px;margin-top:0.5rem">No campaigns yet — <a href="bulk-sms.html" style="color:var(--accent)">send your first one</a></div>
             </div>
           </div>
 
@@ -1743,12 +1744,7 @@
           if (c >= target) clearInterval(iv);
         }, 16);
       }
-      setTimeout(() => {
-        animateCount("smsStat", 842310);
-        animateCount("emailStat", 218045);
-        animateCount("otpStat", 12481);
-        animateCount("failStat", 1247);
-      }, 300);
+      // Stats populated by real data below — do not hardcode here
       const ctx = document.getElementById("deliveryChart").getContext("2d");
       const CD = {
         "7d": {
@@ -1817,7 +1813,7 @@
           ],
         };
       }
-      let chart = new Chart(ctx, {
+      window.deliveryChartInstance = new Chart(ctx, {
         type: "line",
         data: bd("7d"),
         options: {
@@ -2044,6 +2040,82 @@
           .maybeSingle();
 
         if (!profile) return;
+
+        // ── Real stats from messages table ──
+        const todayStart = new Date(); todayStart.setHours(0,0,0,0);
+        const { data: todayMsgs } = await supabase
+          .from('messages')
+          .select('type, status')
+          .eq('user_id', session.user.id)
+          .gte('created_at', todayStart.toISOString());
+
+        const msgs = todayMsgs || [];
+        const smsSent   = msgs.filter(m => m.type === 'sms').length;
+        const emailSent = msgs.filter(m => m.type === 'email').length;
+        const otpSent   = msgs.filter(m => m.type === 'otp').length;
+        const failed    = msgs.filter(m => m.status === 'failed' || m.status === 'bounced').length;
+
+        animateCount('smsStat',   smsSent);
+        animateCount('emailStat', emailSent);
+        animateCount('otpStat',   otpSent);
+        animateCount('failStat',  failed);
+
+        // ── Top performing campaign this month ──
+        const monthStart = new Date(); monthStart.setDate(1); monthStart.setHours(0,0,0,0);
+        const { data: camps } = await supabase
+          .from('campaigns')
+          .select('name, type, total_recipients, total_delivered, cost, sent_at')
+          .eq('user_id', session.user.id)
+          .eq('status', 'sent')
+          .gte('sent_at', monthStart.toISOString())
+          .order('total_delivered', { ascending: false })
+          .limit(1);
+
+        const topCamp = camps?.[0];
+        if (topCamp) {
+          document.getElementById('topCampCard').style.display = '';
+          document.getElementById('topCampEmpty').style.display = 'none';
+          document.getElementById('topCampName').textContent = topCamp.name;
+          const sentDate = topCamp.sent_at ? new Date(topCamp.sent_at).toLocaleDateString('en-NG', { day:'numeric', month:'short' }) : '';
+          document.getElementById('topCampMeta').textContent = `${topCamp.type.toUpperCase()} · Sent ${sentDate} · ${(topCamp.total_recipients||0).toLocaleString()} recipients`;
+          const delivRate = topCamp.total_recipients > 0 ? ((topCamp.total_delivered / topCamp.total_recipients) * 100).toFixed(1) + '%' : '—';
+          document.getElementById('topCampDelivered').textContent = delivRate;
+          document.getElementById('topCampCost').textContent = '₦' + Number(topCamp.cost||0).toLocaleString('en-NG');
+          document.getElementById('topCampRecipients').textContent = (topCamp.total_recipients||0).toLocaleString();
+        } else {
+          document.getElementById('topCampCard').style.display = 'none';
+          document.getElementById('topCampEmpty').style.display = '';
+        }
+
+        // ── Next scheduled campaign ──
+        const { data: scheduled } = await supabase
+          .from('campaigns')
+          .select('name, type, total_recipients, scheduled_at')
+          .eq('user_id', session.user.id)
+          .eq('status', 'scheduled')
+          .gte('scheduled_at', new Date().toISOString())
+          .order('scheduled_at', { ascending: true })
+          .limit(1);
+
+        const nextCamp = scheduled?.[0];
+        if (nextCamp) {
+          document.getElementById('nextSchedCard').style.display = '';
+          document.getElementById('nextSchedName').textContent = nextCamp.name + ' — ' + nextCamp.type.toUpperCase();
+          document.getElementById('nextSchedMeta').textContent = `${(nextCamp.total_recipients||0).toLocaleString()} recipients`;
+          const schedDate = new Date(nextCamp.scheduled_at);
+          const isToday = schedDate.toDateString() === new Date().toDateString();
+          const isTomorrow = schedDate.toDateString() === new Date(Date.now() + 86400000).toDateString();
+          const dayLabel = isToday ? 'Today' : isTomorrow ? 'Tomorrow' : schedDate.toLocaleDateString('en-NG', { day:'numeric', month:'short' });
+          document.getElementById('nextSchedTime').innerHTML = `${dayLabel}<br />${schedDate.toLocaleTimeString('en-NG', { hour:'2-digit', minute:'2-digit' })}`;
+        }
+
+        // ── Zero out chart for users with no data ──
+        if (msgs.length === 0) {
+          if (window.deliveryChartInstance) {
+            window.deliveryChartInstance.data.datasets.forEach(ds => { ds.data = ds.data.map(() => 0); });
+            window.deliveryChartInstance.update();
+          }
+        }
 
         // Update greeting with real name
         const firstName = profile.first_name || session.user.email.split('@')[0];
