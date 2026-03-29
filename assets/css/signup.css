@@ -323,23 +323,47 @@ nav {
   to   { opacity: 1; transform: scale(1); }
 }
 
-/* ── USE CASE PILLS ── */
-.uc-pill {
-  padding: 7px 14px;
-  border-radius: 20px;
-  border: 1px solid rgba(255,255,255,0.12);
+/* ── USE CASE DROPDOWN ── */
+.uc-dropdown {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
   background: rgba(255,255,255,0.04);
-  color: var(--text-muted);
   font-size: 13px;
   cursor: pointer;
-  transition: all .18s;
+  user-select: none;
+  transition: border-color .18s;
 }
-.uc-pill:hover { border-color: rgba(0,232,122,0.4); color: #fff; }
-.uc-pill.selected {
-  background: rgba(0,232,122,0.12);
-  border-color: rgba(0,232,122,0.5);
-  color: var(--accent);
-  font-weight: 500;
+.uc-dropdown:hover { border-color: rgba(255,255,255,0.2); }
+.uc-dropdown.open { border-color: rgba(0,232,122,0.4); }
+.uc-options {
+  display: none;
+  flex-direction: column;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+  background: #0D1117;
+  overflow: hidden;
+}
+.uc-options.open { display: flex; }
+.uc-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background .15s;
+}
+.uc-option:hover { background: rgba(255,255,255,0.04); }
+.uc-option input[type="checkbox"] {
+  accent-color: var(--accent);
+  width: 15px;
+  height: 15px;
+  cursor: pointer;
 }
 
 /* ── RESPONSIVE ── */
