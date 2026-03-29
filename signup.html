@@ -143,18 +143,15 @@
                 </select>
               </div>
               <div class="form-group">
-                <label>Use Cases <span style="font-weight:400;color:var(--text-muted);font-size:12px">(select all that apply)</span></label>
-                <div class="uc-dropdown" id="ucDropdown" onclick="toggleUcDropdown()">
-                  <span id="ucSummary" style="color:var(--text-muted)">Select use cases…</span>
-                  <span style="margin-left:auto;font-size:11px;opacity:.5">▾</span>
-                </div>
-                <div class="uc-options" id="ucOptions">
-                  <label class="uc-option"><input type="checkbox" value="otp" onchange="updateUseCases()"> OTP &amp; Verification</label>
-                  <label class="uc-option"><input type="checkbox" value="marketing" onchange="updateUseCases()"> Marketing &amp; Promotions</label>
-                  <label class="uc-option"><input type="checkbox" value="transactional" onchange="updateUseCases()"> Transactional Alerts</label>
-                  <label class="uc-option"><input type="checkbox" value="notifications" onchange="updateUseCases()"> Customer Notifications</label>
-                </div>
-                <input type="hidden" id="useCase" />
+                <label>Primary Use Case</label>
+                <select id="useCase">
+                  <option value="" disabled selected>What will you use it for?</option>
+                  <option value="otp">OTP &amp; Verification</option>
+                  <option value="marketing">Marketing &amp; Promotions</option>
+                  <option value="transactional">Transactional Alerts</option>
+                  <option value="notifications">Customer Notifications</option>
+                  <option value="multiple">Multiple / Not sure yet</option>
+                </select>
               </div>
             </div>
 

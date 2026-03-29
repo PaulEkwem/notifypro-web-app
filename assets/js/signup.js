@@ -242,21 +242,6 @@ document.getElementById('password')?.addEventListener('input', function () {
   label.style.color     = colors[strength] || '';
 });
 
-// ── USE CASE DROPDOWN ─────────────────────────────────────────
-window.toggleUcDropdown = function () {
-  document.getElementById('ucDropdown').classList.toggle('open');
-  document.getElementById('ucOptions').classList.toggle('open');
-};
-window.updateUseCases = function () {
-  const checked = [...document.querySelectorAll('#ucOptions input:checked')]
-    .map(i => i.value);
-  document.getElementById('useCase').value = checked.join(',');
-  const labels = { otp: 'OTP & Verification', marketing: 'Marketing & Promotions', transactional: 'Transactional Alerts', notifications: 'Customer Notifications' };
-  document.getElementById('ucSummary').style.color = checked.length ? '#F0F4FF' : '';
-  document.getElementById('ucSummary').textContent = checked.length
-    ? checked.map(v => labels[v]).join(', ')
-    : 'Select use cases…';
-};
 
 // ── PLAN SELECT ───────────────────────────────────────────────
 window.selectPlan = function (plan) {
