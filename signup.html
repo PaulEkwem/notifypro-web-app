@@ -298,6 +298,7 @@
                 id="otp1"
                 oninput="otpNext(this, 'otp2')"
                 onkeydown="otpBack(event, this, null, 'otp1')"
+                onpaste="otpPaste(event)"
               />
               <input
                 class="otp-input"

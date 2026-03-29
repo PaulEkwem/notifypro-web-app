@@ -272,6 +272,16 @@ function getSelectedServices() {
 }
 
 // ── OTP INPUT NAVIGATION ──────────────────────────────────────
+window.otpPaste = function (e) {
+  e.preventDefault();
+  const digits = (e.clipboardData.getData('text') || '').replace(/\D/g, '').slice(0, 6);
+  ['otp1','otp2','otp3','otp4','otp5','otp6'].forEach((id, i) => {
+    const el = document.getElementById(id);
+    if (el) el.value = digits[i] || '';
+  });
+  const last = document.getElementById('otp' + Math.min(digits.length, 6));
+  if (last) last.focus();
+};
 window.otpNext = function (el, nextId) {
   el.value = el.value.replace(/[^0-9]/g, '');
   if (el.value && nextId) document.getElementById(nextId).focus();
