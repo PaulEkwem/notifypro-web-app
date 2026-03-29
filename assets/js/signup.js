@@ -135,6 +135,8 @@ window.verifyOtp = async function () {
         last_name:     document.getElementById('lastName').value.trim(),
         business_name: document.getElementById('bizName').value.trim(),
         phone:         document.getElementById('phone').value.trim(),
+        industry:      document.getElementById('industry').value,
+        use_case:      document.getElementById('useCase').value,
         plan,
         services,
       },
@@ -155,6 +157,8 @@ window.verifyOtp = async function () {
       last_name:     document.getElementById('lastName').value.trim(),
       business_name: document.getElementById('bizName').value.trim(),
       phone:         document.getElementById('phone').value.trim(),
+      industry:      document.getElementById('industry').value,
+      use_case:      document.getElementById('useCase').value,
       plan,
       sms_limit:     PLAN_LIMITS[plan] ?? 5000,
     }).eq('id', data.user.id);
