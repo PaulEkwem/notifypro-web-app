@@ -189,7 +189,7 @@
                 <div class="stat-label">Total Spend</div>
                 <div class="stat-icon amber">💰</div>
               </div>
-              <div class="stat-val amber">₦186K</div>
+              <div class="stat-val amber" id="rStatSpend">₦0</div>
               <div class="stat-change up">
                 ↑ 11.2% <span>vs last period</span>
               </div>
@@ -199,7 +199,7 @@
                 <div class="stat-label">Failure Rate</div>
                 <div class="stat-icon red">⚠️</div>
               </div>
-              <div class="stat-val red">1.4%</div>
+              <div class="stat-val red" id="rStatFail">0%</div>
               <div class="stat-change down">↓ 0.3% <span>improved</span></div>
             </div>
           </div>
@@ -487,11 +487,13 @@
     <script type="module" src="../assets/js/auth-guard.js"></script>
     <script src="../assets/js/topbar.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-    <script>
-      "use strict";
+    <script type="module">
+      import { supabase } from "../assets/js/supabase-config.js";
+
       function animateCount(id, target) {
         const el = document.getElementById(id);
         if (!el) return;
+        if (target === 0) { el.textContent = "0"; return; }
         const inc = target / 80;
         let c = 0;
         const iv = setInterval(() => {
@@ -500,39 +502,92 @@
           if (c >= target) clearInterval(iv);
         }, 16);
       }
-      setTimeout(() => {
-        animateCount("rStatTotal", 1073281);
-        animateCount("rStatDelivered", 1058177);
-      }, 300);
+
+      async function loadReportStats() {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) return;
+
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+        const { data: msgs } = await supabase
+          .from("messages")
+          .select("status, cost")
+          .eq("user_id", session.user.id)
+          .gte("created_at", thirtyDaysAgo.toISOString());
+
+        const rows = msgs || [];
+        const total     = rows.length;
+        const delivered = rows.filter(m => m.status === "delivered").length;
+        const failed    = rows.filter(m => m.status === "failed").length;
+        const spend     = rows.reduce((s, m) => s + (m.cost || 0), 0);
+        const failRate  = total > 0 ? ((failed / total) * 100).toFixed(1) : "0.0";
+
+        animateCount("rStatTotal", total);
+        animateCount("rStatDelivered", delivered);
+        document.getElementById("rStatSpend").textContent =
+          spend >= 1000 ? "₦" + (spend / 1000).toFixed(1) + "K" : "₦" + spend.toLocaleString("en-NG");
+        document.getElementById("rStatFail").textContent = failRate + "%";
+      }
+
+      loadReportStats();
 
       // Chart
       const ctx = document.getElementById("reportChart").getContext("2d");
       const CD = {
-        "7d": {
-          labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
-          sms: [120, 145, 132, 98, 156, 178, 142],
-          email: [30, 42, 38, 25, 51, 64, 48],
-          otp: [18, 21, 19, 14, 22, 28, 25],
-        },
-        "30d": {
-          labels: ["W1", "W2", "W3", "W4"],
-          sms: [820, 910, 775, 842],
-          email: [190, 220, 205, 218],
-          otp: [42, 51, 48, 49],
-        },
-        "90d": {
-          labels: ["Jan", "Feb", "Mar"],
-          sms: [2400, 2650, 2510],
-          email: [610, 680, 654],
-          otp: [140, 155, 148],
-        },
+        "7d":  { labels: ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"], sms: [0,0,0,0,0,0,0], email: [0,0,0,0,0,0,0], otp: [0,0,0,0,0,0,0] },
+        "30d": { labels: ["W1","W2","W3","W4"], sms: [0,0,0,0], email: [0,0,0,0], otp: [0,0,0,0] },
+        "90d": { labels: ["Jan","Feb","Mar"], sms: [0,0,0], email: [0,0,0], otp: [0,0,0] },
       };
-      function mg(c, col) {
-        const g = c.createLinearGradient(0, 0, 0, 220);
-        g.addColorStop(0, col.replace("1)", "0.15)"));
-        g.addColorStop(1, col.replace("1)", "0)"));
-        return g;
-      }
+
+      // Populate chart data from real messages
+      (async () => {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) return;
+
+        const ninetyDaysAgo = new Date();
+        ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
+
+        const { data: msgs } = await supabase
+          .from("messages")
+          .select("type,created_at")
+          .eq("user_id", session.user.id)
+          .gte("created_at", ninetyDaysAgo.toISOString());
+
+        if (!msgs || msgs.length === 0) return;
+
+        const now = new Date();
+        // 7d buckets by day-of-week
+        const dayNames = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+        msgs.forEach(m => {
+          const d = new Date(m.created_at);
+          const daysAgo = Math.floor((now - d) / 86400000);
+          const type = (m.type || "sms").toLowerCase();
+          const key = type === "email" ? "email" : type === "otp" ? "otp" : "sms";
+          if (daysAgo < 7) {
+            const idx = 6 - daysAgo;
+            CD["7d"][key][idx] = (CD["7d"][key][idx] || 0) + 1;
+          }
+          if (daysAgo < 30) {
+            const wk = Math.floor(daysAgo / 7);
+            const idx = Math.min(3, 3 - wk);
+            CD["30d"][key][idx] = (CD["30d"][key][idx] || 0) + 1;
+          }
+          const month = d.getMonth();
+          const nowMonth = now.getMonth();
+          if (month >= nowMonth - 2) {
+            const idx = Math.max(0, month - (nowMonth - 2));
+            CD["90d"][key][idx] = (CD["90d"][key][idx] || 0) + 1;
+          }
+        });
+
+        rc.data.labels = CD["7d"].labels;
+        rc.data.datasets[0].data = CD["7d"].sms;
+        rc.data.datasets[1].data = CD["7d"].email;
+        rc.data.datasets[2].data = CD["7d"].otp;
+        rc.update("active");
+      })();
+
       let rc = new Chart(ctx, {
         type: "bar",
         data: {
@@ -593,7 +648,7 @@
               ticks: {
                 color: "#8892A4",
                 font: { family: "DM Sans", size: 11 },
-                callback: (v) => v + "K",
+                callback: (v) => v >= 1000 ? (v/1000).toFixed(1) + "K" : v,
               },
               stacked: true,
             },
@@ -612,68 +667,45 @@
         rc.update("active");
       }
 
-      // Table
-      const rows = [
-        {
-          rank: 1,
-          name: "Ramadan Promo Blast",
-          ch: "💬 SMS",
-          sent: "24,000",
-          del: "23,568",
-          rate: "98.2%",
-          cost: "₦144,000",
-          status: "sent",
-        },
-        {
-          rank: 2,
-          name: "Newsletter — March",
-          ch: "📧 Email",
-          sent: "12,000",
-          del: "11,364",
-          rate: "94.7%",
-          cost: "₦18,000",
-          status: "sent",
-        },
-        {
-          rank: 3,
-          name: "Flash Sale Alert",
-          ch: "💬 SMS",
-          sent: "15,000",
-          del: "14,625",
-          rate: "97.5%",
-          cost: "₦90,000",
-          status: "sent",
-        },
-        {
-          rank: 4,
-          name: "OTP Login Flow",
-          ch: "🔐 OTP",
-          sent: "3,210",
-          del: "3,181",
-          rate: "99.1%",
-          cost: "₦24,075",
-          status: "sending",
-        },
-        {
-          rank: 5,
-          name: "Welcome Email Series",
-          ch: "📧 Email",
-          sent: "3,210",
-          del: "3,047",
-          rate: "94.9%",
-          cost: "₦4,815",
-          status: "sent",
-        },
-      ];
-      const tb = document.getElementById("reportTable");
-      rows.forEach((r) => {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `<td class="text-muted">${r.rank}</td><td><div style="font-size:13px;font-weight:500">${r.name}</div></td><td>${r.ch}</td><td>${r.sent}</td><td>${r.del}</td><td class="text-green fw-bold">${r.rate}</td><td class="text-amber">${r.cost}</td><td><span class="status-pill ${r.status}">${r.status.charAt(0).toUpperCase() + r.status.slice(1)}</span></td>`;
-        tb.appendChild(tr);
-      });
-      function exportReport() {
+      // Campaign table
+      (async () => {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) return;
+
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+        const { data: camps } = await supabase
+          .from("campaigns")
+          .select("name,type,total_recipients,total_delivered,cost,status,sent_at")
+          .eq("user_id", session.user.id)
+          .in("status", ["sent","sending"])
+          .gte("sent_at", thirtyDaysAgo.toISOString())
+          .order("total_delivered", { ascending: false })
+          .limit(10);
+
+        const tb = document.getElementById("reportTable");
+
+        if (!camps || camps.length === 0) {
+          tb.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:48px 0;color:var(--text-muted);font-size:13px">No campaigns yet. Send your first campaign to see performance data here.</td></tr>`;
+          return;
+        }
+
+        const chIcon = { sms: "SMS", email: "Email", otp: "OTP" };
+        camps.forEach((c, i) => {
+          const sent = c.total_recipients || 0;
+          const del  = c.total_delivered || 0;
+          const rate = sent > 0 ? ((del / sent) * 100).toFixed(1) + "%" : "—";
+          const cost = c.cost ? "₦" + Number(c.cost).toLocaleString("en-NG") : "—";
+          const tr = document.createElement("tr");
+          tr.innerHTML = `<td class="text-muted">${i + 1}</td><td><div style="font-size:13px;font-weight:500">${c.name}</div></td><td>${chIcon[c.type] || c.type || "—"}</td><td>${sent.toLocaleString()}</td><td>${del.toLocaleString()}</td><td class="text-green fw-bold">${rate}</td><td class="text-amber">${cost}</td><td><span class="status-pill ${c.status}">${c.status.charAt(0).toUpperCase() + c.status.slice(1)}</span></td>`;
+          tb.appendChild(tr);
+        });
+      })();
+
+      window.exportReport = function () {
         alert("Exporting CSV… (connect to backend)");
-      }
+      };
     </script>
   </body>
 </html>

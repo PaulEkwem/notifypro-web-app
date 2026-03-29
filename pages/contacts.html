@@ -460,11 +460,14 @@
     <script src="../assets/js/sidebar.js"></script>
     <script type="module" src="../assets/js/auth-guard.js"></script>
     <script src="../assets/js/topbar.js"></script>
-    <script>
-      "use strict";
+    <script type="module">
+      import { supabase } from "../assets/js/supabase-config.js";
+
+      // ── HELPERS ───────────────────────────────────────────────
       function animateCount(id, target) {
         const el = document.getElementById(id);
         if (!el) return;
+        if (target === 0) { el.textContent = "0"; return; }
         const inc = target / 80;
         let c = 0;
         const iv = setInterval(() => {
@@ -473,68 +476,7 @@
           if (c >= target) clearInterval(iv);
         }, 16);
       }
-      setTimeout(() => {
-        animateCount("cStatTotal", 14891);
-        animateCount("cStatActive", 12480);
-        animateCount("cStatUnsub", 341);
-      }, 300);
 
-      const firstNames = [
-        "Emeka",
-        "Aisha",
-        "Chukwudi",
-        "Fatima",
-        "Tunde",
-        "Ngozi",
-        "Damilola",
-        "Halima",
-        "Seun",
-        "Uche",
-        "Bola",
-        "Amina",
-        "Korede",
-        "Chioma",
-        "Yemi",
-        "Adaeze",
-        "Kunle",
-        "Zainab",
-        "Ade",
-        "Obiageli",
-      ];
-      const lastNames = [
-        "Okafor",
-        "Bello",
-        "Nwosu",
-        "Abubakar",
-        "Adeyemi",
-        "Eze",
-        "Okonkwo",
-        "Ibrahim",
-        "Adeleke",
-        "Chukwu",
-        "Johnson",
-        "Musa",
-        "Adeola",
-        "Onyeka",
-        "Olawale",
-        "Nduka",
-      ];
-      const groups = [
-        "Customers",
-        "Prospects",
-        "VIP",
-        "Inactive",
-        "Customers",
-        "Customers",
-      ];
-      const statuses = [
-        "active",
-        "active",
-        "active",
-        "active",
-        "inactive",
-        "active",
-      ];
       const avatarColors = [
         "linear-gradient(135deg,#00E87A,#00BFFF)",
         "linear-gradient(135deg,#FFB800,#FF4D6D)",
@@ -542,135 +484,161 @@
         "linear-gradient(135deg,#00E87A,#B464FF)",
       ];
 
-      let contacts = Array.from({ length: 60 }, (_, i) => {
-        const fn = firstNames[i % firstNames.length],
-          ln = lastNames[i % lastNames.length];
-        return {
-          id: i + 1,
-          name: `${fn} ${ln}`,
-          phone: `+234 ${["803", "706", "811", "909", "813"][i % 5]} ${String(10000000 + i * 13197).slice(0, 7)}`,
-          email: `${fn.toLowerCase()}.${ln.toLowerCase()}${i}@gmail.com`,
-          group: groups[i % groups.length],
-          status: statuses[i % statuses.length],
-          color: avatarColors[i % avatarColors.length],
-          initials: fn[0] + ln[0],
-        };
-      });
-
+      let allContacts = [];
       let selected = new Set();
 
+      // ── RENDER ────────────────────────────────────────────────
       function renderContacts(data) {
         const tb = document.getElementById("contactsTable");
         document.getElementById("contactTotal").textContent =
           data.length.toLocaleString();
+
+        if (data.length === 0) {
+          tb.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:48px 0;color:var(--text-muted);font-size:13px">
+            No contacts yet. Add your first contact or import a CSV file.
+          </td></tr>`;
+          return;
+        }
+
         tb.innerHTML = data
-          .slice(0, 20)
-          .map(
-            (c) => `
+          .slice(0, 50)
+          .map((c, i) => {
+            const name = `${c.first_name || ""} ${c.last_name || ""}`.trim() || "—";
+            const initials = ((c.first_name?.[0] || "") + (c.last_name?.[0] || "")).toUpperCase() || "?";
+            const color = avatarColors[i % avatarColors.length];
+            const statusClass = c.status === "active" ? "sent" : c.status === "unsubscribed" ? "failed" : "paused";
+            const statusLabel = c.status ? c.status.charAt(0).toUpperCase() + c.status.slice(1) : "Active";
+            const group = c.group_name || "—";
+            return `
     <tr>
-      <td><input type="checkbox" class="contact-cb" data-id="${c.id}" ${selected.has(c.id) ? "checked" : ""} onchange="toggleSelect(${c.id},this)"/></td>
+      <td><input type="checkbox" class="contact-cb" data-id="${c.id}" ${selected.has(c.id) ? "checked" : ""} onchange="toggleSelect('${c.id}',this)"/></td>
       <td>
         <div style="display:flex;align-items:center;gap:8px">
-          <div class="contact-avatar" style="background:${c.color}">${c.initials}</div>
-          <span style="font-weight:500;font-size:13px">${c.name}</span>
+          <div class="contact-avatar" style="background:${color}">${initials}</div>
+          <span style="font-weight:500;font-size:13px">${name}</span>
         </div>
       </td>
-      <td class="text-sm">${c.phone}</td>
-      <td class="text-sm truncate" style="max-width:160px">${c.email}</td>
-      <td><span class="tag">${c.group}</span></td>
-      <td><span class="status-pill ${c.status === "active" ? "sent" : c.status === "inactive" ? "paused" : "failed"}">${c.status.charAt(0).toUpperCase() + c.status.slice(1)}</span></td>
+      <td class="text-sm">${c.phone || "—"}</td>
+      <td class="text-sm truncate" style="max-width:160px">${c.email || "—"}</td>
+      <td><span class="tag">${group}</span></td>
+      <td><span class="status-pill ${statusClass}">${statusLabel}</span></td>
       <td>
         <div style="display:flex;gap:4px">
-          <button class="btn-icon" onclick="editContact(${c.id})" title="Edit">✎</button>
-          <button class="btn-icon" onclick="deleteContact(${c.id})" title="Delete" style="color:var(--accent4)">✕</button>
+          <button class="btn-icon" onclick="editContact('${c.id}')" title="Edit">✎</button>
+          <button class="btn-icon" onclick="deleteContact('${c.id}')" title="Delete" style="color:var(--accent4)">✕</button>
         </div>
       </td>
-    </tr>`,
-          )
+    </tr>`;
+          })
           .join("");
       }
 
-      function toggleSelect(id, cb) {
+      // ── LOAD DATA ─────────────────────────────────────────────
+      async function loadContacts() {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) return;
+
+        const { data: rows, error } = await supabase
+          .from("contacts")
+          .select("id,first_name,last_name,phone,email,group_name,status,created_at")
+          .eq("user_id", session.user.id)
+          .order("created_at", { ascending: false })
+          .limit(500);
+
+        if (error) { console.error("Contacts error:", error); }
+
+        allContacts = rows || [];
+
+        const total = allContacts.length;
+        const active = allContacts.filter(c => c.status === "active" || !c.status).length;
+        const unsub  = allContacts.filter(c => c.status === "unsubscribed").length;
+
+        animateCount("cStatTotal", total);
+        animateCount("cStatActive", active);
+        animateCount("cStatUnsub", unsub);
+
+        renderContacts(allContacts);
+      }
+
+      loadContacts();
+
+      // ── SELECTION ─────────────────────────────────────────────
+      window.toggleSelect = function (id, cb) {
         if (cb.checked) selected.add(id);
         else selected.delete(id);
         updateBulkBar();
-      }
-      function toggleSelectAll(cb) {
+      };
+      window.toggleSelectAll = function (cb) {
         document.querySelectorAll(".contact-cb").forEach((el) => {
           el.checked = cb.checked;
-          const id = Number(el.dataset.id);
+          const id = el.dataset.id;
           if (cb.checked) selected.add(id);
           else selected.delete(id);
         });
         updateBulkBar();
-      }
+      };
       function updateBulkBar() {
         const bar = document.getElementById("bulkBar");
-        document.getElementById("bulkCount").textContent =
-          `${selected.size} selected`;
+        document.getElementById("bulkCount").textContent = `${selected.size} selected`;
         bar.classList.toggle("show", selected.size > 0);
       }
-      function clearSelection() {
+      window.clearSelection = function () {
         selected.clear();
-        document
-          .querySelectorAll(".contact-cb")
-          .forEach((el) => (el.checked = false));
+        document.querySelectorAll(".contact-cb").forEach((el) => (el.checked = false));
         document.getElementById("selectAll").checked = false;
         updateBulkBar();
-      }
-      function bulkAction(action) {
-        alert(
-          `${action.toUpperCase()} action for ${selected.size} contacts — connect to backend`,
-        );
-      }
-      function filterByGroup(el, group) {
-        document
-          .querySelectorAll(".group-chip")
-          .forEach((c) => c.classList.remove("active"));
+      };
+      window.bulkAction = function (action) {
+        alert(`${action.toUpperCase()} action for ${selected.size} contacts — connect to backend`);
+      };
+
+      // ── FILTER ────────────────────────────────────────────────
+      window.filterByGroup = function (el, group) {
+        document.querySelectorAll(".group-chip").forEach((c) => c.classList.remove("active"));
         el.classList.add("active");
         const filtered =
           group === "all"
-            ? contacts
-            : contacts.filter(
-                (c) =>
-                  c.group.toLowerCase() === group ||
-                  (group === "unsub" && c.status === "unsub"),
-              );
+            ? allContacts
+            : group === "unsub"
+            ? allContacts.filter((c) => c.status === "unsubscribed")
+            : allContacts.filter((c) => (c.group_name || "").toLowerCase() === group);
         renderContacts(filtered);
-      }
-      function filterContacts() {
+      };
+      window.filterContacts = function () {
         const q = document.getElementById("contactSearch").value.toLowerCase();
         const s = document.getElementById("contactStatus").value;
-        const filtered = contacts.filter(
-          (c) =>
-            (!q ||
-              c.name.toLowerCase().includes(q) ||
-              c.phone.includes(q) ||
-              c.email.includes(q)) &&
-            (s === "all" || c.status === s),
+        const filtered = allContacts.filter(
+          (c) => {
+            const name = `${c.first_name || ""} ${c.last_name || ""}`.toLowerCase();
+            const matchQ = !q || name.includes(q) || (c.phone || "").includes(q) || (c.email || "").toLowerCase().includes(q);
+            const matchS = s === "all" || c.status === s || (!c.status && s === "active");
+            return matchQ && matchS;
+          }
         );
         renderContacts(filtered);
-      }
-      function addContact() {
-        alert("Add contact modal — connect to backend");
-      }
-      function importContacts() {
-        alert("Import CSV — connect to backend");
-      }
-      function editContact(id) {
-        alert(`Edit contact ${id} — connect to backend`);
-      }
-      function deleteContact(id) {
-        if (confirm("Delete this contact?")) {
-          contacts = contacts.filter((c) => c.id !== id);
-          renderContacts(contacts);
-        }
-      }
-      function newGroup() {
-        alert("New group modal — connect to backend");
-      }
+      };
 
-      renderContacts(contacts);
+      // ── ACTIONS ───────────────────────────────────────────────
+      window.addContact = function () {
+        alert("Add contact modal — connect to backend");
+      };
+      window.importContacts = function () {
+        alert("Import CSV — connect to backend");
+      };
+      window.editContact = function (id) {
+        alert(`Edit contact ${id} — connect to backend`);
+      };
+      window.deleteContact = async function (id) {
+        if (!confirm("Delete this contact?")) return;
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) return;
+        await supabase.from("contacts").delete().eq("id", id).eq("user_id", session.user.id);
+        allContacts = allContacts.filter((c) => c.id !== id);
+        renderContacts(allContacts);
+      };
+      window.newGroup = function () {
+        alert("New group modal — connect to backend");
+      };
     </script>
   </body>
 </html>

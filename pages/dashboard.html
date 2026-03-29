@@ -1867,54 +1867,7 @@
         chart.data = bd(k);
         chart.update("active");
       }
-      const campaigns = [
-        {
-          name: "Ramadan Promo Blast",
-          sub: "Bulk SMS",
-          ch: "💬",
-          sent: "24,000",
-          rate: "98.2%",
-          status: "sent",
-        },
-        {
-          name: "Newsletter — March",
-          sub: "Email",
-          ch: "📧",
-          sent: "8,500",
-          rate: "94.7%",
-          status: "sent",
-        },
-        {
-          name: "OTP Login Flow",
-          sub: "Verification",
-          ch: "🔐",
-          sent: "3,210",
-          rate: "99.1%",
-          status: "sending",
-        },
-        {
-          name: "Flash Sale Alert",
-          sub: "Bulk SMS",
-          ch: "💬",
-          sent: "15,000",
-          rate: "97.5%",
-          status: "sent",
-        },
-        {
-          name: "Welcome Email Series",
-          sub: "Email",
-          ch: "📧",
-          sent: "—",
-          rate: "—",
-          status: "draft",
-        },
-      ];
-      const tb = document.getElementById("campaignsBody");
-      campaigns.forEach((c) => {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `<td style="padding:0.65rem 0;border-bottom:1px solid rgba(255,255,255,0.04)"><div class="campaign-name">${c.name}</div><div class="campaign-sub">${c.sub}</div></td><td style="padding:0.65rem 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:14px">${c.ch}</td><td style="padding:0.65rem 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:13px">${c.sent}</td><td style="padding:0.65rem 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:13px;font-weight:600">${c.rate}</td><td style="padding:0.65rem 0;border-bottom:1px solid rgba(255,255,255,0.04)"><span class="status-pill ${c.status}">${c.status.charAt(0).toUpperCase() + c.status.slice(1)}</span></td>`;
-        tb.appendChild(tr);
-      });
+      // Recent campaigns table populated from Supabase (see module script below)
       function selectChannel(btn, ch) {
         document
           .querySelectorAll(".channel-pill")
@@ -1946,43 +1899,7 @@
         document.getElementById("quickSendRecipient").value = "";
       }
       const fl = document.getElementById("feedList");
-      [
-        {
-          icon: "💬",
-          bg: "rgba(0,232,122,0.1)",
-          to: "+234 803 XXX XXXX",
-          desc: "SMS delivered — Ramadan Promo",
-          time: "2m",
-        },
-        {
-          icon: "📧",
-          bg: "rgba(0,191,255,0.1)",
-          to: "k.adamu@mail.com",
-          desc: "Email opened · Newsletter March",
-          time: "4m",
-        },
-        {
-          icon: "🔐",
-          bg: "rgba(255,184,0,0.1)",
-          to: "+234 706 XXX XXXX",
-          desc: "OTP verified in 1.8s",
-          time: "6m",
-        },
-        {
-          icon: "💬",
-          bg: "rgba(0,232,122,0.1)",
-          to: "+234 810 XXX XXXX",
-          desc: "SMS delivered — Flash Sale",
-          time: "9m",
-        },
-        {
-          icon: "🛡️",
-          bg: "rgba(255,77,109,0.1)",
-          to: "app@fintech.ng",
-          desc: "2FA auth success",
-          time: "11m",
-        },
-      ].forEach((e) => addFeedItem(e.icon, e.bg, e.to, e.desc, e.time));
+      // Feed items populated from Supabase (see module script below)
       function addFeedItem(icon, bg, to, desc, time) {
         const item = document.createElement("div");
         item.className = "feed-item";
@@ -2150,6 +2067,64 @@
         if (noteEl) noteEl.textContent = `${smsPct}% used · resets in 11 days`;
         const topEl = document.querySelector(".usage-top strong");
         if (topEl) topEl.textContent = `${smsUsed.toLocaleString()} / ${smsLimit > 0 ? smsLimit.toLocaleString() : "∞"}`;
+
+        // ── Recent campaigns table ──
+        const { data: recentCamps } = await supabase
+          .from('campaigns')
+          .select('name, type, total_recipients, total_delivered, status')
+          .eq('user_id', session.user.id)
+          .order('created_at', { ascending: false })
+          .limit(5);
+
+        const tb = document.getElementById("campaignsBody");
+        if (tb) {
+          const chIcon = { sms: "💬", email: "📧", otp: "🔐", whatsapp: "💚" };
+          if (!recentCamps || recentCamps.length === 0) {
+            tb.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:32px 0;color:var(--text-muted);font-size:13px">No campaigns yet.</td></tr>`;
+          } else {
+            tb.innerHTML = recentCamps.map(c => {
+              const sent = c.total_recipients || 0;
+              const del  = c.total_delivered  || 0;
+              const rate = sent > 0 ? ((del / sent) * 100).toFixed(1) + "%" : "—";
+              const sentLabel = c.status === "sending" ? "Sending…" : sent ? sent.toLocaleString() : "—";
+              return `<tr>
+                <td style="padding:0.65rem 0;border-bottom:1px solid rgba(255,255,255,0.04)"><div class="campaign-name">${c.name}</div><div class="campaign-sub">${c.type || "SMS"}</div></td>
+                <td style="padding:0.65rem 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:14px">${chIcon[c.type] || "💬"}</td>
+                <td style="padding:0.65rem 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:13px">${sentLabel}</td>
+                <td style="padding:0.65rem 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:13px;font-weight:600">${rate}</td>
+                <td style="padding:0.65rem 0;border-bottom:1px solid rgba(255,255,255,0.04)"><span class="status-pill ${c.status}">${c.status.charAt(0).toUpperCase() + c.status.slice(1)}</span></td>
+              </tr>`;
+            }).join("");
+          }
+        }
+
+        // ── Live feed — seed with real recent messages ──
+        const { data: recentMsgs } = await supabase
+          .from('messages')
+          .select('type, recipient, status, created_at')
+          .eq('user_id', session.user.id)
+          .order('created_at', { ascending: false })
+          .limit(5);
+
+        if (recentMsgs && recentMsgs.length > 0) {
+          const feedIcon = { sms: "💬", email: "📧", otp: "🔐" };
+          const feedBg   = { sms: "rgba(0,232,122,0.1)", email: "rgba(0,191,255,0.1)", otp: "rgba(255,184,0,0.1)" };
+          const statusDesc = { delivered: "delivered", sent: "sent", failed: "failed", pending: "pending" };
+          [...recentMsgs].reverse().forEach(m => {
+            const typeKey = (m.type || "sms").toLowerCase();
+            const ago = (() => {
+              const diff = Math.floor((Date.now() - new Date(m.created_at)) / 60000);
+              return diff < 60 ? diff + "m" : Math.floor(diff/60) + "h";
+            })();
+            addFeedItem(
+              feedIcon[typeKey] || "💬",
+              feedBg[typeKey]   || "rgba(0,232,122,0.1)",
+              m.recipient || "—",
+              `${typeKey.toUpperCase()} ${statusDesc[m.status] || m.status}`,
+              ago
+            );
+          });
+        }
       })();
     </script>
   </body>

@@ -343,12 +343,14 @@
     <script src="../assets/js/sidebar.js"></script>
     <script type="module" src="../assets/js/auth-guard.js"></script>
     <script src="../assets/js/topbar.js"></script>
-    <script>
+    <script type="module">
+      import { supabase } from "../assets/js/supabase-config.js";
       "use strict";
+
       function animateCount(id, target) {
         const el = document.getElementById(id);
         if (!el) return;
-        const inc = target / 80;
+        const inc = Math.max(target / 80, 1);
         let c = 0;
         const iv = setInterval(() => {
           c = Math.min(c + inc, target);
@@ -356,71 +358,58 @@
           if (c >= target) clearInterval(iv);
         }, 16);
       }
+
+      const chIcons = { sms: "💬", email: "📧", otp: "🔐", "2fa": "🛡️" };
+
+      // ── Load real data from Supabase ──
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) { window.location.href = "../login.html"; }
+
+      const { data: msgs } = await supabase
+        .from('messages')
+        .select('id, type, recipient, status, network, cost, created_at, sent_at, delivered_at, provider_ref, campaigns(name)')
+        .eq('user_id', session.user.id)
+        .order('created_at', { ascending: false })
+        .limit(200);
+
+      const allMsgs = msgs || [];
+
+      // Stat counts
+      const delivered = allMsgs.filter(m => m.status === 'delivered').length;
+      const pending   = allMsgs.filter(m => m.status === 'pending' || m.status === 'sent').length;
+      const failed    = allMsgs.filter(m => m.status === 'failed' || m.status === 'bounced' || m.status === 'expired').length;
+
       setTimeout(() => {
-        animateCount("lStatDel", 1058177);
-        animateCount("lStatPend", 312);
-        animateCount("lStatFail", 1247);
+        animateCount("lStatDel",  delivered);
+        animateCount("lStatPend", pending);
+        animateCount("lStatFail", failed);
+        // Delivery rate
+        const total = allMsgs.length;
+        const rate  = total > 0 ? ((delivered / total) * 100).toFixed(1) + '%' : '—';
+        const rateEl = document.getElementById('lStatRate');
+        if (rateEl) rateEl.textContent = rate;
       }, 300);
 
-      // ── Generate mock log data ──
-      const networks = ["MTN", "Airtel", "Glo", "9mobile"];
-      const channels = ["SMS", "Email", "OTP", "2FA"];
-      const campaigns = [
-        "Ramadan Promo Blast",
-        "Newsletter March",
-        "Flash Sale Alert",
-        "OTP Login Flow",
-        "Welcome Series",
-        "Easter Promo",
-      ];
-      const statuses = ["sent", "sent", "sent", "sent", "sending", "failed"];
-      const chIcons = { SMS: "💬", Email: "📧", OTP: "🔐", "2FA": "🛡️" };
-
-      function rndPhone() {
-        return `+234 ${[803, 706, 811, 909, 813][Math.floor(Math.random() * 5)]} ${Math.floor(1000000 + Math.random() * 8999999)}`;
-      }
-      function rndTime() {
-        const h = String(Math.floor(Math.random() * 12 + 7)).padStart(2, "0");
-        const m = String(Math.floor(Math.random() * 60)).padStart(2, "0");
-        return `${h}:${m} AM`;
-      }
-      function rndId() {
-        return "NP-" + Math.random().toString(36).substr(2, 8).toUpperCase();
-      }
-
-      let allLogs = Array.from({ length: 80 }, () => {
-        const ch = channels[Math.floor(Math.random() * channels.length)];
-        const to =
-          ch === "Email"
-            ? `user${Math.floor(Math.random() * 9999)}@gmail.com`
-            : rndPhone();
-        return {
-          id: rndId(),
-          to,
-          ch,
-          network:
-            ch === "Email"
-              ? "—"
-              : networks[Math.floor(Math.random() * networks.length)],
-          camp: campaigns[Math.floor(Math.random() * campaigns.length)],
-          time: rndTime(),
-          status: statuses[Math.floor(Math.random() * statuses.length)],
-          msgId: Math.floor(1000000000 + Math.random() * 8999999999),
-          latency: (Math.random() * 3 + 0.4).toFixed(2) + "s",
-          cost:
-            "₦" +
-            (ch === "SMS"
-              ? "6.00"
-              : ch === "OTP"
-                ? "7.50"
-                : ch === "2FA"
-                  ? "3.00"
-                  : "2.50"),
-        };
-      });
+      // Map to display format
+      let allLogs = allMsgs.map(m => ({
+        id:      'NP-' + m.id.slice(0, 8).toUpperCase(),
+        to:      m.recipient,
+        ch:      m.type.toUpperCase(),
+        network: m.network || '—',
+        camp:    m.campaigns?.name || '—',
+        time:    m.created_at ? new Date(m.created_at).toLocaleTimeString('en-NG', { hour: '2-digit', minute: '2-digit' }) : '—',
+        status:  m.status,
+        msgId:   m.provider_ref || m.id,
+        cost:    m.cost ? '₦' + Number(m.cost).toFixed(2) : '—',
+      }));
 
       function renderLogs(data) {
         const container = document.getElementById("logsContainer");
+        if (!data || data.length === 0) {
+          container.innerHTML = `<div style="text-align:center;padding:3rem;color:var(--muted);font-size:14px">No delivery logs yet — logs appear here once you send your first message.</div>`;
+          document.getElementById("pageInfo").textContent = "Showing 0 of 0";
+          return;
+        }
         container.innerHTML = data
           .slice(0, 20)
           .map(
@@ -494,27 +483,9 @@
       // Initial render
       renderLogs(allLogs);
 
-      // Live feed — append new log every few seconds
-      setInterval(() => {
-        const ch = channels[Math.floor(Math.random() * channels.length)];
-        const to =
-          ch === "Email"
-            ? `user${Math.floor(Math.random() * 9999)}@gmail.com`
-            : rndPhone();
-        allLogs.unshift({
-          id: rndId(),
-          to,
-          ch,
-          network: networks[Math.floor(Math.random() * networks.length)],
-          camp: campaigns[Math.floor(Math.random() * campaigns.length)],
-          time: "now",
-          status: "sent",
-          msgId: Math.floor(1000000000 + Math.random() * 8999999999),
-          latency: (Math.random() * 2 + 0.4).toFixed(2) + "s",
-          cost: "₦6.00",
-        });
-        renderLogs(allLogs);
-      }, 5000);
+      // Make filter functions work with real data
+      window._allLogs = allLogs;
+      window.filterLogsData = function() { filterLogs(); };
     </script>
   </body>
 </html>

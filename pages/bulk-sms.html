@@ -1312,7 +1312,7 @@
           <div class="topbar-right">
             <div class="balance-pill">
               <span class="balance-pill-label">Balance</span>
-              <span class="balance-pill-val">₦34,750</span>
+              <span class="balance-pill-val" id="topbarBalance">₦0</span>
             </div>
             <button class="icon-btn">🔔<span class="notif-dot"></span></button>
           </div>
@@ -1762,7 +1762,7 @@
                       >Wallet after send</span
                     >
                     <span class="balance-remaining-val" id="balanceAfter"
-                      >₦34,750</span
+                      >₦0</span
                     >
                   </div>
 
@@ -1808,139 +1808,8 @@
                     <th>Date</th>
                   </tr>
                 </thead>
-                <tbody>
-                  <tr>
-                    <td>
-                      <strong>Ramadan Promo Blast</strong><br /><span
-                        style="color: var(--muted); font-size: 11px"
-                        >Bulk SMS · NotifyPro</span
-                      >
-                    </td>
-                    <td>24,000</td>
-                    <td>24,000</td>
-                    <td>
-                      <div class="delivery-bar">
-                        <div class="delivery-bar-track">
-                          <div
-                            class="delivery-bar-fill"
-                            style="width: 98.2%"
-                          ></div>
-                        </div>
-                        <span class="delivery-bar-pct">98.2%</span>
-                      </div>
-                    </td>
-                    <td>₦96,000</td>
-                    <td><span class="status-pill sent">Sent</span></td>
-                    <td style="color: var(--muted); font-size: 12px">
-                      25 Mar 2026
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <strong>Flash Sale Alert</strong><br /><span
-                        style="color: var(--muted); font-size: 11px"
-                        >Bulk SMS · ShopAlert</span
-                      >
-                    </td>
-                    <td>15,000</td>
-                    <td>15,000</td>
-                    <td>
-                      <div class="delivery-bar">
-                        <div class="delivery-bar-track">
-                          <div
-                            class="delivery-bar-fill"
-                            style="width: 97.5%"
-                          ></div>
-                        </div>
-                        <span class="delivery-bar-pct">97.5%</span>
-                      </div>
-                    </td>
-                    <td>₦60,000</td>
-                    <td><span class="status-pill sent">Sent</span></td>
-                    <td style="color: var(--muted); font-size: 12px">
-                      22 Mar 2026
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <strong>Easter Campaign</strong><br /><span
-                        style="color: var(--muted); font-size: 11px"
-                        >Bulk SMS · NotifyPro</span
-                      >
-                    </td>
-                    <td>—</td>
-                    <td>30,000</td>
-                    <td>—</td>
-                    <td>₦120,000 est.</td>
-                    <td>
-                      <span class="status-pill scheduled">Scheduled</span>
-                    </td>
-                    <td style="color: var(--muted); font-size: 12px">
-                      31 Mar 2026
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <strong>OTP Blast (Test)</strong><br /><span
-                        style="color: var(--muted); font-size: 11px"
-                        >OTP · AuthService</span
-                      >
-                    </td>
-                    <td>250</td>
-                    <td>250</td>
-                    <td>
-                      <div class="delivery-bar">
-                        <div class="delivery-bar-track">
-                          <div
-                            class="delivery-bar-fill"
-                            style="width: 72%; background: var(--accent4)"
-                          ></div>
-                        </div>
-                        <span
-                          class="delivery-bar-pct"
-                          style="color: var(--accent4)"
-                          >72%</span
-                        >
-                      </div>
-                    </td>
-                    <td>₦1,000</td>
-                    <td>
-                      <span class="status-pill failed">Partial Fail</span>
-                    </td>
-                    <td style="color: var(--muted); font-size: 12px">
-                      18 Mar 2026
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <strong>Account Alerts</strong><br /><span
-                        style="color: var(--muted); font-size: 11px"
-                        >Transactional · BankAlert</span
-                      >
-                    </td>
-                    <td style="color: var(--accent2)">Sending…</td>
-                    <td>8,500</td>
-                    <td>
-                      <div class="delivery-bar">
-                        <div class="delivery-bar-track">
-                          <div
-                            class="delivery-bar-fill"
-                            style="width: 61%; background: var(--accent2)"
-                          ></div>
-                        </div>
-                        <span
-                          class="delivery-bar-pct"
-                          style="color: var(--accent2)"
-                          >61%</span
-                        >
-                      </div>
-                    </td>
-                    <td>₦34,000</td>
-                    <td><span class="status-pill sending">Sending</span></td>
-                    <td style="color: var(--muted); font-size: 12px">
-                      26 Mar 2026
-                    </td>
-                  </tr>
+                <tbody id="historyTableBody">
+                  <tr><td colspan="7" style="text-align:center;padding:48px 0;color:var(--text-muted);font-size:13px">Loading campaign history…</td></tr>
                 </tbody>
               </table>
             </div>
@@ -1984,7 +1853,7 @@
     <script>
       // ── STATE ──
       let tags = [];
-      let walletBalance = 34750;
+      var walletBalance = 0;
       let smsRatePerUnit = 4;
       let isUnicode = false;
       let smsParts = 1;
@@ -2370,5 +2239,69 @@
     <script>window.NP_PAGE = 'bulk-sms';</script>
     <script src="../assets/js/sidebar.js"></script>
     <script type="module" src="../assets/js/auth-guard.js"></script>
+    <script type="module">
+      import { supabase } from "../assets/js/supabase-config.js";
+
+      async function loadWalletAndHistory() {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) return;
+
+        // Load wallet balance from profile
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("wallet_balance")
+          .eq("id", session.user.id)
+          .single();
+
+        if (profile) {
+          walletBalance = profile.wallet_balance || 0;
+          const fmt = "₦" + walletBalance.toLocaleString("en-NG");
+          const topEl = document.getElementById("topbarBalance");
+          if (topEl) topEl.textContent = fmt;
+          updateCost(); // refresh "wallet after send" display
+        }
+
+        // Load campaign history
+        const { data: camps } = await supabase
+          .from("campaigns")
+          .select("name,type,total_recipients,total_delivered,cost,status,sent_at,scheduled_at")
+          .eq("user_id", session.user.id)
+          .order("created_at", { ascending: false })
+          .limit(20);
+
+        const tb = document.getElementById("historyTableBody");
+        if (!camps || camps.length === 0) {
+          tb.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:48px 0;color:var(--text-muted);font-size:13px">No campaigns yet. Send your first bulk SMS campaign.</td></tr>`;
+          return;
+        }
+
+        tb.innerHTML = camps.map(c => {
+          const sent = c.total_recipients || 0;
+          const del  = c.total_delivered  || 0;
+          const pct  = sent > 0 ? ((del / sent) * 100).toFixed(1) : null;
+          const deliveryCell = pct != null
+            ? `<div class="delivery-bar"><div class="delivery-bar-track"><div class="delivery-bar-fill" style="width:${pct}%"></div></div><span class="delivery-bar-pct">${pct}%</span></div>`
+            : "—";
+          const sentCell = c.status === "sending" ? `<span style="color:var(--accent2)">Sending…</span>` : (sent ? sent.toLocaleString() : "—");
+          const cost = c.cost ? "₦" + Number(c.cost).toLocaleString("en-NG") : "—";
+          const dateStr = c.sent_at || c.scheduled_at
+            ? new Date(c.sent_at || c.scheduled_at).toLocaleDateString("en-NG", { day: "numeric", month: "short", year: "numeric" })
+            : "—";
+          const statusClass = { sent: "sent", sending: "sending", scheduled: "scheduled", failed: "failed", draft: "paused" }[c.status] || "paused";
+          const statusLabel = c.status ? c.status.charAt(0).toUpperCase() + c.status.slice(1) : "—";
+          return `<tr>
+            <td><strong>${c.name}</strong><br><span style="color:var(--muted);font-size:11px">${c.type || "SMS"}</span></td>
+            <td>${sentCell}</td>
+            <td>${sent ? sent.toLocaleString() : "—"}</td>
+            <td>${deliveryCell}</td>
+            <td>${cost}</td>
+            <td><span class="status-pill ${statusClass}">${statusLabel}</span></td>
+            <td style="color:var(--muted);font-size:12px">${dateStr}</td>
+          </tr>`;
+        }).join("");
+      }
+
+      loadWalletAndHistory();
+    </script>
   </body>
 </html>
