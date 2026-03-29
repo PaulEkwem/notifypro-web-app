@@ -2242,6 +2242,57 @@
     <script type="module">
       import { supabase } from "../assets/js/supabase-config.js";
 
+      // ── REAL SEND — overrides the placeholder confirmSend above ──
+      window.confirmSend = async function () {
+        const msg = document.getElementById("msgBody").value.trim();
+        if (!msg) { alert("Please write a message first."); return; }
+
+        const recipientList = [...tags];
+        if (recipientList.length === 0) {
+          alert("Please add at least one recipient.");
+          return;
+        }
+
+        const sendBtn   = document.getElementById("sendBtn");
+        const origLabel = sendBtn.textContent;
+        sendBtn.disabled    = true;
+        sendBtn.textContent = "Sending…";
+
+        const campaignName = document.getElementById("campaignName").value.trim() || "Bulk SMS Campaign";
+        const senderId     = document.getElementById("senderId")?.value.trim()    || "";
+
+        try {
+          const { data, error } = await supabase.functions.invoke("send-bulk-sms", {
+            body: { recipients: recipientList, message: msg, campaignName, senderId },
+          });
+
+          if (error || data?.error) {
+            alert("Send failed: " + (data?.error || error.message));
+            sendBtn.disabled    = false;
+            sendBtn.textContent = origLabel;
+            return;
+          }
+
+          // Update local wallet display
+          walletBalance -= data.cost;
+          updateCost();
+          const topEl = document.getElementById("topbarBalance");
+          if (topEl) topEl.textContent = "₦" + walletBalance.toLocaleString("en-NG");
+
+          // Show success modal
+          document.getElementById("modalMsg").textContent =
+            `${data.sent.toLocaleString()} message${data.sent > 1 ? "s" : ""} sent successfully via Termii. ₦${data.cost.toLocaleString("en-NG")} deducted from your wallet.`;
+          document.getElementById("successModal").classList.add("show");
+
+          // Refresh campaign history
+          loadWalletAndHistory();
+        } catch (err) {
+          alert("Unexpected error: " + err.message);
+          sendBtn.disabled    = false;
+          sendBtn.textContent = origLabel;
+        }
+      };
+
       async function loadWalletAndHistory() {
         const { data: { session } } = await supabase.auth.getSession();
         if (!session) return;
