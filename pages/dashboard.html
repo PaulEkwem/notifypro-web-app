@@ -2015,7 +2015,9 @@
         }
 
         // Update greeting with real name
-        const firstName = profile.first_name || session.user.email.split('@')[0];
+        const firstName = profile.first_name
+          || session.user.user_metadata?.first_name
+          || session.user.email.split('@')[0];
         const hour = new Date().getHours();
         const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
         const greetEl = document.getElementById('dashGreeting');
@@ -2023,7 +2025,7 @@
         if (greetEl) greetEl.childNodes[0].textContent = greeting + ', ';
         if (nameEl)  nameEl.textContent = firstName;
 
-        const fullName  = [profile.first_name, profile.last_name].filter(Boolean).join(" ") || session.user.email;
+        const fullName  = [profile.first_name || session.user.user_metadata?.first_name, profile.last_name || session.user.user_metadata?.last_name].filter(Boolean).join(" ") || session.user.email;
         const initials  = fullName.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2);
         const planLabel = { starter: "Starter Plan", business: "Business Plan", enterprise: "Enterprise Plan" };
         const smsUsed   = profile.sms_used  ?? 0;
