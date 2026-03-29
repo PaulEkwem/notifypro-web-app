@@ -242,6 +242,14 @@ document.getElementById('password')?.addEventListener('input', function () {
   label.style.color     = colors[strength] || '';
 });
 
+// ── USE CASE PILLS ────────────────────────────────────────────
+window.toggleUseCase = function (btn) {
+  btn.classList.toggle('selected');
+  const selected = [...document.querySelectorAll('.uc-pill.selected')]
+    .map(b => b.dataset.val);
+  document.getElementById('useCase').value = selected.join(',');
+};
+
 // ── PLAN SELECT ───────────────────────────────────────────────
 window.selectPlan = function (plan) {
   ['starter','business','enterprise'].forEach(p =>

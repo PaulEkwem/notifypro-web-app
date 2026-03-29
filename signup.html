@@ -143,15 +143,14 @@
                 </select>
               </div>
               <div class="form-group">
-                <label>Primary Use Case</label>
-                <select id="useCase">
-                  <option value="" disabled selected>What will you use it for?</option>
-                  <option value="otp">OTP &amp; Verification</option>
-                  <option value="marketing">Marketing &amp; Promotions</option>
-                  <option value="transactional">Transactional Alerts</option>
-                  <option value="notifications">Customer Notifications</option>
-                  <option value="multiple">Multiple / Not sure yet</option>
-                </select>
+                <label>Use Cases <span style="font-weight:400;color:var(--text-muted);font-size:12px">(select all that apply)</span></label>
+                <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:6px" id="useCasePills">
+                  <button type="button" class="uc-pill" data-val="otp" onclick="toggleUseCase(this)">OTP &amp; Verification</button>
+                  <button type="button" class="uc-pill" data-val="marketing" onclick="toggleUseCase(this)">Marketing</button>
+                  <button type="button" class="uc-pill" data-val="transactional" onclick="toggleUseCase(this)">Transactional Alerts</button>
+                  <button type="button" class="uc-pill" data-val="notifications" onclick="toggleUseCase(this)">Notifications</button>
+                </div>
+                <input type="hidden" id="useCase" />
               </div>
             </div>
 
