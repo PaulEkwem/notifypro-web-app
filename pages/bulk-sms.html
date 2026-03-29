@@ -2262,8 +2262,10 @@
         const senderId     = document.getElementById("senderId")?.value.trim()    || "";
 
         try {
+          const { data: { session } } = await supabase.auth.getSession();
           const { data, error } = await supabase.functions.invoke("send-bulk-sms", {
             body: { recipients: recipientList, message: msg, campaignName, senderId },
+            headers: session ? { Authorization: `Bearer ${session.access_token}` } : {},
           });
 
           if (error || data?.error) {
