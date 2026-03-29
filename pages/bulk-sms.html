@@ -53,6 +53,66 @@
         color: var(--accent);
       }
 
+      .btn-topup {
+        background: var(--accent);
+        color: #000;
+        font-family: var(--font-display);
+        font-weight: 700;
+        font-size: 12px;
+        padding: 6px 14px;
+        border-radius: var(--radius-sm);
+        border: none;
+        cursor: pointer;
+        letter-spacing: 0.02em;
+        transition: opacity 0.2s, transform 0.2s;
+      }
+      .btn-topup:hover { opacity: 0.88; transform: translateY(-1px); }
+
+      /* Top-up modal */
+      .topup-modal-body { padding: 2rem; }
+      .topup-modal-body h3 {
+        font-family: var(--font-display);
+        font-size: 20px; font-weight: 800;
+        margin-bottom: 0.25rem;
+      }
+      .topup-modal-body p.sub { color: var(--muted); font-size: 13px; margin-bottom: 1.5rem; }
+      .amount-presets { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 1rem; }
+      .amount-preset {
+        background: var(--bg3);
+        border: 1px solid var(--card-border);
+        border-radius: var(--radius-sm);
+        padding: 8px 16px;
+        font-family: var(--font-display);
+        font-size: 13px; font-weight: 700;
+        color: var(--muted);
+        cursor: pointer;
+        transition: border-color 0.2s, color 0.2s;
+      }
+      .amount-preset:hover,
+      .amount-preset.active { border-color: var(--accent); color: var(--accent); }
+      .topup-input-wrap { margin-bottom: 1.2rem; }
+      .topup-input-wrap label {
+        display: block; font-size: 11px; font-weight: 600;
+        text-transform: uppercase; letter-spacing: 0.06em;
+        color: var(--muted); margin-bottom: 6px;
+      }
+      .topup-input-wrap input {
+        width: 100%; background: var(--bg3);
+        border: 1px solid var(--card-border);
+        border-radius: var(--radius-sm);
+        padding: 12px 16px;
+        color: var(--text); font-family: var(--font-display);
+        font-size: 22px; font-weight: 800;
+        outline: none; appearance: none;
+        transition: border-color 0.2s;
+      }
+      .topup-input-wrap input:focus { border-color: rgba(0,232,122,0.4); }
+      .topup-sms-est {
+        font-size: 12px; color: var(--muted);
+        margin-bottom: 1.5rem;
+      }
+      .topup-sms-est span { color: var(--accent); font-weight: 600; }
+
       .btn-outline {
         background: none;
         border: 1px solid var(--card-border);
@@ -1314,6 +1374,7 @@
               <span class="balance-pill-label">Balance</span>
               <span class="balance-pill-val" id="topbarBalance">₦0</span>
             </div>
+            <button class="btn-topup" onclick="openTopUp()">+ Top Up</button>
             <button class="icon-btn">🔔<span class="notif-dot"></span></button>
           </div>
         </header>
@@ -1749,7 +1810,7 @@
                   </div>
                   <div class="cost-row">
                     <span class="cost-row-label">Rate per unit</span>
-                    <span class="cost-row-val">₦4.00</span>
+                    <span class="cost-row-val">₦6.00</span>
                   </div>
 
                   <div class="cost-total-row">
@@ -1819,6 +1880,34 @@
       </div>
     </div>
 
+    <!-- TOP-UP MODAL -->
+    <div class="modal-overlay" id="topupModal">
+      <div class="modal" style="max-width:420px;padding:0;overflow:hidden">
+        <div class="topup-modal-body">
+          <h3>💳 Top Up Wallet</h3>
+          <p class="sub">Funds are added instantly after payment.</p>
+
+          <div class="amount-presets">
+            <button class="amount-preset" onclick="setTopupAmount(5000)">₦5,000</button>
+            <button class="amount-preset" onclick="setTopupAmount(10000)">₦10,000</button>
+            <button class="amount-preset" onclick="setTopupAmount(25000)">₦25,000</button>
+            <button class="amount-preset" onclick="setTopupAmount(50000)">₦50,000</button>
+          </div>
+
+          <div class="topup-input-wrap">
+            <label>Enter Amount (₦)</label>
+            <input type="number" id="topupAmount" placeholder="0" min="1000" oninput="onTopupAmountInput()" />
+          </div>
+          <div class="topup-sms-est" id="topupEst">Enter an amount to see how many SMS credits you'll get.</div>
+
+          <div class="modal-actions">
+            <button class="btn-primary" id="topupPayBtn" onclick="initiateTopup()">Pay with Paystack</button>
+            <button class="btn-outline" onclick="document.getElementById('topupModal').classList.remove('show')">Cancel</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- SUCCESS MODAL -->
     <div class="modal-overlay" id="successModal">
       <div class="modal">
@@ -1854,7 +1943,7 @@
       // ── STATE ──
       let tags = [];
       var walletBalance = 0;
-      let smsRatePerUnit = 4;
+      let smsRatePerUnit = 6;
       let isUnicode = false;
       let smsParts = 1;
       let maxCharsPerPart = 160;
@@ -1904,9 +1993,17 @@
         if (tagInput.value.trim()) addTag(tagInput.value);
       });
 
+      function normalizePhoneClient(raw) {
+        let n = raw.replace(/\D/g, "");
+        if (n.startsWith("0")) n = "234" + n.slice(1);
+        if (!n.startsWith("234")) n = "234" + n;
+        return n;
+      }
+
       function addTag(val) {
-        const num = val.trim().replace(/,$/, "");
-        if (!num) return;
+        const raw = val.trim().replace(/,$/, "");
+        if (!raw) return;
+        const num = normalizePhoneClient(raw);
         if (tags.includes(num)) {
           tagInput.value = "";
           return;
@@ -2364,6 +2461,111 @@
       }
 
       loadWalletAndHistory();
+    </script>
+
+    <!-- Paystack inline JS -->
+    <script src="https://js.paystack.co/v1/inline.js"></script>
+    <script type="module">
+      import { supabase } from "../assets/js/supabase-config.js";
+
+      const PAYSTACK_PUBLIC_KEY = "pk_live_REPLACE_WITH_YOUR_KEY"; // ← replace with your Paystack public key
+      const SMS_RATE = 6; // ₦ per SMS unit
+
+      window.openTopUp = function () {
+        document.getElementById("topupAmount").value = "";
+        document.getElementById("topupEst").innerHTML = "Enter an amount to see how many SMS credits you'll get.";
+        document.querySelectorAll(".amount-preset").forEach(b => b.classList.remove("active"));
+        document.getElementById("topupModal").classList.add("show");
+      };
+
+      window.setTopupAmount = function (amt) {
+        document.getElementById("topupAmount").value = amt;
+        document.querySelectorAll(".amount-preset").forEach(b => {
+          b.classList.toggle("active", Number(b.textContent.replace(/[^\d]/g,"")) === amt);
+        });
+        updateTopupEst(amt);
+      };
+
+      window.onTopupAmountInput = function () {
+        const amt = Number(document.getElementById("topupAmount").value);
+        document.querySelectorAll(".amount-preset").forEach(b => b.classList.remove("active"));
+        updateTopupEst(amt);
+      };
+
+      function updateTopupEst(amt) {
+        const est = document.getElementById("topupEst");
+        if (!amt || amt < 1) {
+          est.innerHTML = "Enter an amount to see how many SMS credits you'll get.";
+          return;
+        }
+        const units = Math.floor(amt / SMS_RATE);
+        est.innerHTML = `₦${amt.toLocaleString("en-NG")} = <span>${units.toLocaleString("en-NG")} SMS units</span>`;
+      }
+
+      window.initiateTopup = async function () {
+        const amt = Number(document.getElementById("topupAmount").value);
+        if (!amt || amt < 1000) {
+          alert("Minimum top-up is ₦1,000.");
+          return;
+        }
+
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) return;
+
+        const btn = document.getElementById("topupPayBtn");
+        btn.disabled = true;
+        btn.textContent = "Opening payment…";
+
+        const handler = PaystackPop.setup({
+          key: PAYSTACK_PUBLIC_KEY,
+          email: session.user.email,
+          amount: amt * 100, // Paystack uses kobo
+          currency: "NGN",
+          metadata: { user_id: session.user.id, purpose: "wallet_topup" },
+          callback: async function (response) {
+            btn.disabled = false;
+            btn.textContent = "Pay with Paystack";
+            // Verify + credit wallet
+            await creditWallet(session, amt, response.reference);
+          },
+          onClose: function () {
+            btn.disabled = false;
+            btn.textContent = "Pay with Paystack";
+          },
+        });
+        handler.openIframe();
+      };
+
+      async function creditWallet(session, amt, reference) {
+        // Fetch current balance then increment
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("wallet_balance")
+          .eq("id", session.user.id)
+          .single();
+
+        const newBalance = (profile?.wallet_balance || 0) + amt;
+
+        const { error } = await supabase
+          .from("profiles")
+          .update({ wallet_balance: newBalance })
+          .eq("id", session.user.id);
+
+        if (error) {
+          alert("Payment received but balance update failed. Contact support with reference: " + reference);
+          return;
+        }
+
+        // Update local state
+        walletBalance = newBalance;
+        const fmt = "₦" + newBalance.toLocaleString("en-NG");
+        const topEl = document.getElementById("topbarBalance");
+        if (topEl) topEl.textContent = fmt;
+        updateCost();
+
+        document.getElementById("topupModal").classList.remove("show");
+        alert(`✅ ₦${amt.toLocaleString("en-NG")} added! New balance: ₦${newBalance.toLocaleString("en-NG")}`);
+      }
     </script>
   </body>
 </html>
