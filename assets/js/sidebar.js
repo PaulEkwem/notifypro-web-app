@@ -66,8 +66,14 @@
   }
 
   const sidebarHTML = `
+    <div id="sidebarBackdrop" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:49;backdrop-filter:blur(2px)"></div>
     <aside class="sidebar" id="sidebar">
-      <a href="dashboard.html" class="sidebar-logo">Notify<span>Pro</span></a>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:0 1.5rem;height:64px;border-bottom:1px solid rgba(255,255,255,0.07);flex-shrink:0">
+        <a href="dashboard.html" class="sidebar-logo" style="border:none;padding:0;height:auto">Notify<span>Pro</span></a>
+        <button id="sidebarClose" style="display:none;background:none;border:none;color:#8892A4;cursor:pointer;padding:4px;line-height:1" aria-label="Close menu">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
       <nav class="sidebar-nav" aria-label="Main navigation">
         ${buildNav()}
       </nav>
@@ -83,18 +89,18 @@
         <div class="usage-wrap">
           <div class="usage-top">
             <span>Monthly SMS Usage</span>
-            <strong>18,400 / 30,000</strong>
+            <strong id="usageTopText">— / —</strong>
           </div>
           <div class="usage-track">
             <div class="usage-fill" id="usageFill"></div>
           </div>
-          <div class="usage-note">61.3% used · resets in 11 days</div>
+          <div class="usage-note">— · resets in — days</div>
         </div>
         <div class="user-card" id="userCard">
-          <div class="user-avatar" id="userAvatar">EO</div>
+          <div class="user-avatar" id="userAvatar">–</div>
           <div>
-            <div class="user-name" id="userName">Emeka Okafor</div>
-            <div class="user-plan">Business Plan</div>
+            <div class="user-name" id="userName">Loading…</div>
+            <div class="user-plan">Starter Plan</div>
           </div>
         </div>
         <button class="logout-btn" onclick="window.npLogout()">
@@ -111,24 +117,78 @@
   }
 
   // ── MOBILE TOGGLE ──
+  function isMobile() { return window.innerWidth <= 768; }
+
+  function openSidebar() {
+    const sidebar  = document.getElementById('sidebar');
+    const backdrop = document.getElementById('sidebarBackdrop');
+    const closeBtn = document.getElementById('sidebarClose');
+    if (!sidebar) return;
+    sidebar.classList.add('open');
+    if (backdrop) { backdrop.style.display = 'block'; }
+    if (closeBtn) { closeBtn.style.display = 'flex'; }
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeSidebar() {
+    const sidebar  = document.getElementById('sidebar');
+    const backdrop = document.getElementById('sidebarBackdrop');
+    const closeBtn = document.getElementById('sidebarClose');
+    if (!sidebar) return;
+    sidebar.classList.remove('open');
+    if (backdrop) { backdrop.style.display = 'none'; }
+    if (closeBtn) { closeBtn.style.display = 'none'; }
+    document.body.style.overflow = '';
+  }
+
+  // Wire up toggle — use capturing so page-level handlers don't double-fire
   document.addEventListener('DOMContentLoaded', () => {
-    const toggle = document.getElementById('menuToggle');
-    const sidebar = document.getElementById('sidebar');
-    if (toggle && sidebar) {
-      toggle.addEventListener('click', () => sidebar.classList.toggle('open'));
-      // Close sidebar on outside click
-      document.addEventListener('click', (e) => {
-        if (!sidebar.contains(e.target) && !toggle.contains(e.target)) {
-          sidebar.classList.remove('open');
-        }
+    const toggle   = document.getElementById('menuToggle');
+    const backdrop = document.getElementById('sidebarBackdrop');
+    const closeBtn = document.getElementById('sidebarClose');
+
+    if (toggle) {
+      // Remove any duplicate listener pages may have added by replacing the element
+      const newToggle = toggle.cloneNode(true);
+      toggle.parentNode.replaceChild(newToggle, toggle);
+      newToggle.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const sidebar = document.getElementById('sidebar');
+        if (sidebar.classList.contains('open')) { closeSidebar(); } else { openSidebar(); }
       });
     }
 
-    // Animate usage bar
-    setTimeout(() => {
-      const fill = document.getElementById('usageFill');
-      if (fill) fill.style.width = '61.3%';
-    }, 500);
+    if (backdrop) backdrop.addEventListener('click', closeSidebar);
+    if (closeBtn) closeBtn.addEventListener('click', closeSidebar);
+
+    // Wire Top Up link to modal if available on current page
+    const topUpLink = document.querySelector('.wallet-topup');
+    if (topUpLink) {
+      topUpLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        closeSidebar();
+        if (typeof window.openTopUp === 'function') window.openTopUp();
+        else window.location.href = 'bulk-sms.html';
+      });
+    }
+
+    // Close sidebar when a nav link is tapped on mobile
+    document.querySelectorAll('.sidebar .nav-item').forEach(link => {
+      link.addEventListener('click', () => { if (isMobile()) closeSidebar(); });
+    });
+
+    // Show ✕ button only on mobile via CSS-equivalent
+    function checkMobile() {
+      const closeBtn = document.getElementById('sidebarClose');
+      if (closeBtn) closeBtn.style.display = isMobile() ? 'flex' : 'none';
+      // Reset close button — only show when sidebar is open
+      const sidebar = document.getElementById('sidebar');
+      if (sidebar && !sidebar.classList.contains('open')) {
+        if (closeBtn) closeBtn.style.display = 'none';
+      }
+    }
+    window.addEventListener('resize', () => { if (!isMobile()) closeSidebar(); });
+    checkMobile();
   });
 
   // ── SVG ICONS ──

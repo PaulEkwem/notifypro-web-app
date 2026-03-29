@@ -10,7 +10,7 @@ const CORS = {
     "authorization, x-client-info, apikey, content-type",
 };
 
-const RATE_PER_UNIT = 4; // ₦4 per SMS unit (1 unit = 160 chars)
+const RATE_PER_UNIT = 6; // ₦6 per SMS unit (1 unit = 160 chars)
 
 serve(async (req) => {
   // Handle CORS preflight

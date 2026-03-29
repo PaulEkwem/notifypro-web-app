@@ -1901,7 +1901,7 @@
           <div class="topup-sms-est" id="topupEst">Enter an amount to see how many SMS credits you'll get.</div>
 
           <div class="modal-actions">
-            <button class="btn-primary" id="topupPayBtn" onclick="initiateTopup()">Pay with Monnify</button>
+            <button class="btn-primary" id="topupPayBtn" onclick="initiateTopup()">Pay with Paystack</button>
             <button class="btn-outline" onclick="document.getElementById('topupModal').classList.remove('show')">Cancel</button>
           </div>
         </div>
@@ -1948,10 +1948,7 @@
       let smsParts = 1;
       let maxCharsPerPart = 160;
 
-      // ── MOBILE MENU ──
-      document.getElementById("menuToggle").addEventListener("click", () => {
-        document.getElementById("sidebar").classList.toggle("open");
-      });
+      // menuToggle is handled by sidebar.js — do not add duplicate listener here
 
       // ── PAGE TABS ──
       function switchPageTab(btn, tab) {
@@ -2463,13 +2460,12 @@
       loadWalletAndHistory();
     </script>
 
-    <!-- Monnify inline JS -->
-    <script src="https://sdk.monnify.com/plugin/monnify.js"></script>
+    <!-- Paystack inline JS -->
+    <script src="https://js.paystack.co/v1/inline.js"></script>
     <script type="module">
       import { supabase } from "../assets/js/supabase-config.js";
 
-      const MONNIFY_API_KEY     = "MK_REPLACE_WITH_YOUR_API_KEY";   // ← Monnify API Key
-      const MONNIFY_CONTRACT    = "REPLACE_WITH_CONTRACT_CODE";      // ← Monnify Contract Code
+      const PAYSTACK_PUBLIC_KEY = "pk_test_c9b82ccf07f58e95aac6371b40b2d2b7fc4715d7";
       const SMS_RATE = 6; // ₦ per SMS unit
 
       window.openTopUp = function () {
@@ -2517,35 +2513,24 @@
         btn.disabled = true;
         btn.textContent = "Opening payment…";
 
-        const reference = "NFYPRO-" + Date.now() + "-" + Math.random().toString(36).slice(2, 7).toUpperCase();
-
-        MonnifySDK.initialize({
-          amount: amt,           // Monnify uses Naira directly
+        const handler = PaystackPop.setup({
+          key:      PAYSTACK_PUBLIC_KEY,
+          email:    session.user.email,
+          amount:   amt * 100, // Paystack uses kobo
           currency: "NGN",
-          reference,
-          customerFullName: session.user.user_metadata?.first_name
-            ? `${session.user.user_metadata.first_name} ${session.user.user_metadata.last_name || ""}`.trim()
-            : session.user.email,
-          customerEmail: session.user.email,
-          apiKey: MONNIFY_API_KEY,
-          contractCode: MONNIFY_CONTRACT,
-          paymentDescription: "NotifyPro Wallet Top-Up",
-          onLoadComplete: function () {
+          ref:      "NFYPRO-" + Date.now() + "-" + Math.random().toString(36).slice(2, 7).toUpperCase(),
+          metadata: { user_id: session.user.id, purpose: "wallet_topup" },
+          callback: function (response) {
             btn.disabled = false;
-            btn.textContent = "Pay with Monnify";
+            btn.textContent = "Pay with Paystack";
+            creditWallet(session, amt, response.reference);
           },
-          onComplete: async function (response) {
+          onClose: function () {
             btn.disabled = false;
-            btn.textContent = "Pay with Monnify";
-            if (response.paymentStatus === "PAID") {
-              await creditWallet(session, amt, response.transactionReference);
-            }
-          },
-          onClose: function (data) {
-            btn.disabled = false;
-            btn.textContent = "Pay with Monnify";
+            btn.textContent = "Pay with Paystack";
           },
         });
+        handler.openIframe();
       };
 
       async function creditWallet(session, amt, reference) {

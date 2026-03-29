@@ -1706,11 +1706,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script>
-      document
-        .getElementById("menuToggle")
-        .addEventListener("click", () =>
-          document.getElementById("sidebar").classList.toggle("open"),
-        );
+      // menuToggle is handled by sidebar.js — do not add duplicate listener here
       setTimeout(
         () => (document.getElementById("usageFill").style.width = "61.3%"),
         400,
@@ -1929,6 +1925,15 @@
       (async () => {
         const { data: { session } } = await supabase.auth.getSession();
         if (!session) { window.location.href = "../login.html"; return; }
+
+        // Set greeting immediately from session (no network wait)
+        const _earlyName = session.user.user_metadata?.first_name || session.user.email.split('@')[0];
+        const _hour = new Date().getHours();
+        const _greet = _hour < 12 ? 'Good morning' : _hour < 17 ? 'Good afternoon' : 'Good evening';
+        const _greetEl = document.getElementById('dashGreeting');
+        const _nameEl  = document.getElementById('dashName');
+        if (_greetEl) _greetEl.childNodes[0].textContent = _greet + ', ';
+        if (_nameEl)  _nameEl.textContent = _earlyName;
 
         const { data: profile } = await supabase
           .from("profiles")
