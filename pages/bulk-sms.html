@@ -2263,13 +2263,22 @@
 
         try {
           const { data: { session } } = await supabase.auth.getSession();
-          const { data, error } = await supabase.functions.invoke("send-bulk-sms", {
-            body: { recipients: recipientList, message: msg, campaignName, senderId },
-            headers: session ? { Authorization: `Bearer ${session.access_token}` } : {},
-          });
+          const res = await fetch(
+            "https://oilnrhqcfzkonoumsfav.supabase.co/functions/v1/send-bulk-sms",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${session?.access_token || ""}`,
+              },
+              body: JSON.stringify({ recipients: recipientList, message: msg, campaignName, senderId }),
+            }
+          );
 
-          if (error || data?.error) {
-            alert("Send failed: " + (data?.error || error.message));
+          const data = await res.json();
+
+          if (!res.ok || data?.error) {
+            alert("Send failed: " + (data?.error || "Unknown error"));
             sendBtn.disabled    = false;
             sendBtn.textContent = origLabel;
             return;
