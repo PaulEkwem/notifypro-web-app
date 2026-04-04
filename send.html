@@ -605,9 +605,54 @@ const KNOWN_TOKENS = [
 
 // ── Boot ──
 document.addEventListener('DOMContentLoaded', function() {
-  document.getElementById('msgBody').value = DEFAULT_TEMPLATE;
-  updateMsgUI();
-  syncContactsForm();
+  const params        = new URLSearchParams(window.location.search);
+  const resume        = params.get('resume') === '1';
+  const savedMsg      = sessionStorage.getItem('np_sms_msg');
+  const savedContacts = sessionStorage.getItem('np_sms_contacts');
+  const savedTokens   = sessionStorage.getItem('np_sms_tokens');
+
+  if (resume && savedMsg && savedContacts) {
+    // Restore message
+    document.getElementById('msgBody').value = savedMsg;
+    msgEdited = true;
+
+    // Restore contacts
+    try { JSON.parse(savedContacts).forEach(c => contacts.push(c)); } catch(e) {}
+
+    // Restore any custom tokens
+    try {
+      JSON.parse(savedTokens || '[]').forEach(k => {
+        if (!KNOWN_TOKENS.find(t => t.key === k) && !customTokens.includes(k)) customTokens.push(k);
+      });
+    } catch(e) {}
+
+    updateMsgUI();
+    syncContactsForm();
+    renderChips();
+
+    // Jump straight to preview — they already did steps 1 & 2 before signup
+    setTimeout(() => {
+      buildPreview3();
+      goToStep(3);
+      // Success banner
+      const banner = document.createElement('div');
+      banner.style.cssText = `position:fixed;top:72px;left:50%;transform:translateX(-50%);
+        background:#0d1117;border:1px solid rgba(0,232,122,0.3);border-radius:12px;
+        padding:12px 24px;font-size:14px;color:#f0f4ff;z-index:100;
+        box-shadow:0 8px 32px rgba(0,0,0,0.5);white-space:nowrap`;
+      banner.innerHTML = `✅ Account created! Review your message and hit <strong>Send now</strong>.`;
+      document.body.appendChild(banner);
+      setTimeout(() => banner.remove(), 6000);
+    }, 100);
+
+    // Clear so it doesn't persist on next visit
+    ['np_sms_msg','np_sms_contacts','np_sms_tokens','np_sms_email'].forEach(k => sessionStorage.removeItem(k));
+
+  } else {
+    document.getElementById('msgBody').value = DEFAULT_TEMPLATE;
+    updateMsgUI();
+    syncContactsForm();
+  }
 });
 
 

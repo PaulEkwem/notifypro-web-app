@@ -174,7 +174,18 @@ window.verifyOtp = async function () {
     el.classList.add('done');
   });
 
-  setTimeout(() => { window.location.href = 'pages/dashboard.html'; }, 2000);
+  // If user came from send.html, return there to complete the send
+  const urlParams  = new URLSearchParams(window.location.search);
+  const ref        = urlParams.get('ref');
+  const hasPending = sessionStorage.getItem('np_sms_msg') && sessionStorage.getItem('np_sms_contacts');
+
+  if (ref === 'sms' && hasPending) {
+    const note = document.querySelector('#step-5 p');
+    if (note) note.textContent = 'Account created! Taking you back to finish sending your message…';
+    setTimeout(() => { window.location.href = 'send.html?resume=1'; }, 2000);
+  } else {
+    setTimeout(() => { window.location.href = 'pages/dashboard.html'; }, 2000);
+  }
 };
 
 // ── RESEND ────────────────────────────────────────────────────
