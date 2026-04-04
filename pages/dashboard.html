@@ -224,6 +224,12 @@
         color: var(--muted);
         margin-top: 2px;
       }
+      .wallet-health {
+        font-size: 10.5px;
+        color: var(--accent);
+        margin-top: 3px;
+        display: none;
+      }
       .usage-wrap {
         padding: 0 2px;
       }
@@ -506,6 +512,59 @@
         white-space: nowrap;
         flex-shrink: 0;
         text-align: right;
+      }
+
+      /* PERIOD BAR */
+      .period-bar {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: var(--radius-md);
+        padding: 10px 16px;
+      }
+      .period-tabs {
+        display: flex;
+        gap: 4px;
+        flex-shrink: 0;
+      }
+      .period-tab {
+        background: none;
+        border: 1px solid transparent;
+        border-radius: var(--radius-sm);
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 600;
+        font-family: var(--font-display);
+        padding: 4px 12px;
+        cursor: pointer;
+        transition: all 0.15s;
+        letter-spacing: 0.03em;
+      }
+      .period-tab:hover {
+        color: var(--text);
+        background: rgba(255,255,255,0.05);
+      }
+      .period-tab.active {
+        background: rgba(0,232,122,0.1);
+        border-color: rgba(0,232,122,0.25);
+        color: var(--accent);
+      }
+      .period-bar-divider {
+        width: 1px;
+        height: 20px;
+        background: var(--card-border);
+        flex-shrink: 0;
+      }
+      .period-summary {
+        font-size: 13px;
+        color: var(--muted);
+        flex: 1;
+      }
+      .period-summary strong {
+        color: var(--text);
+        font-weight: 600;
       }
 
       /* TOP CAMPAIGN */
@@ -880,6 +939,9 @@
       }
       .network-rate.amber {
         color: var(--accent3);
+      }
+      .network-rate.red {
+        color: var(--accent4);
       }
       .network-status {
         font-size: 10px;
@@ -1293,47 +1355,27 @@
             </div>
           </div>
 
-          <!-- TOP CAMPAIGN -->
-          <div class="top-camp" id="topCampCard" style="display:none">
-            <div>
-              <div class="top-camp-label">🏆 Top Performing Campaign This Month</div>
-              <div class="top-camp-name" id="topCampName">—</div>
-              <div class="top-camp-meta" id="topCampMeta">—</div>
+          <!-- PERIOD TABS + SUMMARY BAR -->
+          <div class="period-bar">
+            <div class="period-tabs">
+              <button class="period-tab" onclick="window.setPeriod(this,7)">7D</button>
+              <button class="period-tab active" onclick="window.setPeriod(this,30)">30D</button>
+              <button class="period-tab" onclick="window.setPeriod(this,60)">60D</button>
+              <button class="period-tab" onclick="window.setPeriod(this,90)">90D</button>
             </div>
-            <div class="top-stats">
-              <div class="top-stat">
-                <div class="top-stat-val green" id="topCampDelivered">—</div>
-                <div class="top-stat-lbl">Delivered</div>
-              </div>
-              <div class="top-stat">
-                <div class="top-stat-val amber" id="topCampCost">—</div>
-                <div class="top-stat-lbl">Total Cost</div>
-              </div>
-              <div class="top-stat">
-                <div class="top-stat-val blue" id="topCampRecipients">—</div>
-                <div class="top-stat-lbl">Recipients</div>
-              </div>
-            </div>
-          </div>
-          <!-- Empty state when no campaigns -->
-          <div class="top-camp" id="topCampEmpty" style="justify-content:center;text-align:center;padding:1.5rem">
-            <div>
-              <div class="top-camp-label">🏆 Top Performing Campaign This Month</div>
-              <div style="color:var(--muted);font-size:14px;margin-top:0.5rem">No campaigns yet — <a href="bulk-sms.html" style="color:var(--accent)">send your first one</a></div>
-            </div>
+            <div class="period-bar-divider"></div>
+            <span class="period-summary" id="periodSummaryText">Loading…</span>
           </div>
 
           <!-- STATS -->
           <div class="stats-row">
             <div class="stat-card green">
               <div class="stat-card-top">
-                <div class="stat-label">SMS Sent Today</div>
+                <div class="stat-label">SMS Sent</div>
                 <div class="stat-icon green">💬</div>
               </div>
               <div class="stat-val green" id="smsStat">0</div>
-              <div class="stat-change up">
-                ↑ 12.4% <span>vs yesterday</span>
-              </div>
+              <div class="stat-change" id="smsStatChange">— vs yesterday</div>
             </div>
             <div class="stat-card blue">
               <div class="stat-card-top">
@@ -1341,7 +1383,7 @@
                 <div class="stat-icon blue">📧</div>
               </div>
               <div class="stat-val blue" id="emailStat">0</div>
-              <div class="stat-change up">↑ 8.1% <span>vs yesterday</span></div>
+              <div class="stat-change" id="emailStatChange">— vs yesterday</div>
             </div>
             <div class="stat-card amber">
               <div class="stat-card-top">
@@ -1349,7 +1391,7 @@
                 <div class="stat-icon amber">🔐</div>
               </div>
               <div class="stat-val amber" id="otpStat">0</div>
-              <div class="stat-change up">↑ 3.7% <span>vs yesterday</span></div>
+              <div class="stat-change" id="otpStatChange">— vs yesterday</div>
             </div>
             <div class="stat-card red">
               <div class="stat-card-top">
@@ -1357,9 +1399,7 @@
                 <div class="stat-icon red">⚠️</div>
               </div>
               <div class="stat-val red" id="failStat">0</div>
-              <div class="stat-change down">
-                ↓ 2.1% <span>vs yesterday</span>
-              </div>
+              <div class="stat-change" id="failStatChange">— vs yesterday</div>
             </div>
           </div>
 
@@ -1422,60 +1462,30 @@
               <div class="breakdown-list">
                 <div>
                   <div class="breakdown-top">
-                    <div
-                      class="breakdown-icon"
-                      style="background: rgba(0, 232, 122, 0.1)"
-                    >
-                      💬
-                    </div>
+                    <div class="breakdown-icon" style="background:rgba(0,232,122,0.1)">💬</div>
                     <div class="breakdown-name">Bulk SMS</div>
-                    <div class="breakdown-pct green">98.2%</div>
+                    <div class="breakdown-pct green" id="bdSmsPct">—</div>
                   </div>
-                  <div class="breakdown-bar-track">
-                    <div
-                      class="breakdown-bar-fill"
-                      style="width: 98.2%; background: var(--accent)"
-                    ></div>
-                  </div>
-                  <div class="breakdown-count">842,310 messages</div>
+                  <div class="breakdown-bar-track"><div class="breakdown-bar-fill" id="bdSmsBar" style="width:0%;background:var(--accent)"></div></div>
+                  <div class="breakdown-count" id="bdSmsCount">—</div>
                 </div>
                 <div>
                   <div class="breakdown-top">
-                    <div
-                      class="breakdown-icon"
-                      style="background: rgba(0, 191, 255, 0.1)"
-                    >
-                      📧
-                    </div>
+                    <div class="breakdown-icon" style="background:rgba(0,191,255,0.1)">📧</div>
                     <div class="breakdown-name">Email</div>
-                    <div class="breakdown-pct blue">94.7%</div>
+                    <div class="breakdown-pct blue" id="bdEmailPct">—</div>
                   </div>
-                  <div class="breakdown-bar-track">
-                    <div
-                      class="breakdown-bar-fill"
-                      style="width: 94.7%; background: var(--accent2)"
-                    ></div>
-                  </div>
-                  <div class="breakdown-count">218,045 emails</div>
+                  <div class="breakdown-bar-track"><div class="breakdown-bar-fill" id="bdEmailBar" style="width:0%;background:var(--accent2)"></div></div>
+                  <div class="breakdown-count" id="bdEmailCount">—</div>
                 </div>
                 <div>
                   <div class="breakdown-top">
-                    <div
-                      class="breakdown-icon"
-                      style="background: rgba(255, 184, 0, 0.1)"
-                    >
-                      🔐
-                    </div>
+                    <div class="breakdown-icon" style="background:rgba(255,184,0,0.1)">🔐</div>
                     <div class="breakdown-name">OTP</div>
-                    <div class="breakdown-pct amber">99.1%</div>
+                    <div class="breakdown-pct amber" id="bdOtpPct">—</div>
                   </div>
-                  <div class="breakdown-bar-track">
-                    <div
-                      class="breakdown-bar-fill"
-                      style="width: 99.1%; background: var(--accent3)"
-                    ></div>
-                  </div>
-                  <div class="breakdown-count">12,481 verifications</div>
+                  <div class="breakdown-bar-track"><div class="breakdown-bar-fill" id="bdOtpBar" style="width:0%;background:var(--accent3)"></div></div>
+                  <div class="breakdown-count" id="bdOtpCount">—</div>
                 </div>
                 <div style="margin-top: 0.4rem">
                   <div
@@ -1547,7 +1557,7 @@
                   <div class="card-title">Recent Campaigns</div>
                   <div class="card-subtitle">Last 5 activities</div>
                 </div>
-                <a class="card-action" href="#">View all →</a>
+                <a class="card-action" href="reports.html">View all →</a>
               </div>
               <table style="width: 100%; border-collapse: collapse">
                 <thead>
@@ -1679,7 +1689,7 @@
                 </div>
                 <div>
                   <span class="qs-label">Sender ID</span
-                  ><input class="qs-input" type="text" value="NotifyPro" />
+                  ><input class="qs-input" id="quickSendSenderId" type="text" value="NotifyPro" />
                 </div>
                 <button class="btn-send" onclick="quickSend()">
                   Send Now →
@@ -1707,10 +1717,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script>
       // menuToggle is handled by sidebar.js — do not add duplicate listener here
-      setTimeout(
-        () => (document.getElementById("usageFill").style.width = "61.3%"),
-        400,
-      );
+      // usageFill width set by real data in module script
       function animateCount(id, target) {
         const el = document.getElementById(id),
           inc = target / 87;
@@ -1721,28 +1728,19 @@
           if (c >= target) clearInterval(iv);
         }, 16);
       }
-      // Stats populated by real data below — do not hardcode here
+      // Stats & chart populated from real data in the module script below
       const ctx = document.getElementById("deliveryChart").getContext("2d");
       const CD = {
-        "7d": {
-          labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
-          sms: [120000, 145000, 132000, 98000, 156000, 178000, 842310],
-          email: [30000, 42000, 38000, 25000, 51000, 64000, 218045],
-          otp: [1800, 2100, 1950, 1400, 2200, 2800, 12481],
-        },
-        "30d": {
-          labels: ["W1", "W2", "W3", "W4"],
-          sms: [820000, 910000, 775000, 842310],
-          email: [190000, 220000, 205000, 218045],
-          otp: [42000, 51000, 48000, 12481],
-        },
-        "90d": {
-          labels: ["Jan", "Feb", "Mar"],
-          sms: [2400000, 2650000, 2510000],
-          email: [610000, 680000, 654000],
-          otp: [140000, 155000, 148000],
-        },
+        "7d":  { labels: [], sms: Array(7).fill(0), email: Array(7).fill(0), otp: Array(7).fill(0) },
+        "30d": { labels: ["W1","W2","W3","W4"], sms: Array(4).fill(0), email: Array(4).fill(0), otp: Array(4).fill(0) },
+        "90d": { labels: [], sms: Array(3).fill(0), email: Array(3).fill(0), otp: Array(3).fill(0) },
       };
+      // Build dynamic labels
+      (function() {
+        const now = new Date();
+        for (let i = 6; i >= 0; i--) { const d = new Date(now); d.setDate(d.getDate()-i); CD["7d"].labels.push(["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][d.getDay()]); }
+        for (let i = 2; i >= 0; i--) { const d = new Date(now); d.setMonth(d.getMonth()-i); CD["90d"].labels.push(["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][d.getMonth()]); }
+      })();
       function mg(c, col) {
         const g = c.createLinearGradient(0, 0, 0, 190);
         g.addColorStop(0, col.replace("1)", "0.18)"));
@@ -1841,8 +1839,10 @@
           .querySelectorAll(".chart-tab")
           .forEach((t) => t.classList.remove("active"));
         btn.classList.add("active");
-        chart.data = bd(k);
-        chart.update("active");
+        if (window.deliveryChartInstance) {
+          window.deliveryChartInstance.data = bd(k);
+          window.deliveryChartInstance.update("active");
+        }
       }
       // Recent campaigns table populated from Supabase (see module script below)
       function selectChannel(btn, ch) {
@@ -1857,23 +1857,68 @@
       function countChars(el) {
         document.getElementById("charCount").textContent = el.value.length;
       }
-      function quickSend() {
-        const r = document.getElementById("quickSendRecipient").value.trim(),
-          m = document.getElementById("quickSendMsg").value.trim();
-        if (!r || !m) {
-          alert("Fill in recipient and message.");
+      async function quickSend() {
+        const r   = document.getElementById("quickSendRecipient").value.trim();
+        const msg = document.getElementById("quickSendMsg").value.trim();
+        const sid = document.getElementById("quickSendSenderId").value.trim() || "NotifyPro";
+        const btn = document.querySelector(".btn-send");
+
+        if (!r || !msg) {
+          showQSError("Fill in recipient and message.");
           return;
         }
-        addFeedItem(
-          "💬",
-          "rgba(0,232,122,0.1)",
-          r,
-          "Queued for delivery",
-          "Just now",
-        );
-        document.getElementById("quickSendMsg").value = "";
-        document.getElementById("charCount").textContent = "0";
-        document.getElementById("quickSendRecipient").value = "";
+
+        btn.disabled = true;
+        btn.textContent = "Sending…";
+
+        try {
+          const { data: { session } } = await window._npSupabase.auth.getSession();
+          const res = await fetch(
+            `${window._npSupabaseUrl}/functions/v1/send-bulk-sms`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${session.access_token}`,
+              },
+              body: JSON.stringify({
+                recipients:   [r],
+                message:      msg,
+                campaignName: "Quick Send",
+                senderId:     sid,
+              }),
+            }
+          );
+          const data = await res.json();
+          if (!res.ok) {
+            showQSError(data.error || "Send failed.");
+          } else {
+            document.getElementById("quickSendMsg").value = "";
+            document.getElementById("quickSendRecipient").value = "";
+            document.getElementById("charCount").textContent = "0";
+            showQSSuccess(`Sent to ${r}`);
+            addFeedItem("💬", "rgba(0,232,122,0.1)", r, "SMS queued for delivery", "Just now");
+          }
+        } catch (e) {
+          showQSError("Network error — try again.");
+        } finally {
+          btn.disabled = false;
+          btn.textContent = "Send Now →";
+        }
+      }
+      function showQSError(msg) {
+        let el = document.getElementById("qsFeedback");
+        if (!el) { el = document.createElement("div"); el.id = "qsFeedback"; el.style.cssText = "font-size:12px;padding:6px 0;"; document.querySelector(".btn-send").insertAdjacentElement("afterend", el); }
+        el.style.color = "var(--accent4)";
+        el.textContent = "⚠ " + msg;
+        setTimeout(() => { if (el) el.textContent = ""; }, 4000);
+      }
+      function showQSSuccess(msg) {
+        let el = document.getElementById("qsFeedback");
+        if (!el) { el = document.createElement("div"); el.id = "qsFeedback"; el.style.cssText = "font-size:12px;padding:6px 0;"; document.querySelector(".btn-send").insertAdjacentElement("afterend", el); }
+        el.style.color = "var(--accent)";
+        el.textContent = "✓ " + msg;
+        setTimeout(() => { if (el) el.textContent = ""; }, 4000);
       }
       const fl = document.getElementById("feedList");
       // Feed items populated from Supabase (see module script below)
@@ -1884,36 +1929,17 @@
         fl.prepend(item);
         if (fl.children.length > 8) fl.lastChild.remove();
       }
-      const live = [
-        {
-          icon: "💬",
-          bg: "rgba(0,232,122,0.1)",
-          desc: "SMS delivered to MTN subscriber",
-        },
-        {
-          icon: "📧",
-          bg: "rgba(0,191,255,0.1)",
-          desc: "Email opened · click recorded",
-        },
-        { icon: "🔐", bg: "rgba(255,184,0,0.1)", desc: "OTP sent & verified" },
-      ];
-      const phs = ["+234 802", "+234 703", "+234 816", "+234 909", "+234 811"];
-      setInterval(() => {
-        const t = live[Math.floor(Math.random() * live.length)];
-        addFeedItem(
-          t.icon,
-          t.bg,
-          phs[Math.floor(Math.random() * phs.length)] + " XXX XXXX",
-          t.desc,
-          "now",
-        );
-      }, 4500);
+      // Live feed seeded from real messages in module script below
     </script>
     <script>window.NP_PAGE = 'dashboard';</script>
     <script src="../assets/js/sidebar.js"></script>
     <script type="module" src="../assets/js/auth-guard.js"></script>
     <script type="module">
       import { supabase } from "../assets/js/supabase-config.js";
+
+      // Expose for non-module quickSend()
+      window._npSupabase    = supabase;
+      window._npSupabaseUrl = "https://oilnrhqcfzkonoumsfav.supabase.co";
 
       // Define logout IMMEDIATELY — before any awaits so it's always available
       window.npLogout = async function () {
@@ -1943,51 +1969,111 @@
 
         if (!profile) return;
 
-        // ── Real stats from messages table ──
-        const todayStart = new Date(); todayStart.setHours(0,0,0,0);
-        const { data: todayMsgs } = await supabase
+        // ── Fetch 180 days — powers stat cards, summary bar, channel breakdown ──
+        const { data: _allMsgs } = await supabase
           .from('messages')
-          .select('type, status')
+          .select('type, status, cost, created_at')
           .eq('user_id', session.user.id)
-          .gte('created_at', todayStart.toISOString());
+          .gte('created_at', new Date(Date.now() - 180*86400000).toISOString());
+        const _cache = _allMsgs || [];
 
-        const msgs = todayMsgs || [];
-        const smsSent   = msgs.filter(m => m.type === 'sms').length;
-        const emailSent = msgs.filter(m => m.type === 'email').length;
-        const otpSent   = msgs.filter(m => m.type === 'otp').length;
-        const failed    = msgs.filter(m => m.status === 'failed' || m.status === 'bounced').length;
+        function renderPeriodStats(days) {
+          const now = new Date();
+          const pStart  = new Date(now - days * 86400000);
+          const prStart = new Date(now - 2 * days * 86400000);
+          const curr  = _cache.filter(m => new Date(m.created_at) >= pStart);
+          const prior = _cache.filter(m => new Date(m.created_at) >= prStart && new Date(m.created_at) < pStart);
 
-        animateCount('smsStat',   smsSent);
-        animateCount('emailStat', emailSent);
-        animateCount('otpStat',   otpSent);
-        animateCount('failStat',  failed);
+          const smsSent   = curr.filter(m => (m.type||'sms').toLowerCase() === 'sms').length;
+          const emailSent = curr.filter(m => (m.type||'').toLowerCase() === 'email').length;
+          const otpSent   = curr.filter(m => (m.type||'').toLowerCase() === 'otp').length;
+          const failed    = curr.filter(m => m.status === 'failed' || m.status === 'bounced').length;
+          const pSmsSent  = prior.filter(m => (m.type||'sms').toLowerCase() === 'sms').length;
+          const pEmailSent= prior.filter(m => (m.type||'').toLowerCase() === 'email').length;
+          const pOtpSent  = prior.filter(m => (m.type||'').toLowerCase() === 'otp').length;
+          const pFailed   = prior.filter(m => m.status === 'failed' || m.status === 'bounced').length;
 
-        // ── Top performing campaign this month ──
-        const monthStart = new Date(); monthStart.setDate(1); monthStart.setHours(0,0,0,0);
-        const { data: camps } = await supabase
-          .from('campaigns')
-          .select('name, type, total_recipients, total_delivered, cost, sent_at')
-          .eq('user_id', session.user.id)
-          .eq('status', 'sent')
-          .gte('sent_at', monthStart.toISOString())
-          .order('total_delivered', { ascending: false })
-          .limit(1);
+          animateCount('smsStat',   smsSent);
+          animateCount('emailStat', emailSent);
+          animateCount('otpStat',   otpSent);
+          animateCount('failStat',  failed);
 
-        const topCamp = camps?.[0];
-        if (topCamp) {
-          document.getElementById('topCampCard').style.display = '';
-          document.getElementById('topCampEmpty').style.display = 'none';
-          document.getElementById('topCampName').textContent = topCamp.name;
-          const sentDate = topCamp.sent_at ? new Date(topCamp.sent_at).toLocaleDateString('en-NG', { day:'numeric', month:'short' }) : '';
-          document.getElementById('topCampMeta').textContent = `${topCamp.type.toUpperCase()} · Sent ${sentDate} · ${(topCamp.total_recipients||0).toLocaleString()} recipients`;
-          const delivRate = topCamp.total_recipients > 0 ? ((topCamp.total_delivered / topCamp.total_recipients) * 100).toFixed(1) + '%' : '—';
-          document.getElementById('topCampDelivered').textContent = delivRate;
-          document.getElementById('topCampCost').textContent = '₦' + Number(topCamp.cost||0).toLocaleString('en-NG');
-          document.getElementById('topCampRecipients').textContent = (topCamp.total_recipients||0).toLocaleString();
-        } else {
-          document.getElementById('topCampCard').style.display = 'none';
-          document.getElementById('topCampEmpty').style.display = '';
+          function vsPrior(cur, prev, higherGood = true) {
+            if (prev === 0 && cur === 0) return `<span style="color:var(--muted)">— vs prior ${days}D</span>`;
+            if (prev === 0) return `<span class="up">↑ new vs prior ${days}D</span>`;
+            const diff = (((cur - prev) / prev) * 100).toFixed(1);
+            const good = higherGood ? cur >= prev : cur <= prev;
+            return `<span class="${good ? 'up' : 'down'}">${cur >= prev ? '↑' : '↓'} ${Math.abs(diff)}% vs prior ${days}D</span>`;
+          }
+          document.getElementById('smsStatChange').innerHTML   = vsPrior(smsSent,   pSmsSent,   true);
+          document.getElementById('emailStatChange').innerHTML = vsPrior(emailSent, pEmailSent, true);
+          document.getElementById('otpStatChange').innerHTML   = vsPrior(otpSent,   pOtpSent,   true);
+          document.getElementById('failStatChange').innerHTML  = vsPrior(failed,    pFailed,    false);
+
+          // ── Summary bar ──
+          const mTotal     = curr.length;
+          const mDelivered = curr.filter(m => m.status === 'delivered').length;
+          const mCost      = curr.reduce((s, m) => s + Number(m.cost || 0), 0);
+          const mRate      = mTotal > 0 ? ((mDelivered / mTotal) * 100).toFixed(0) : 0;
+          const summaryEl  = document.getElementById('periodSummaryText');
+          if (summaryEl) {
+            if (mTotal > 0) {
+              summaryEl.innerHTML = `<strong>${mTotal.toLocaleString('en-NG')}</strong> messages · <strong>${mRate}%</strong> delivered · <strong>₦${mCost.toLocaleString('en-NG')}</strong> spent`;
+            } else {
+              summaryEl.innerHTML = `No messages in the last ${days} days — <a href="bulk-sms.html" style="color:var(--accent)">send a campaign</a>`;
+            }
+          }
+
+          // ── Channel breakdown ──
+          function chRate(type) {
+            const rows = curr.filter(m => (m.type||'sms').toLowerCase() === type);
+            const del  = rows.filter(m => m.status === 'delivered').length;
+            const pct  = rows.length > 0 ? ((del / rows.length) * 100).toFixed(1) : null;
+            return { count: rows.length, pct, label: pct !== null ? pct + '%' : '—' };
+          }
+          const bdSms   = chRate('sms');
+          const bdEmail = chRate('email');
+          const bdOtp   = chRate('otp');
+          document.getElementById('bdSmsPct').textContent     = bdSms.label;
+          document.getElementById('bdSmsBar').style.width     = (bdSms.pct || 0) + '%';
+          document.getElementById('bdSmsCount').textContent   = bdSms.count.toLocaleString('en-NG') + ' messages';
+          document.getElementById('bdEmailPct').textContent   = bdEmail.label;
+          document.getElementById('bdEmailBar').style.width   = (bdEmail.pct || 0) + '%';
+          document.getElementById('bdEmailCount').textContent = bdEmail.count.toLocaleString('en-NG') + ' emails';
+          document.getElementById('bdOtpPct').textContent     = bdOtp.label;
+          document.getElementById('bdOtpBar').style.width     = (bdOtp.pct || 0) + '%';
+          document.getElementById('bdOtpCount').textContent   = bdOtp.count.toLocaleString('en-NG') + ' verifications';
         }
+
+        window.setPeriod = function(btn, days) {
+          document.querySelectorAll('.period-tab').forEach(t => t.classList.remove('active'));
+          btn.classList.add('active');
+          renderPeriodStats(days);
+        };
+
+        renderPeriodStats(30); // default to 30D
+
+        // ── Real chart data (90 days) ──
+        const { data: chartMsgs } = await supabase
+          .from('messages').select('type, created_at')
+          .eq('user_id', session.user.id)
+          .gte('created_at', new Date(Date.now() - 90*86400000).toISOString());
+
+        const now2 = new Date();
+        (chartMsgs || []).forEach(m => {
+          const d = new Date(m.created_at);
+          const daysAgo = Math.floor((now2 - d) / 86400000);
+          const key = (m.type||'sms').toLowerCase() === 'email' ? 'email' : (m.type||'sms').toLowerCase() === 'otp' ? 'otp' : 'sms';
+          if (daysAgo < 7)  { CD['7d'][key][6 - daysAgo]++; }
+          if (daysAgo < 30) { const idx = Math.min(3, 3 - Math.floor(daysAgo/7)); CD['30d'][key][idx]++; }
+          const mIdx = (d.getMonth() - (now2.getMonth()-2) + 12) % 12;
+          if (mIdx >= 0 && mIdx < 3) CD['90d'][key][mIdx]++;
+        });
+        if (window.deliveryChartInstance) {
+          window.deliveryChartInstance.data = bd('7d');
+          window.deliveryChartInstance.update();
+        }
+
 
         // ── Next scheduled campaign ──
         const { data: scheduled } = await supabase
@@ -2011,13 +2097,6 @@
           document.getElementById('nextSchedTime').innerHTML = `${dayLabel}<br />${schedDate.toLocaleTimeString('en-NG', { hour:'2-digit', minute:'2-digit' })}`;
         }
 
-        // ── Zero out chart for users with no data ──
-        if (msgs.length === 0) {
-          if (window.deliveryChartInstance) {
-            window.deliveryChartInstance.data.datasets.forEach(ds => { ds.data = ds.data.map(() => 0); });
-            window.deliveryChartInstance.update();
-          }
-        }
 
         // Update greeting with real name
         const firstName = profile.first_name
@@ -2047,18 +2126,33 @@
         const balanceEl = document.getElementById("walletBalance");
         if (balanceEl) balanceEl.textContent = Number(profile.wallet_balance ?? 0).toLocaleString("en-NG");
         const estEl = document.getElementById("walletEst");
-        if (estEl) estEl.textContent = `≈ ${Number(smsRemain).toLocaleString("en-NG")} SMS remaining`;
+        if (estEl) estEl.textContent = `≈ ${smsRemain === "∞" ? "∞" : Number(smsRemain).toLocaleString("en-NG")} SMS remaining`;
         const fillEl = document.getElementById("usageFill");
         if (fillEl) fillEl.style.width = smsPct + "%";
         const noteEl = document.querySelector(".usage-note");
-        if (noteEl) noteEl.textContent = `${smsPct}% used · resets in 11 days`;
+        // Days until next billing cycle (1st of next month)
+        const now3 = new Date();
+        const nextFirst = new Date(now3.getFullYear(), now3.getMonth() + 1, 1);
+        const daysLeft = Math.ceil((nextFirst - now3) / 86400000);
+        if (noteEl) noteEl.textContent = `${smsPct}% used · resets in ${daysLeft} day${daysLeft !== 1 ? 's' : ''}`;
         const topEl = document.querySelector(".usage-top strong");
         if (topEl) topEl.textContent = `${smsUsed.toLocaleString()} / ${smsLimit > 0 ? smsLimit.toLocaleString() : "∞"}`;
+
+
+        // ── Wallet health ──
+        const walletBal   = Number(profile.wallet_balance ?? 0);
+        const smsCostRate = 6; // ₦6 per SMS
+        const smsAffordable = Math.floor(walletBal / smsCostRate);
+        const healthEl = document.getElementById('walletHealth');
+        if (healthEl && walletBal > 0) {
+          healthEl.textContent = `~${smsAffordable.toLocaleString('en-NG')} more SMS sends`;
+          healthEl.style.display = 'block';
+        }
 
         // ── Recent campaigns table ──
         const { data: recentCamps } = await supabase
           .from('campaigns')
-          .select('name, type, total_recipients, total_delivered, status')
+          .select('name, type, total_recipients, total_delivered, cost, status, sent_at, created_at')
           .eq('user_id', session.user.id)
           .order('created_at', { ascending: false })
           .limit(5);
@@ -2067,19 +2161,24 @@
         if (tb) {
           const chIcon = { sms: "💬", email: "📧", otp: "🔐", whatsapp: "💚" };
           if (!recentCamps || recentCamps.length === 0) {
-            tb.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:32px 0;color:var(--text-muted);font-size:13px">No campaigns yet.</td></tr>`;
+            tb.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:32px 0;color:var(--muted);font-size:13px">No campaigns yet.</td></tr>`;
           } else {
             tb.innerHTML = recentCamps.map(c => {
-              const sent = c.total_recipients || 0;
-              const del  = c.total_delivered  || 0;
-              const rate = sent > 0 ? ((del / sent) * 100).toFixed(1) + "%" : "—";
-              const sentLabel = c.status === "sending" ? "Sending…" : sent ? sent.toLocaleString() : "—";
+              const sent    = c.total_recipients || 0;
+              const del     = c.total_delivered  || 0;
+              const rate    = sent > 0 ? ((del / sent) * 100).toFixed(1) + "%" : "—";
+              const chLabel = { sms: "Bulk SMS", email: "Email", otp: "OTP", whatsapp: "WhatsApp" };
+              const sub     = chLabel[(c.type||'sms').toLowerCase()] || "Bulk SMS";
+              const statusClass = c.status === 'sent' ? 'sent' : c.status === 'sending' ? 'sending' : c.status === 'failed' ? 'failed' : c.status;
               return `<tr>
-                <td style="padding:0.65rem 0;border-bottom:1px solid rgba(255,255,255,0.04)"><div class="campaign-name">${c.name}</div><div class="campaign-sub">${c.type || "SMS"}</div></td>
-                <td style="padding:0.65rem 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:14px">${chIcon[c.type] || "💬"}</td>
-                <td style="padding:0.65rem 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:13px">${sentLabel}</td>
+                <td style="padding:0.65rem 0;border-bottom:1px solid rgba(255,255,255,0.04)">
+                  <div class="campaign-name">${c.name}</div>
+                  <div class="campaign-sub" style="color:var(--muted);font-size:11px;margin-top:2px">${sub}</div>
+                </td>
+                <td style="padding:0.65rem 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:14px">${chIcon[(c.type||'sms').toLowerCase()] || "💬"}</td>
+                <td style="padding:0.65rem 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:13px">${sent ? sent.toLocaleString() : '—'}</td>
                 <td style="padding:0.65rem 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:13px;font-weight:600">${rate}</td>
-                <td style="padding:0.65rem 0;border-bottom:1px solid rgba(255,255,255,0.04)"><span class="status-pill ${c.status}">${c.status.charAt(0).toUpperCase() + c.status.slice(1)}</span></td>
+                <td style="padding:0.65rem 0;border-bottom:1px solid rgba(255,255,255,0.04)"><span class="status-pill ${statusClass}">${c.status.charAt(0).toUpperCase() + c.status.slice(1)}</span></td>
               </tr>`;
             }).join("");
           }

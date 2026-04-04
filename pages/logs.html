@@ -12,6 +12,30 @@
     />
     <link rel="stylesheet" href="../assets/css/dashboard.css" />
     <style>
+      .insight-card {
+        background: linear-gradient(135deg, rgba(0,232,122,0.06) 0%, rgba(0,180,255,0.04) 100%);
+        border: 1px solid rgba(0,232,122,0.2);
+        border-radius: var(--radius-md);
+        padding: 1rem 1.25rem;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 14px;
+        color: var(--text);
+        line-height: 1.6;
+        margin-bottom: 1rem;
+      }
+      .insight-card .insight-icon {
+        font-size: 22px;
+        flex-shrink: 0;
+      }
+      .insight-card strong { color: #00E87A; }
+      .insight-card .insight-warn { color: #FF6B6B; }
+      .insight-card.no-data {
+        border-color: rgba(255,255,255,0.08);
+        background: transparent;
+        color: var(--muted);
+      }
       .filter-bar {
         display: flex;
         align-items: center;
@@ -45,7 +69,7 @@
       }
       .log-row {
         display: grid;
-        grid-template-columns: 140px 1fr 100px 80px 100px 90px 36px;
+        grid-template-columns: 130px 200px 80px 80px 110px 90px 36px;
         align-items: center;
         gap: 1rem;
         padding: 0.75rem 1rem;
@@ -62,7 +86,7 @@
       }
       .log-header {
         display: grid;
-        grid-template-columns: 140px 1fr 100px 80px 100px 90px 36px;
+        grid-template-columns: 130px 200px 80px 80px 110px 90px 36px;
         gap: 1rem;
         padding: 0 1rem 0.6rem;
         font-size: 10px;
@@ -205,22 +229,18 @@
                 <div class="live-dot"></div>
                 Live
               </div>
-              <button class="btn-secondary" onclick="exportLogs()">
-                <svg
-                  width="13"
-                  height="13"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                >
-                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                  <polyline points="7 10 12 15 17 10" />
-                  <line x1="12" y1="15" x2="12" y2="3" />
-                </svg>
-                Export CSV
-              </button>
+              <div style="display:flex;gap:8px;">
+                <button class="btn-secondary" onclick="exportLogs('csv')">⬇ CSV</button>
+                <button class="btn-secondary" onclick="exportLogs('excel')">⬇ Excel</button>
+                <button class="btn-secondary" onclick="exportLogs('pdf')">⬇ PDF</button>
+              </div>
             </div>
+          </div>
+
+          <!-- PLAIN-ENGLISH INSIGHT -->
+          <div class="insight-card no-data" id="insightCard">
+            <span class="insight-icon">💬</span>
+            <span id="insightText">Loading your summary…</span>
           </div>
 
           <!-- STATS -->
@@ -231,9 +251,7 @@
                 <div class="stat-icon green">✅</div>
               </div>
               <div class="stat-val green" id="lStatDel">0</div>
-              <div class="stat-change up">
-                ↑ 12.4% <span>vs yesterday</span>
-              </div>
+              <div class="stat-change" id="lStatDelChange">—</div>
             </div>
             <div class="stat-card amber">
               <div class="stat-card-top">
@@ -241,7 +259,7 @@
                 <div class="stat-icon amber">⏳</div>
               </div>
               <div class="stat-val amber" id="lStatPend">0</div>
-              <div class="stat-change up">↓ 3.1% <span>vs yesterday</span></div>
+              <div class="stat-change" id="lStatPendChange">—</div>
             </div>
             <div class="stat-card red">
               <div class="stat-card-top">
@@ -249,15 +267,15 @@
                 <div class="stat-icon red">⚠️</div>
               </div>
               <div class="stat-val red" id="lStatFail">0</div>
-              <div class="stat-change down">↑ 28 <span>vs yesterday</span></div>
+              <div class="stat-change" id="lStatFailChange">—</div>
             </div>
             <div class="stat-card blue">
               <div class="stat-card-top">
                 <div class="stat-label">Delivery Rate</div>
                 <div class="stat-icon blue">📈</div>
               </div>
-              <div class="stat-val blue">98.6%</div>
-              <div class="stat-change up">↑ 0.2% <span>vs yesterday</span></div>
+              <div class="stat-val blue" id="lStatRate">—</div>
+              <div class="stat-change" id="lStatRateChange">—</div>
             </div>
           </div>
 
@@ -290,8 +308,8 @@
             </select>
             <select id="filterStatus" onchange="filterLogs()">
               <option value="all">All Statuses</option>
-              <option value="sent">Delivered</option>
-              <option value="sending">Sending</option>
+              <option value="delivered">Delivered</option>
+              <option value="sent">Sent</option>
               <option value="failed">Failed</option>
             </select>
             <select id="filterNetwork" onchange="filterLogs()">
@@ -315,21 +333,8 @@
             </div>
             <div id="logsContainer"></div>
             <div class="pagination">
-              <span class="text-muted text-sm" id="pageInfo"
-                >Showing 1–20 of 1,073</span
-              >
-              <div class="page-btns">
-                <button class="page-btn">‹</button>
-                <button class="page-btn active">1</button>
-                <button class="page-btn">2</button>
-                <button class="page-btn">3</button>
-                <span
-                  style="color: var(--muted); padding: 0 4px; font-size: 13px"
-                  >…</span
-                >
-                <button class="page-btn">54</button>
-                <button class="page-btn">›</button>
-              </div>
+              <span class="text-muted text-sm" id="pageInfo">Showing 0 of 0</span>
+              <div class="page-btns" id="pageBtns"></div>
             </div>
           </div>
         </main>
@@ -345,6 +350,7 @@
     <script src="../assets/js/topbar.js"></script>
     <script type="module">
       import { supabase } from "../assets/js/supabase-config.js";
+      import { exportCSV as exportCSVFn, exportExcel as exportExcelFn, exportPDF as exportPDFFn } from "../assets/js/export-utils.js";
       "use strict";
 
       function animateCount(id, target) {
@@ -361,33 +367,143 @@
 
       const chIcons = { sms: "💬", email: "📧", otp: "🔐", "2fa": "🛡️" };
 
+      // ── Nigerian carrier lookup by number prefix ──
+      const NG_PREFIXES = {
+        MTN:    ["0803","0806","0703","0706","0813","0816","0810","0814","0903","0906","0913","0916",
+                 "2348030","2348060","2347030","2347060","2348130","2348160","2348100","2348140","2349030","2349060","2349130","2349160"],
+        Airtel: ["0802","0808","0708","0812","0701","0902","0907","0901","0912",
+                 "2348020","2348080","2347080","2348120","2347010","2349020","2349070","2349010","2349120"],
+        Glo:    ["0805","0807","0705","0815","0811","0905","0915",
+                 "2348050","2348070","2347050","2348150","2348110","2349050","2349150"],
+        "9mobile": ["0809","0818","0817","0908","0909",
+                    "2348090","2348180","2348170","2349080","2349090"],
+      };
+
+      function guessNetwork(phone) {
+        if (!phone) return null;
+        const p = String(phone).replace(/\s+/g, "");
+        // Normalise to local format for prefix check
+        const local = p.startsWith("234") ? "0" + p.slice(3) : p.startsWith("+234") ? "0" + p.slice(4) : p;
+        const prefix4 = local.slice(0, 4);
+        for (const [carrier, prefixes] of Object.entries(NG_PREFIXES)) {
+          if (prefixes.includes(prefix4)) return carrier;
+        }
+        return null;
+      }
+
       // ── Load real data from Supabase ──
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) { window.location.href = "../login.html"; }
 
-      const { data: msgs } = await supabase
-        .from('messages')
-        .select('id, type, recipient, status, network, cost, created_at, sent_at, delivered_at, provider_ref, campaigns(name)')
-        .eq('user_id', session.user.id)
-        .order('created_at', { ascending: false })
-        .limit(200);
+      // Date boundaries (WAT = UTC+1)
+      const nowUTC      = new Date();
+      const todayStart  = new Date(nowUTC); todayStart.setUTCHours(todayStart.getUTCHours() - 1); // rough WAT midnight
+      const todayStr    = new Date(Date.now() - 60*60*1000).toISOString().slice(0,10); // YYYY-MM-DD in WAT
+      const todayFrom   = todayStr + 'T00:00:00+01:00';
+      const todayTo     = todayStr + 'T23:59:59+01:00';
+      const yestStr     = new Date(Date.now() - 60*60*1000 - 86400000).toISOString().slice(0,10);
+      const yestFrom    = yestStr  + 'T00:00:00+01:00';
+      const yestTo      = yestStr  + 'T23:59:59+01:00';
 
-      const allMsgs = msgs || [];
+      // Fetch today's messages + yesterday's for comparison (parallel)
+      const [todayRes, yestRes, allRes] = await Promise.all([
+        supabase.from('messages').select('id, status')
+          .eq('user_id', session.user.id)
+          .gte('created_at', todayFrom).lte('created_at', todayTo),
+        supabase.from('messages').select('id, status')
+          .eq('user_id', session.user.id)
+          .gte('created_at', yestFrom).lte('created_at', yestTo),
+        supabase.from('messages')
+          .select('id, type, recipient, status, network, cost, created_at, sent_at, delivered_at, provider_ref, campaigns(name, message)')
+          .eq('user_id', session.user.id)
+          .order('created_at', { ascending: false })
+          .limit(200),
+      ]);
 
-      // Stat counts
-      const delivered = allMsgs.filter(m => m.status === 'delivered').length;
-      const pending   = allMsgs.filter(m => m.status === 'pending' || m.status === 'sent').length;
-      const failed    = allMsgs.filter(m => m.status === 'failed' || m.status === 'bounced' || m.status === 'expired').length;
+      if (allRes.error) console.error("Failed to load messages:", allRes.error.message);
+
+      const allMsgs   = allRes.data  || [];
+      const todayMsgs = todayRes.data || [];
+      const yestMsgs  = yestRes.data  || [];
+
+      // Today's counts
+      const delivered  = todayMsgs.filter(m => m.status === 'delivered').length;
+      const pending    = todayMsgs.filter(m => m.status === 'sent' || m.status === 'pending').length;
+      const failed     = todayMsgs.filter(m => m.status === 'failed' || m.status === 'bounced' || m.status === 'expired').length;
+      const totalToday = todayMsgs.length;
+      const rate       = totalToday > 0 ? ((delivered / totalToday) * 100).toFixed(1) : null;
+
+      // Yesterday's counts
+      const yDel   = yestMsgs.filter(m => m.status === 'delivered').length;
+      const yPend  = yestMsgs.filter(m => m.status === 'sent' || m.status === 'pending').length;
+      const yFail  = yestMsgs.filter(m => m.status === 'failed' || m.status === 'bounced' || m.status === 'expired').length;
+      const yTotal = yestMsgs.length;
+      const yRate  = yTotal > 0 ? (yDel / yTotal) * 100 : null;
+
+      function changeBadge(elId, today, yesterday, higherIsBetter = true) {
+        const el = document.getElementById(elId);
+        if (!el) return;
+        if (yesterday === 0 && today === 0) { el.textContent = '— vs yesterday'; el.className = 'stat-change'; return; }
+        const diff = today - yesterday;
+        if (diff === 0) { el.textContent = '↔ No change vs yesterday'; el.className = 'stat-change'; return; }
+        const isGood = higherIsBetter ? diff > 0 : diff < 0;
+        const arrow  = diff > 0 ? '↑' : '↓';
+        const pct    = yesterday > 0 ? Math.abs(((diff / yesterday) * 100).toFixed(1)) + '%' : Math.abs(diff);
+        el.textContent = `${arrow} ${pct} vs yesterday`;
+        el.className   = `stat-change ${isGood ? 'up' : 'down'}`;
+      }
 
       setTimeout(() => {
         animateCount("lStatDel",  delivered);
         animateCount("lStatPend", pending);
         animateCount("lStatFail", failed);
-        // Delivery rate
-        const total = allMsgs.length;
-        const rate  = total > 0 ? ((delivered / total) * 100).toFixed(1) + '%' : '—';
+
         const rateEl = document.getElementById('lStatRate');
-        if (rateEl) rateEl.textContent = rate;
+        if (rateEl) rateEl.textContent = rate !== null ? rate + '%' : '—';
+
+        changeBadge('lStatDelChange',  delivered, yDel,  true);
+        changeBadge('lStatPendChange', pending,   yPend, false);
+        changeBadge('lStatFailChange', failed,    yFail, false);
+
+        const rateChangeEl = document.getElementById('lStatRateChange');
+        if (rateChangeEl) {
+          if (rate === null) { rateChangeEl.textContent = '— vs yesterday'; }
+          else {
+            const rateDiff = yRate !== null ? (parseFloat(rate) - yRate).toFixed(1) : null;
+            if (rateDiff === null) { rateChangeEl.textContent = '— vs yesterday'; }
+            else {
+              const arrow = rateDiff >= 0 ? '↑' : '↓';
+              rateChangeEl.textContent = `${arrow} ${Math.abs(rateDiff)}% vs yesterday`;
+              rateChangeEl.className   = `stat-change ${rateDiff >= 0 ? 'up' : 'down'}`;
+            }
+          }
+        }
+
+
+        // ── Plain-English insight ──
+        const card       = document.getElementById('insightCard');
+        const insightEl  = document.getElementById('insightText');
+        const totalSpent = todayMsgs.reduce((sum, m) => sum + (Number(m.cost) || 0), 0);
+        const costPerDel = delivered > 0 ? (totalSpent / delivered).toFixed(2) : null;
+
+        if (totalToday === 0) {
+          card.className = 'insight-card no-data';
+          insightEl.innerHTML = "No messages sent today yet. Send a campaign and your results will show up here.";
+        } else if (delivered === 0) {
+          card.className = 'insight-card';
+          insightEl.innerHTML = `You sent <strong>${totalToday}</strong> message${totalToday > 1 ? 's' : ''} today but none have been confirmed delivered yet — they may still be in transit.`;
+        } else {
+          card.className = 'insight-card';
+          const spent    = totalSpent > 0 ? `You spent <strong>₦${totalSpent.toLocaleString('en-NG')}</strong> and ` : '';
+          const reached  = `<strong>${delivered}</strong> out of <strong>${totalToday}</strong> people actually received your message`;
+          const costNote = costPerDel ? ` — that's <strong>₦${costPerDel}</strong> per person reached` : '';
+          let   extra    = '';
+          if (failed > 0) {
+            const lostMoney = (failed * 6).toLocaleString('en-NG');
+            extra = ` <span class="insight-warn">${failed} message${failed > 1 ? 's' : ''} didn't go through (₦${lostMoney} undelivered).</span>`;
+          }
+          insightEl.innerHTML = `${spent}${reached}${costNote}.${extra}`;
+        }
       }, 300);
 
       // Map to display format
@@ -395,54 +511,88 @@
         id:      'NP-' + m.id.slice(0, 8).toUpperCase(),
         to:      m.recipient,
         ch:      m.type.toUpperCase(),
-        network: m.network || '—',
+        network: m.network || guessNetwork(m.recipient) || '—',
         camp:    m.campaigns?.name || '—',
-        time:    m.created_at ? new Date(m.created_at).toLocaleTimeString('en-NG', { hour: '2-digit', minute: '2-digit' }) : '—',
+        message: m.campaigns?.message || null,
+        time:    m.created_at ? new Date(m.created_at).toLocaleString('en-NG', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) : '—',
         status:  m.status,
         msgId:   m.provider_ref || m.id,
         cost:    m.cost ? '₦' + Number(m.cost).toFixed(2) : '—',
+        rawDate: m.created_at || null,
       }));
 
-      function renderLogs(data) {
+      const PAGE_SIZE = 20;
+      let currentPage = 1;
+      let activeData  = allLogs;
+
+      function renderLogs(data, page) {
+        page = page || 1;
         const container = document.getElementById("logsContainer");
         if (!data || data.length === 0) {
           container.innerHTML = `<div style="text-align:center;padding:3rem;color:var(--muted);font-size:14px">No delivery logs yet — logs appear here once you send your first message.</div>`;
           document.getElementById("pageInfo").textContent = "Showing 0 of 0";
+          document.getElementById("pageBtns").innerHTML = "";
           return;
         }
-        container.innerHTML = data
-          .slice(0, 20)
-          .map(
-            (l, i) => `
+        const start   = (page - 1) * PAGE_SIZE;
+        const pageData = data.slice(start, start + PAGE_SIZE);
+        const end     = start + pageData.length;
+        const total   = data.length;
+        const pages   = Math.ceil(total / PAGE_SIZE);
+
+        container.innerHTML = pageData.map((l, i) => `
     <div>
-      <div class="log-row" onclick="toggleDetail('d${i}')">
+      <div class="log-row" onclick="toggleDetail('d${start + i}')">
         <span class="log-id">${l.id}</span>
         <div>
           <div class="log-to-val">${l.to}</div>
-          <div class="log-camp">${l.camp}</div>
+          <div class="log-camp">${l.message ? l.message.slice(0, 55) + (l.message.length > 55 ? '…' : '') : l.camp}</div>
         </div>
-        <span>${chIcons[l.ch]} ${l.ch}</span>
+        <span>${chIcons[l.ch] || ''} ${l.ch}</span>
         <span class="text-muted text-sm">${l.network}</span>
         <span class="text-muted text-sm">${l.time}</span>
         <span class="status-pill ${l.status}">${l.status.charAt(0).toUpperCase() + l.status.slice(1)}</span>
         <button class="expand-btn" aria-label="Expand">⌄</button>
       </div>
-      <div class="log-detail" id="d${i}">
+      <div class="log-detail" id="d${start + i}">
         <div class="detail-grid">
           <div class="detail-item"><label>Message ID</label><span class="font-mono">${l.id}</span></div>
           <div class="detail-item"><label>Platform ID</label><span class="font-mono">${l.msgId}</span></div>
           <div class="detail-item"><label>Channel</label><span>${l.ch}</span></div>
           <div class="detail-item"><label>Network</label><span>${l.network}</span></div>
-          <div class="detail-item"><label>Latency</label><span>${l.latency}</span></div>
           <div class="detail-item"><label>Cost</label><span>${l.cost}</span></div>
           <div class="detail-item"><label>Campaign</label><span>${l.camp}</span></div>
+          <div class="detail-item"><label>Sent At</label><span>${l.time}</span></div>
           <div class="detail-item"><label>Status</label><span class="status-pill ${l.status}" style="display:inline-flex">${l.status}</span></div>
+          ${l.message ? `<div class="detail-item" style="grid-column:1/-1"><label>Message Sent</label><span style="white-space:pre-wrap;line-height:1.6;color:var(--text)">${l.message.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</span></div>` : ''}
         </div>
       </div>
-    </div>`,
-          )
-          .join("");
+    </div>`).join("");
+
+        document.getElementById("pageInfo").textContent =
+          `Showing ${(start + 1).toLocaleString()}–${end.toLocaleString()} of ${total.toLocaleString()}`;
+
+        // Render pagination buttons
+        const pageBtns = document.getElementById("pageBtns");
+        if (pages <= 1) { pageBtns.innerHTML = ""; return; }
+        let btns = `<button class="page-btn" onclick="goPage(${page - 1})" ${page === 1 ? 'disabled' : ''}>‹</button>`;
+        for (let p = 1; p <= pages; p++) {
+          if (p === 1 || p === pages || (p >= page - 1 && p <= page + 1)) {
+            btns += `<button class="page-btn ${p === page ? 'active' : ''}" onclick="goPage(${p})">${p}</button>`;
+          } else if (p === page - 2 || p === page + 2) {
+            btns += `<span style="color:var(--muted);padding:0 4px;font-size:13px">…</span>`;
+          }
+        }
+        btns += `<button class="page-btn" onclick="goPage(${page + 1})" ${page === pages ? 'disabled' : ''}>›</button>`;
+        pageBtns.innerHTML = btns;
       }
+
+      window.goPage = function(p) {
+        const pages = Math.ceil(activeData.length / PAGE_SIZE);
+        if (p < 1 || p > pages) return;
+        currentPage = p;
+        renderLogs(activeData, currentPage);
+      };
 
       function toggleDetail(id) {
         const el = document.getElementById(id);
@@ -450,22 +600,21 @@
       }
 
       function filterLogs() {
-        const q = document.getElementById("logSearch").value.toLowerCase();
+        const q  = document.getElementById("logSearch").value.toLowerCase();
         const ch = document.getElementById("filterChannel").value;
         const st = document.getElementById("filterStatus").value;
         const nw = document.getElementById("filterNetwork").value;
-        const filtered = allLogs.filter(
-          (l) =>
-            (!q ||
-              l.to.toLowerCase().includes(q) ||
-              l.id.toLowerCase().includes(q)) &&
-            (ch === "all" || l.ch === ch) &&
-            (st === "all" || l.status === st) &&
-            (nw === "all" || l.network === nw),
+        activeData = allLogs.filter(l =>
+          (!q || l.to.toLowerCase().includes(q) ||
+                 l.id.toLowerCase().includes(q) ||
+                 (l.message && l.message.toLowerCase().includes(q)) ||
+                 l.camp.toLowerCase().includes(q)) &&
+          (ch === "all" || l.ch === ch) &&
+          (st === "all" || l.status === st) &&
+          (nw === "all" || l.network === nw)
         );
-        renderLogs(filtered);
-        document.getElementById("pageInfo").textContent =
-          `Showing 1–${Math.min(20, filtered.length)} of ${filtered.length.toLocaleString()}`;
+        currentPage = 1;
+        renderLogs(activeData, 1);
       }
 
       function resetFilters() {
@@ -473,19 +622,118 @@
         document.getElementById("filterChannel").value = "all";
         document.getElementById("filterStatus").value = "all";
         document.getElementById("filterNetwork").value = "all";
-        renderLogs(allLogs);
+        activeData  = allLogs;
+        currentPage = 1;
+        renderLogs(activeData, 1);
       }
 
-      function exportLogs() {
-        alert("Exporting logs to CSV… (connect to backend)");
+      // Expose to global scope so inline onclick/oninput handlers can reach them
+      window.filterLogs    = filterLogs;
+      window.resetFilters  = resetFilters;
+      window.toggleDetail  = toggleDetail;
+      window.exportLogs    = exportLogs;
+
+      async function exportLogs(format) {
+        const rows = activeData.map(l => ({
+          id:        l.id,
+          recipient: l.to,
+          channel:   l.ch,
+          network:   l.network,
+          campaign:  l.camp,
+          message:   l.message || '',
+          status:    l.status,
+          cost:      l.cost,
+          sent_at:   l.time,
+        }));
+        const cols = [
+          { key: 'id',        label: 'Message ID'  },
+          { key: 'recipient', label: 'Recipient'   },
+          { key: 'channel',   label: 'Channel'     },
+          { key: 'network',   label: 'Network'     },
+          { key: 'campaign',  label: 'Campaign'    },
+          { key: 'message',   label: 'Message'     },
+          { key: 'status',    label: 'Status'      },
+          { key: 'cost',      label: 'Cost'        },
+          { key: 'sent_at',   label: 'Sent At'     },
+        ];
+        const filename = `notifypro-logs-${new Date().toISOString().slice(0,10)}`;
+        if (format === 'csv')        { exportCSVFn(rows, cols, filename + '.csv'); }
+        else if (format === 'excel') { exportExcelFn(rows, cols, filename + '.xls'); }
+        else if (format === 'pdf')   { exportPDFFn(rows, cols, 'NotifyPro Delivery Logs'); }
       }
 
       // Initial render
-      renderLogs(allLogs);
+      renderLogs(allLogs, 1);
 
-      // Make filter functions work with real data
       window._allLogs = allLogs;
-      window.filterLogsData = function() { filterLogs(); };
+
+      // ── Supabase Realtime: live status updates ──
+      // When termii-webhook updates a message row, flip the status badge
+      // in the DOM instantly — no page reload needed.
+      supabase
+        .channel("logs-realtime")
+        .on(
+          "postgres_changes",
+          {
+            event:  "UPDATE",
+            schema: "public",
+            table:  "messages",
+            filter: `user_id=eq.${session.user.id}`,
+          },
+          (payload) => {
+            const updated = payload.new;
+            if (!updated) return;
+
+            // Update in allLogs array so filters stay accurate
+            const idx = allLogs.findIndex(l => l.msgId === updated.provider_ref || l.id === 'NP-' + updated.id.slice(0, 8).toUpperCase());
+            if (idx !== -1) {
+              allLogs[idx].status = updated.status;
+              if (updated.network) allLogs[idx].network = updated.network;
+            }
+
+            // Update any visible status pill without a full re-render
+            document.querySelectorAll(".status-pill").forEach(pill => {
+              const row = pill.closest(".log-row");
+              if (!row) return;
+              const idEl = row.querySelector(".log-id");
+              if (!idEl) return;
+              const displayId = 'NP-' + updated.id.slice(0, 8).toUpperCase();
+              if (idEl.textContent.trim() === displayId) {
+                const label = updated.status.charAt(0).toUpperCase() + updated.status.slice(1);
+                pill.className = `status-pill ${updated.status}`;
+                pill.textContent = label;
+
+                // Also update the detail panel pill if open
+                const detailPill = pill.closest("div")?.nextElementSibling?.querySelector(".status-pill");
+                if (detailPill) {
+                  detailPill.className = `status-pill ${updated.status}`;
+                  detailPill.textContent = updated.status;
+                }
+
+                // Flash the row green briefly to signal the update
+                row.style.transition = "background 0.4s";
+                row.style.background = "rgba(0,232,122,0.08)";
+                setTimeout(() => { row.style.background = ""; }, 1500);
+              }
+            });
+
+            // Recount today's stats live (filter allLogs to today only)
+            const todayLogs = allLogs.filter(l => l.rawDate && l.rawDate >= todayFrom);
+            const tDel   = todayLogs.filter(m => m.status === 'delivered').length;
+            const tPend  = todayLogs.filter(m => m.status === 'pending' || m.status === 'sent').length;
+            const tFail  = todayLogs.filter(m => m.status === 'failed' || m.status === 'bounced' || m.status === 'expired').length;
+            const tTotal = todayLogs.length;
+            const delEl  = document.getElementById("lStatDel");
+            const pendEl = document.getElementById("lStatPend");
+            const failEl = document.getElementById("lStatFail");
+            const rateEl = document.getElementById("lStatRate");
+            if (delEl)  delEl.textContent  = tDel.toLocaleString("en-NG");
+            if (pendEl) pendEl.textContent = tPend.toLocaleString("en-NG");
+            if (failEl) failEl.textContent = tFail.toLocaleString("en-NG");
+            if (rateEl) rateEl.textContent = tTotal > 0 ? ((tDel / tTotal) * 100).toFixed(1) + '%' : '—';
+          }
+        )
+        .subscribe();
     </script>
   </body>
 </html>

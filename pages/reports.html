@@ -12,6 +12,26 @@
     />
     <link rel="stylesheet" href="../assets/css/dashboard.css" />
     <style>
+      .channel-tabs {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 1.25rem;
+        flex-wrap: wrap;
+      }
+      .ch-tab {
+        padding: 7px 18px;
+        border-radius: 20px;
+        border: 1px solid var(--card-border);
+        background: var(--bg2);
+        color: var(--muted);
+        font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.18s;
+        font-family: var(--font-body);
+      }
+      .ch-tab:hover { border-color: rgba(0,232,122,0.3); color: var(--text); }
+      .ch-tab.active { background: rgba(0,232,122,0.12); border-color: rgba(0,232,122,0.4); color: #00E87A; }
       .two-col {
         display: grid;
         grid-template-columns: 1fr 1fr;
@@ -140,26 +160,24 @@
                   <line x1="8" y1="2" x2="8" y2="6" />
                   <line x1="3" y1="10" x2="21" y2="10" />
                 </svg>
-                <input type="date" value="2026-03-01" id="dateFrom" />
+                <input type="date" id="dateFrom" onchange="applyDateRange()" />
                 <span style="color: var(--muted)">—</span>
-                <input type="date" value="2026-03-26" id="dateTo" />
+                <input type="date" id="dateTo" onchange="applyDateRange()" />
               </div>
-              <button class="btn-secondary" onclick="exportReport()">
-                <svg
-                  width="13"
-                  height="13"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                >
-                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                  <polyline points="7 10 12 15 17 10" />
-                  <line x1="12" y1="15" x2="12" y2="3" />
-                </svg>
-                Export CSV
-              </button>
+              <div style="display:flex;gap:8px;align-items:center;">
+                <button class="btn-secondary" onclick="exportReport('csv')">⬇ CSV</button>
+                <button class="btn-secondary" onclick="exportReport('excel')">⬇ Excel</button>
+                <button class="btn-secondary" onclick="exportReport('pdf')">⬇ PDF</button>
+              </div>
             </div>
+          </div>
+
+          <!-- CHANNEL TABS -->
+          <div class="channel-tabs">
+            <button class="ch-tab active" onclick="setChannel('all',   this)">All Channels</button>
+            <button class="ch-tab"        onclick="setChannel('sms',   this)">💬 Bulk SMS</button>
+            <button class="ch-tab"        onclick="setChannel('email', this)">📧 Email</button>
+            <button class="ch-tab"        onclick="setChannel('otp',   this)">🔐 OTP & 2FA</button>
           </div>
 
           <!-- STATS -->
@@ -170,9 +188,7 @@
                 <div class="stat-icon green">📊</div>
               </div>
               <div class="stat-val green" id="rStatTotal">0</div>
-              <div class="stat-change up">
-                ↑ 14.3% <span>vs last period</span>
-              </div>
+              <div id="rStatTotalChange" class="stat-change">— vs last period</div>
             </div>
             <div class="stat-card blue">
               <div class="stat-card-top">
@@ -180,9 +196,7 @@
                 <div class="stat-icon blue">✅</div>
               </div>
               <div class="stat-val blue" id="rStatDelivered">0</div>
-              <div class="stat-change up">
-                ↑ 13.8% <span>vs last period</span>
-              </div>
+              <div id="rStatDeliveredChange" class="stat-change">— vs last period</div>
             </div>
             <div class="stat-card amber">
               <div class="stat-card-top">
@@ -190,9 +204,7 @@
                 <div class="stat-icon amber">💰</div>
               </div>
               <div class="stat-val amber" id="rStatSpend">₦0</div>
-              <div class="stat-change up">
-                ↑ 11.2% <span>vs last period</span>
-              </div>
+              <div id="rStatSpendChange" class="stat-change">— vs last period</div>
             </div>
             <div class="stat-card red">
               <div class="stat-card-top">
@@ -200,7 +212,7 @@
                 <div class="stat-icon red">⚠️</div>
               </div>
               <div class="stat-val red" id="rStatFail">0%</div>
-              <div class="stat-change down">↓ 0.3% <span>improved</span></div>
+              <div id="rStatFailChange" class="stat-change">— vs last period</div>
             </div>
           </div>
 
@@ -283,48 +295,12 @@
                       stroke="rgba(255,255,255,0.05)"
                       stroke-width="14"
                     />
-                    <!-- SMS 72% -->
-                    <circle
-                      cx="65"
-                      cy="65"
-                      r="50"
-                      fill="none"
-                      stroke="var(--accent)"
-                      stroke-width="14"
-                      stroke-dasharray="314"
-                      stroke-dashoffset="88"
-                      stroke-linecap="round"
-                      transform="rotate(-90 65 65)"
-                    />
-                    <!-- Email 20% -->
-                    <circle
-                      cx="65"
-                      cy="65"
-                      r="50"
-                      fill="none"
-                      stroke="var(--accent2)"
-                      stroke-width="14"
-                      stroke-dasharray="314"
-                      stroke-dashoffset="251"
-                      stroke-linecap="round"
-                      transform="rotate(169 65 65)"
-                    />
-                    <!-- OTP 8% -->
-                    <circle
-                      cx="65"
-                      cy="65"
-                      r="50"
-                      fill="none"
-                      stroke="var(--accent3)"
-                      stroke-width="14"
-                      stroke-dasharray="314"
-                      stroke-dashoffset="289"
-                      stroke-linecap="round"
-                      transform="rotate(241 65 65)"
-                    />
+                    <circle id="donutSMS"   cx="65" cy="65" r="50" fill="none" stroke="var(--accent)"  stroke-width="14" stroke-dasharray="314" stroke-dashoffset="314" stroke-linecap="round" transform="rotate(-90 65 65)"/>
+                    <circle id="donutEmail" cx="65" cy="65" r="50" fill="none" stroke="var(--accent2)" stroke-width="14" stroke-dasharray="314" stroke-dashoffset="314" stroke-linecap="round" transform="rotate(-90 65 65)"/>
+                    <circle id="donutOTP"   cx="65" cy="65" r="50" fill="none" stroke="var(--accent3)" stroke-width="14" stroke-dasharray="314" stroke-dashoffset="314" stroke-linecap="round" transform="rotate(-90 65 65)"/>
                   </svg>
                   <div class="donut-center">
-                    <div class="donut-val">1.07M</div>
+                    <div class="donut-val" id="donutTotal">—</div>
                     <div class="donut-lbl">Total</div>
                   </div>
                 </div>
@@ -335,28 +311,22 @@
                       style="background: var(--accent)"
                     ></div>
                     Bulk SMS
-                    <div class="legend-line-val text-green">72%</div>
+                    <div class="legend-line-val text-green" id="distSmsPct">—</div>
                   </div>
                   <div class="legend-line">
-                    <div
-                      class="legend-swatch"
-                      style="background: var(--accent2)"
-                    ></div>
+                    <div class="legend-swatch" style="background: var(--accent2)"></div>
                     Email
-                    <div class="legend-line-val text-blue">20%</div>
+                    <div class="legend-line-val text-blue" id="distEmailPct">—</div>
                   </div>
                   <div class="legend-line">
-                    <div
-                      class="legend-swatch"
-                      style="background: var(--accent3)"
-                    ></div>
+                    <div class="legend-swatch" style="background: var(--accent3)"></div>
                     OTP & 2FA
-                    <div class="legend-line-val text-amber">8%</div>
+                    <div class="legend-line-val text-amber" id="distOtpPct">—</div>
                   </div>
                   <hr class="divider" />
                   <div class="legend-line text-sm text-muted">
                     Delivery Rate
-                    <div class="legend-line-val text-green fw-bold">98.6%</div>
+                    <div class="legend-line-val text-green fw-bold" id="distDelRate">—</div>
                   </div>
                 </div>
               </div>
@@ -372,75 +342,27 @@
                     <div style="font-size: 13px; font-weight: 500">
                       💬 Bulk SMS
                     </div>
-                    <div class="text-xs text-muted">771,840 messages × ₦6</div>
+                    <div class="text-xs text-muted" id="costSmsDetail">—</div>
                   </div>
-                  <div
-                    class="fw-bold font-display text-green"
-                    style="font-size: 15px"
-                  >
-                    ₦143,040
-                  </div>
+                  <div class="fw-bold font-display text-green" style="font-size:15px" id="costSmsAmt">—</div>
                 </div>
                 <div class="cost-item">
                   <div>
-                    <div style="font-size: 13px; font-weight: 500">
-                      📧 Email Campaigns
-                    </div>
-                    <div class="text-xs text-muted">218,045 emails</div>
+                    <div style="font-size:13px;font-weight:500">📧 Email Campaigns</div>
+                    <div class="text-xs text-muted" id="costEmailDetail">—</div>
                   </div>
-                  <div
-                    class="fw-bold font-display text-blue"
-                    style="font-size: 15px"
-                  >
-                    ₦32,707
-                  </div>
+                  <div class="fw-bold font-display text-blue" style="font-size:15px" id="costEmailAmt">—</div>
                 </div>
                 <div class="cost-item">
                   <div>
-                    <div style="font-size: 13px; font-weight: 500">
-                      🔐 OTP Verification
-                    </div>
-                    <div class="text-xs text-muted">12,481 verifications</div>
+                    <div style="font-size:13px;font-weight:500">🔐 OTP & 2FA</div>
+                    <div class="text-xs text-muted" id="costOtpDetail">—</div>
                   </div>
-                  <div
-                    class="fw-bold font-display text-amber"
-                    style="font-size: 15px"
-                  >
-                    ₦9,360
-                  </div>
+                  <div class="fw-bold font-display text-amber" style="font-size:15px" id="costOtpAmt">—</div>
                 </div>
-                <div class="cost-item">
-                  <div>
-                    <div style="font-size: 13px; font-weight: 500">
-                      🛡️ 2FA Auth
-                    </div>
-                    <div class="text-xs text-muted">4,920 authentications</div>
-                  </div>
-                  <div
-                    class="fw-bold font-display text-red"
-                    style="font-size: 15px"
-                  >
-                    ₦1,476
-                  </div>
-                </div>
-                <div
-                  style="
-                    margin-top: 1rem;
-                    padding-top: 1rem;
-                    border-top: 1px solid var(--card-border);
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                  "
-                >
-                  <span style="font-size: 13px; font-weight: 600"
-                    >Total This Period</span
-                  >
-                  <span
-                    class="font-display fw-bold"
-                    style="font-size: 22px; color: var(--accent)"
-                    >₦186,583</span
-                  >
+                <div style="margin-top:1rem;padding-top:1rem;border-top:1px solid var(--card-border);display:flex;justify-content:space-between;align-items:center;">
+                  <span style="font-size:13px;font-weight:600">Total This Period</span>
+                  <span class="font-display fw-bold" style="font-size:22px;color:var(--accent)" id="costTotal">—</span>
                 </div>
               </div>
             </div>
@@ -489,6 +411,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script type="module">
       import { supabase } from "../assets/js/supabase-config.js";
+      import { exportCSV, exportExcel, exportPDF } from "../assets/js/export-utils.js";
 
       function animateCount(id, target) {
         const el = document.getElementById(id);
@@ -503,209 +426,329 @@
         }, 16);
       }
 
-      async function loadReportStats() {
+      let activeChannel = "all";
+      let allMsgs = [], allCamps = [];
+
+      // ── Date range helpers ──
+      function getDateRange() {
+        const from = document.getElementById("dateFrom").value;
+        const to   = document.getElementById("dateTo").value;
+        return {
+          from: from ? new Date(from + "T00:00:00") : null,
+          to:   to   ? new Date(to   + "T23:59:59") : null,
+        };
+      }
+      function getPrevRange(from, to) {
+        // Previous period of same length
+        const len = to - from;
+        return { from: new Date(from - len), to: new Date(from) };
+      }
+      function inRange(dateStr, from, to) {
+        const d = new Date(dateStr);
+        return (!from || d >= from) && (!to || d <= to);
+      }
+
+      // Set default date inputs to last 30 days
+      (function setDefaultDates() {
+        const now   = new Date();
+        const ago30 = new Date(); ago30.setDate(ago30.getDate() - 30);
+        document.getElementById("dateTo").value   = now.toISOString().slice(0, 10);
+        document.getElementById("dateFrom").value = ago30.toISOString().slice(0, 10);
+      })();
+
+      // rc must exist before renderChart() is called inside init()
+      const ctx = document.getElementById("reportChart").getContext("2d");
+      let rc = new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels: [],
+          datasets: [
+            { label: "SMS",   data: [], backgroundColor: "rgba(0,232,122,0.6)", borderWidth: 0, borderRadius: 4 },
+            { label: "Email", data: [], backgroundColor: "rgba(0,191,255,0.6)", borderWidth: 0, borderRadius: 4 },
+            { label: "OTP",   data: [], backgroundColor: "rgba(255,184,0,0.6)", borderWidth: 0, borderRadius: 4 },
+          ],
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          interaction: { mode: "index", intersect: false },
+          plugins: { legend: { display: false }, tooltip: { backgroundColor: "#0D1117", borderColor: "rgba(255,255,255,0.08)", borderWidth: 1, titleColor: "#F0F4FF", bodyColor: "#8892A4", padding: 10 } },
+          scales: {
+            x: { grid: { display: false }, ticks: { color: "#8892A4", font: { family: "DM Sans", size: 11 } }, stacked: true },
+            y: { grid: { color: "rgba(255,255,255,0.04)" }, ticks: { color: "#8892A4", font: { family: "DM Sans", size: 11 }, callback: v => v >= 1000 ? (v/1000).toFixed(1)+"K" : v }, stacked: true },
+          },
+        },
+      });
+
+      let _session = null;
+
+      async function init() {
         const { data: { session } } = await supabase.auth.getSession();
         if (!session) return;
+        _session = session;
+        await fetchAndRender();
+      }
 
-        const thirtyDaysAgo = new Date();
-        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      async function fetchAndRender() {
+        if (!_session) return;
+        const { from, to } = getDateRange();
+        // Fetch a wider window (double the period) so we can compute prev period too
+        const periodMs  = from && to ? (to - from) : 30 * 86400000;
+        const fetchFrom = from ? new Date(from - periodMs) : new Date(Date.now() - 60 * 86400000);
 
-        const { data: msgs } = await supabase
-          .from("messages")
-          .select("status, cost")
-          .eq("user_id", session.user.id)
-          .gte("created_at", thirtyDaysAgo.toISOString());
+        const [msgRes, campRes] = await Promise.all([
+          supabase.from("messages")
+            .select("type, status, cost, created_at")
+            .eq("user_id", _session.user.id)
+            .gte("created_at", fetchFrom.toISOString()),
+          supabase.from("campaigns")
+            .select("name, type, total_recipients, total_delivered, cost, status, sent_at")
+            .eq("user_id", _session.user.id)
+            .in("status", ["sent","sending"])
+            .gte("sent_at", fetchFrom.toISOString())
+            .order("total_delivered", { ascending: false })
+            .limit(50),
+        ]);
 
-        const rows = msgs || [];
+        allMsgs  = msgRes.data  || [];
+        allCamps = campRes.data || [];
+        renderAll();
+      }
+
+      window.applyDateRange = function() { fetchAndRender(); };
+
+      function filterMsgs()  { return activeChannel === "all" ? allMsgs  : allMsgs.filter(m => (m.type||"sms").toLowerCase() === activeChannel); }
+      function filterCamps() { return activeChannel === "all" ? allCamps : allCamps.filter(c => (c.type||"sms").toLowerCase() === activeChannel); }
+
+      function renderStats() {
+        const { from, to } = getDateRange();
+        const periodMs = from && to ? (to - from) : 30 * 86400000;
+        const prevFrom = from ? new Date(from - periodMs) : null;
+
+        const rows     = filterMsgs().filter(m => inRange(m.created_at, from, to));
+        const prevRows = filterMsgs().filter(m => inRange(m.created_at, prevFrom, from));
+
         const total     = rows.length;
         const delivered = rows.filter(m => m.status === "delivered").length;
         const failed    = rows.filter(m => m.status === "failed").length;
-        const spend     = rows.reduce((s, m) => s + (m.cost || 0), 0);
+        const spend     = rows.reduce((s, m) => s + (Number(m.cost) || 0), 0);
         const failRate  = total > 0 ? ((failed / total) * 100).toFixed(1) : "0.0";
 
-        animateCount("rStatTotal", total);
+        const pTotal = prevRows.length;
+        const pDel   = prevRows.filter(m => m.status === "delivered").length;
+        const pSpend = prevRows.reduce((s, m) => s + (Number(m.cost) || 0), 0);
+        const pFail  = pTotal > 0 ? (prevRows.filter(m => m.status === "failed").length / pTotal) * 100 : 0;
+
+        function badge(cur, prev, higherGood = true) {
+          if (prev === 0 && cur === 0) return '<span class="stat-change">— vs last period</span>';
+          const diff = prev > 0 ? (((cur - prev) / prev) * 100).toFixed(1) : null;
+          if (diff === null) return `<span class="stat-change">— vs last period</span>`;
+          const good = higherGood ? cur >= prev : cur <= prev;
+          const arrow = cur >= prev ? "↑" : "↓";
+          return `<span class="stat-change ${good ? 'up' : 'down'}">${arrow} ${Math.abs(diff)}% vs last period</span>`;
+        }
+
+        animateCount("rStatTotal",     total);
         animateCount("rStatDelivered", delivered);
         document.getElementById("rStatSpend").textContent =
           spend >= 1000 ? "₦" + (spend / 1000).toFixed(1) + "K" : "₦" + spend.toLocaleString("en-NG");
         document.getElementById("rStatFail").textContent = failRate + "%";
+
+        document.getElementById("rStatTotalChange").innerHTML    = badge(total,     pTotal,  true);
+        document.getElementById("rStatDeliveredChange").innerHTML = badge(delivered, pDel,    true);
+        document.getElementById("rStatSpendChange").innerHTML     = badge(spend,     pSpend,  true);
+        document.getElementById("rStatFailChange").innerHTML      = badge(parseFloat(failRate), pFail, false);
       }
 
-      loadReportStats();
-
-      // Chart
-      const ctx = document.getElementById("reportChart").getContext("2d");
-      const CD = {
-        "7d":  { labels: ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"], sms: [0,0,0,0,0,0,0], email: [0,0,0,0,0,0,0], otp: [0,0,0,0,0,0,0] },
-        "30d": { labels: ["W1","W2","W3","W4"], sms: [0,0,0,0], email: [0,0,0,0], otp: [0,0,0,0] },
-        "90d": { labels: ["Jan","Feb","Mar"], sms: [0,0,0], email: [0,0,0], otp: [0,0,0] },
-      };
-
-      // Populate chart data from real messages
-      (async () => {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session) return;
-
-        const ninetyDaysAgo = new Date();
-        ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
-
-        const { data: msgs } = await supabase
-          .from("messages")
-          .select("type,created_at")
-          .eq("user_id", session.user.id)
-          .gte("created_at", ninetyDaysAgo.toISOString());
-
-        if (!msgs || msgs.length === 0) return;
-
+      function renderChart() {
         const now = new Date();
-        // 7d buckets by day-of-week
-        const dayNames = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
-        msgs.forEach(m => {
-          const d = new Date(m.created_at);
-          const daysAgo = Math.floor((now - d) / 86400000);
-          const type = (m.type || "sms").toLowerCase();
-          const key = type === "email" ? "email" : type === "otp" ? "otp" : "sms";
-          if (daysAgo < 7) {
-            const idx = 6 - daysAgo;
-            CD["7d"][key][idx] = (CD["7d"][key][idx] || 0) + 1;
-          }
-          if (daysAgo < 30) {
-            const wk = Math.floor(daysAgo / 7);
-            const idx = Math.min(3, 3 - wk);
-            CD["30d"][key][idx] = (CD["30d"][key][idx] || 0) + 1;
-          }
-          const month = d.getMonth();
-          const nowMonth = now.getMonth();
-          if (month >= nowMonth - 2) {
-            const idx = Math.max(0, month - (nowMonth - 2));
-            CD["90d"][key][idx] = (CD["90d"][key][idx] || 0) + 1;
-          }
-        });
-
-        rc.data.labels = CD["7d"].labels;
-        rc.data.datasets[0].data = CD["7d"].sms;
-        rc.data.datasets[1].data = CD["7d"].email;
-        rc.data.datasets[2].data = CD["7d"].otp;
-        rc.update("active");
-      })();
-
-      let rc = new Chart(ctx, {
-        type: "bar",
-        data: {
-          labels: CD["7d"].labels,
-          datasets: [
-            {
-              label: "SMS",
-              data: CD["7d"].sms,
-              backgroundColor: "rgba(0,232,122,0.6)",
-              borderColor: "var(--accent)",
-              borderWidth: 0,
-              borderRadius: 4,
-            },
-            {
-              label: "Email",
-              data: CD["7d"].email,
-              backgroundColor: "rgba(0,191,255,0.6)",
-              borderColor: "var(--accent2)",
-              borderWidth: 0,
-              borderRadius: 4,
-            },
-            {
-              label: "OTP",
-              data: CD["7d"].otp,
-              backgroundColor: "rgba(255,184,0,0.6)",
-              borderColor: "var(--accent3)",
-              borderWidth: 0,
-              borderRadius: 4,
-            },
-          ],
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          interaction: { mode: "index", intersect: false },
-          plugins: {
-            legend: { display: false },
-            tooltip: {
-              backgroundColor: "#0D1117",
-              borderColor: "rgba(255,255,255,0.08)",
-              borderWidth: 1,
-              titleColor: "#F0F4FF",
-              bodyColor: "#8892A4",
-              padding: 10,
-            },
-          },
-          scales: {
-            x: {
-              grid: { display: false },
-              ticks: {
-                color: "#8892A4",
-                font: { family: "DM Sans", size: 11 },
-              },
-              stacked: true,
-            },
-            y: {
-              grid: { color: "rgba(255,255,255,0.04)" },
-              ticks: {
-                color: "#8892A4",
-                font: { family: "DM Sans", size: 11 },
-                callback: (v) => v >= 1000 ? (v/1000).toFixed(1) + "K" : v,
-              },
-              stacked: true,
-            },
-          },
-        },
-      });
-      function switchReportTab(btn, k) {
-        document
-          .querySelectorAll(".chart-tab")
-          .forEach((t) => t.classList.remove("active"));
-        btn.classList.add("active");
-        rc.data.labels = CD[k].labels;
-        rc.data.datasets[0].data = CD[k].sms;
-        rc.data.datasets[1].data = CD[k].email;
-        rc.data.datasets[2].data = CD[k].otp;
-        rc.update("active");
-      }
-
-      // Campaign table
-      (async () => {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session) return;
-
-        const thirtyDaysAgo = new Date();
-        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-
-        const { data: camps } = await supabase
-          .from("campaigns")
-          .select("name,type,total_recipients,total_delivered,cost,status,sent_at")
-          .eq("user_id", session.user.id)
-          .in("status", ["sent","sending"])
-          .gte("sent_at", thirtyDaysAgo.toISOString())
-          .order("total_delivered", { ascending: false })
-          .limit(10);
-
-        const tb = document.getElementById("reportTable");
-
-        if (!camps || camps.length === 0) {
-          tb.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:48px 0;color:var(--text-muted);font-size:13px">No campaigns yet. Send your first campaign to see performance data here.</td></tr>`;
-          return;
+        const CD = {
+          "7d":  { labels: [], sms: Array(7).fill(0),  email: Array(7).fill(0),  otp: Array(7).fill(0)  },
+          "30d": { labels: ["W1","W2","W3","W4"], sms: Array(4).fill(0), email: Array(4).fill(0), otp: Array(4).fill(0) },
+          "90d": { labels: [], sms: Array(3).fill(0),  email: Array(3).fill(0),  otp: Array(3).fill(0)  },
+        };
+        // Build 7d day labels
+        for (let i = 6; i >= 0; i--) {
+          const d = new Date(now); d.setDate(d.getDate() - i);
+          CD["7d"].labels.push(["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][d.getDay()]);
+        }
+        // Build 90d month labels
+        for (let i = 2; i >= 0; i--) {
+          const d = new Date(now); d.setMonth(d.getMonth() - i);
+          CD["90d"].labels.push(["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][d.getMonth()]);
         }
 
-        const chIcon = { sms: "SMS", email: "Email", otp: "OTP" };
-        camps.forEach((c, i) => {
+        const { from, to } = getDateRange();
+        filterMsgs().filter(m => inRange(m.created_at, from, to)).forEach(m => {
+          const d = new Date(m.created_at);
+          const daysAgo = Math.floor((now - d) / 86400000);
+          const key = (m.type||"sms").toLowerCase() === "email" ? "email" : (m.type||"sms").toLowerCase() === "otp" ? "otp" : "sms";
+          if (daysAgo < 7)  { const idx = 6 - daysAgo; CD["7d"][key][idx]++; }
+          if (daysAgo < 30) { const idx = Math.min(3, 3 - Math.floor(daysAgo / 7)); CD["30d"][key][idx]++; }
+          const mIdx = (d.getMonth() - (now.getMonth() - 2) + 12) % 12;
+          if (mIdx >= 0 && mIdx < 3) CD["90d"][key][mIdx]++;
+        });
+
+        window._CD = CD;
+
+        const activeTab = document.querySelector(".chart-tab.active")?.dataset?.key || "7d";
+        rc.data.labels = CD[activeTab].labels;
+
+        if (activeChannel === "all") {
+          rc.data.datasets[0].data = CD[activeTab].sms;
+          rc.data.datasets[1].data = CD[activeTab].email;
+          rc.data.datasets[2].data = CD[activeTab].otp;
+          rc.data.datasets[1].hidden = false;
+          rc.data.datasets[2].hidden = false;
+        } else {
+          rc.data.datasets[0].data = CD[activeTab][activeChannel];
+          rc.data.datasets[1].hidden = true;
+          rc.data.datasets[2].hidden = true;
+        }
+
+        const labels = { all: "All Channels", sms: "Bulk SMS", email: "Email", otp: "OTP & 2FA" };
+        document.querySelector(".card-title").textContent = labels[activeChannel] + " — Volume Trend";
+
+        rc.update("active");
+      }
+
+      function renderTable() {
+        const tb  = document.getElementById("reportTable");
+        const ch  = { sms: "💬 SMS", email: "📧 Email", otp: "🔐 OTP" };
+        const camps = filterCamps().slice(0, 10);
+        if (!camps.length) {
+          tb.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:48px 0;color:var(--muted);font-size:13px">No campaigns yet for this channel.</td></tr>`;
+          return;
+        }
+        tb.innerHTML = camps.map((c, i) => {
           const sent = c.total_recipients || 0;
-          const del  = c.total_delivered || 0;
+          const del  = c.total_delivered  || 0;
           const rate = sent > 0 ? ((del / sent) * 100).toFixed(1) + "%" : "—";
           const cost = c.cost ? "₦" + Number(c.cost).toLocaleString("en-NG") : "—";
-          const tr = document.createElement("tr");
-          tr.innerHTML = `<td class="text-muted">${i + 1}</td><td><div style="font-size:13px;font-weight:500">${c.name}</div></td><td>${chIcon[c.type] || c.type || "—"}</td><td>${sent.toLocaleString()}</td><td>${del.toLocaleString()}</td><td class="text-green fw-bold">${rate}</td><td class="text-amber">${cost}</td><td><span class="status-pill ${c.status}">${c.status.charAt(0).toUpperCase() + c.status.slice(1)}</span></td>`;
-          tb.appendChild(tr);
-        });
-      })();
+          const date = c.sent_at ? new Date(c.sent_at).toLocaleDateString("en-NG", { day:"2-digit", month:"short" }) : "—";
+          return `<tr>
+            <td class="text-muted">${i + 1}</td>
+            <td><div style="font-size:13px;font-weight:500">${c.name}</div></td>
+            <td>${ch[c.type] || c.type || "—"}</td>
+            <td>${sent.toLocaleString()}</td>
+            <td>${del.toLocaleString()}</td>
+            <td class="text-green fw-bold">${rate}</td>
+            <td class="text-amber">${cost}</td>
+            <td><span class="status-pill ${c.status}">${c.status.charAt(0).toUpperCase() + c.status.slice(1)}</span></td>
+          </tr>`;
+        }).join("");
+      }
 
-      window.exportReport = function () {
-        alert("Exporting CSV… (connect to backend)");
+      function renderDistribution() {
+        const { from, to } = getDateRange();
+        const rows = allMsgs.filter(m => inRange(m.created_at, from, to));
+        const total = rows.length;
+
+        const smsRows   = rows.filter(m => (m.type||"sms").toLowerCase() === "sms");
+        const emailRows = rows.filter(m => (m.type||"sms").toLowerCase() === "email");
+        const otpRows   = rows.filter(m => ["otp","2fa"].includes((m.type||"").toLowerCase()));
+
+        const smsPct   = total > 0 ? Math.round((smsRows.length   / total) * 100) : 0;
+        const emailPct = total > 0 ? Math.round((emailRows.length / total) * 100) : 0;
+        const otpPct   = total > 0 ? Math.round((otpRows.length   / total) * 100) : 0;
+
+        const delivered = rows.filter(m => m.status === "delivered").length;
+        const delRate   = total > 0 ? ((delivered / total) * 100).toFixed(1) + "%" : "—";
+
+        // Update legend
+        document.getElementById("distSmsPct").textContent   = smsPct + "%";
+        document.getElementById("distEmailPct").textContent = emailPct + "%";
+        document.getElementById("distOtpPct").textContent   = otpPct + "%";
+        document.getElementById("distDelRate").textContent  = delRate;
+
+        // Update donut center
+        const totalEl = document.getElementById("donutTotal");
+        if (totalEl) totalEl.textContent = total >= 1000 ? (total/1000).toFixed(1) + "K" : total;
+
+        // Update SVG donut arcs (circumference = 314)
+        const C = 314;
+        function setArc(id, pct, rotationDeg) {
+          const el = document.getElementById(id);
+          if (!el) return;
+          el.setAttribute("stroke-dashoffset", C - (C * pct / 100));
+          el.setAttribute("transform", `rotate(${rotationDeg} 65 65)`);
+        }
+        setArc("donutSMS",   smsPct,   -90);
+        setArc("donutEmail", emailPct, -90 + smsPct * 3.6);
+        setArc("donutOTP",   otpPct,   -90 + (smsPct + emailPct) * 3.6);
+
+        // Cost breakdown
+        const smsSpend   = smsRows.reduce((s, m)   => s + (Number(m.cost)||0), 0);
+        const emailSpend = emailRows.reduce((s, m) => s + (Number(m.cost)||0), 0);
+        const otpSpend   = otpRows.reduce((s, m)   => s + (Number(m.cost)||0), 0);
+        const totalSpend = smsSpend + emailSpend + otpSpend;
+
+        const fmt = n => n >= 1000 ? "₦" + (n/1000).toFixed(1) + "K" : "₦" + n.toLocaleString("en-NG");
+
+        document.getElementById("costSmsDetail").textContent   = smsRows.length.toLocaleString("en-NG")   + " messages × ₦6";
+        document.getElementById("costEmailDetail").textContent = emailRows.length.toLocaleString("en-NG") + " emails";
+        document.getElementById("costOtpDetail").textContent   = otpRows.length.toLocaleString("en-NG")   + " verifications";
+        document.getElementById("costSmsAmt").textContent   = fmt(smsSpend);
+        document.getElementById("costEmailAmt").textContent = fmt(emailSpend);
+        document.getElementById("costOtpAmt").textContent   = fmt(otpSpend);
+        document.getElementById("costTotal").textContent    = fmt(totalSpend);
+      }
+
+      function renderAll() { renderStats(); renderChart(); renderTable(); renderDistribution(); }
+
+      window.setChannel = function(ch, btn) {
+        activeChannel = ch;
+        document.querySelectorAll(".ch-tab").forEach(t => t.classList.remove("active"));
+        btn.classList.add("active");
+        renderAll();
       };
+
+      window.switchReportTab = function(btn, k) {
+        document.querySelectorAll(".chart-tab").forEach(t => t.classList.remove("active"));
+        btn.classList.add("active");
+        btn.dataset.key = k;
+        const CD = window._CD;
+        if (!CD) return;
+        rc.data.labels = CD[k].labels;
+        if (activeChannel === "all") {
+          rc.data.datasets[0].data = CD[k].sms;
+          rc.data.datasets[1].data = CD[k].email;
+          rc.data.datasets[2].data = CD[k].otp;
+        } else {
+          rc.data.datasets[0].data = CD[k][activeChannel];
+        }
+        rc.update("active");
+      };
+
+      window.exportReport = async function(format) {
+        const { from, to } = getDateRange();
+        const rows = filterCamps().map(c => ({
+          name:      c.name,
+          type:      (c.type||'sms').toUpperCase(),
+          sent:      c.total_recipients || 0,
+          delivered: c.total_delivered  || 0,
+          rate:      (c.total_recipients||0) > 0 ? ((c.total_delivered||0) / c.total_recipients * 100).toFixed(1) + '%' : '—',
+          cost:      c.cost ? '₦' + Number(c.cost).toLocaleString('en-NG') : '—',
+          status:    c.status,
+          date:      c.sent_at ? new Date(c.sent_at).toLocaleDateString('en-NG') : '—',
+        }));
+        const cols = [
+          { key: 'name',      label: 'Campaign'   },
+          { key: 'type',      label: 'Channel'    },
+          { key: 'sent',      label: 'Sent'       },
+          { key: 'delivered', label: 'Delivered'  },
+          { key: 'rate',      label: 'Rate'       },
+          { key: 'cost',      label: 'Cost'       },
+          { key: 'status',    label: 'Status'     },
+          { key: 'date',      label: 'Date'       },
+        ];
+        const title    = `NotifyPro Reports — ${activeChannel.toUpperCase()}`;
+        const filename = `notifypro-reports-${activeChannel}-${new Date().toISOString().slice(0,10)}`;
+        if (format === 'csv')   { exportCSV(rows, cols, filename + '.csv'); }
+        else if (format === 'excel') { exportExcel(rows, cols, filename + '.xls'); }
+        else if (format === 'pdf')   { exportPDF(rows, cols, title); }
+      };
+
+      init();
     </script>
   </body>
 </html>

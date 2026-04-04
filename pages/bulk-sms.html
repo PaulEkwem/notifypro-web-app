@@ -109,9 +109,28 @@
       .topup-input-wrap input:focus { border-color: rgba(0,232,122,0.4); }
       .topup-sms-est {
         font-size: 12px; color: var(--muted);
-        margin-bottom: 1.5rem;
+        margin-bottom: 1rem;
       }
       .topup-sms-est span { color: var(--accent); font-weight: 600; }
+      .topup-fee-breakdown {
+        background: var(--bg3);
+        border: 1px solid var(--card-border);
+        border-radius: var(--radius-sm);
+        padding: 0.8rem 1rem;
+        margin-bottom: 1.2rem;
+        display: none;
+      }
+      .topup-fee-row {
+        display: flex; justify-content: space-between;
+        font-size: 12px; color: var(--muted);
+        padding: 3px 0;
+      }
+      .topup-fee-row.total {
+        border-top: 1px solid var(--card-border);
+        margin-top: 6px; padding-top: 8px;
+        font-size: 13px; font-weight: 700; color: var(--text);
+      }
+      .topup-fee-row.total span:last-child { color: var(--accent); }
 
       .btn-outline {
         background: none;
@@ -1238,6 +1257,8 @@
         display: flex;
         align-items: center;
         gap: 8px;
+        min-width: 120px;
+        white-space: nowrap;
       }
       .delivery-bar-track {
         flex: 1;
@@ -1391,8 +1412,8 @@
               </p>
             </div>
             <div class="header-actions">
-              <button class="btn-outline">📋 Templates</button>
-              <button class="btn-outline">📁 Load Draft</button>
+              <button class="btn-outline" onclick="openTemplates()">📋 Templates</button>
+              <button class="btn-outline" onclick="loadDraft()">📁 Load Draft</button>
             </div>
           </div>
 
@@ -1430,7 +1451,7 @@
                         oninput="updatePreview()"
                       />
                       <div class="field-hint">
-                        Max 11 characters. Alphanumeric only.
+                        Max 11 characters. Alphanumeric only. Promotional routes are restricted 8 PM – 8 AM WAT by telcos.
                       </div>
                     </div>
                     <div class="field">
@@ -1615,6 +1636,7 @@
                       ⚠️ Your message contains special characters (unicode).
                       This reduces max chars per SMS from 160 to 70, increasing
                       your SMS parts and cost.
+                      <div id="unicodeCharList" style="margin-top:8px;display:flex;flex-wrap:wrap;gap:6px;"></div>
                     </div>
                   </div>
 
@@ -1900,8 +1922,27 @@
           </div>
           <div class="topup-sms-est" id="topupEst">Enter an amount to see how many SMS credits you'll get.</div>
 
+          <div class="topup-fee-breakdown" id="topupBreakdown">
+            <div class="topup-fee-row">
+              <span>Wallet credit</span>
+              <span id="feeWallet">—</span>
+            </div>
+            <div class="topup-fee-row">
+              <span>VAT (7.5%)</span>
+              <span id="feeVAT">—</span>
+            </div>
+            <div class="topup-fee-row">
+              <span>Monnify fee (1.5%, max ₦2,000)</span>
+              <span id="feePaystack">—</span>
+            </div>
+            <div class="topup-fee-row total">
+              <span>Total charged</span>
+              <span id="feeTotal">—</span>
+            </div>
+          </div>
+
           <div class="modal-actions">
-            <button class="btn-primary" id="topupPayBtn" onclick="initiateTopup()">Pay with Paystack</button>
+            <button class="btn-primary" id="topupPayBtn" onclick="initiateTopup()">Pay with Monnify</button>
             <button class="btn-outline" onclick="document.getElementById('topupModal').classList.remove('show')">Cancel</button>
           </div>
         </div>
@@ -1947,6 +1988,26 @@
       let isUnicode = false;
       let smsParts = 1;
       let maxCharsPerPart = 160;
+
+      // ── PROMO TIME RESTRICTION (WAT = UTC+1, 8 AM–8 PM only) ──
+      function isOutsidePromoHours() {
+        const watHour = new Date(Date.now() + 60 * 60 * 1000).getUTCHours();
+        return watHour < 8 || watHour >= 20;
+      }
+
+      // ── BALANCE SYNC ──
+      function syncBalanceUI(balance) {
+        const fmt = balance.toLocaleString("en-NG");
+        // Topbar
+        const topEl = document.getElementById("topbarBalance");
+        if (topEl) topEl.textContent = "₦" + fmt;
+        // Sidebar wallet amount
+        const sideEl = document.getElementById("walletBalance");
+        if (sideEl) sideEl.textContent = fmt;
+        // Sidebar SMS estimate
+        const estEl = document.getElementById("walletEst");
+        if (estEl) estEl.textContent = "≈ " + Math.floor(balance / smsRatePerUnit).toLocaleString("en-NG") + " SMS remaining";
+      }
 
       // menuToggle is handled by sidebar.js — do not add duplicate listener here
 
@@ -2118,10 +2179,19 @@
           ? "Unicode · 70 chars/SMS"
           : "GSM-7 · Standard";
 
-        // Unicode warning
-        document
-          .getElementById("unicodeWarn")
-          .classList.toggle("show", isUnicode);
+        // Unicode warning + show which chars are non-GSM7
+        document.getElementById("unicodeWarn").classList.toggle("show", isUnicode);
+        if (isUnicode) {
+          const gsm7Set = /[@£$¥èéùìòÇ\nØø\rÅåΔ_ΦΓΛΩΠΨΣΘΞ\x1BÆæßÉ !"#¤%&'()*+,\-.\/0-9:;<=>?¡A-ZÄÖÑÜ§¿a-zäöñüà]/;
+          const badChars = [...new Set(text.split("").filter(c => !gsm7Set.test(c)))];
+          const listEl = document.getElementById("unicodeCharList");
+          listEl.innerHTML = badChars.map(c =>
+            `<span style="display:inline-flex;align-items:center;gap:4px;background:rgba(255,184,0,0.12);border:1px solid rgba(255,184,0,0.3);border-radius:4px;padding:2px 8px;font-size:12px;font-family:monospace;color:#FFB800;">` +
+            `<span style="font-size:15px">${c}</span>` +
+            `<span style="color:#8892A4;font-size:10px">U+${c.codePointAt(0).toString(16).toUpperCase().padStart(4,'0')}</span>` +
+            `</span>`
+          ).join("");
+        }
 
         // Ruler
         document.getElementById("rulerEncoding").textContent = isUnicode
@@ -2237,15 +2307,13 @@
         document.getElementById("balanceAfter").style.color =
           remaining < 0 ? "var(--accent4)" : "var(--accent)";
 
-        const lowWarn = document.getElementById("lowWarn");
-        const sendBtn = document.getElementById("sendBtn");
-        if (remaining < 0 && recipients > 0) {
-          lowWarn.classList.add("show");
-          sendBtn.disabled = true;
-        } else {
-          lowWarn.classList.remove("show");
-          sendBtn.disabled = false;
-        }
+        const lowWarn  = document.getElementById("lowWarn");
+        const sendBtn  = document.getElementById("sendBtn");
+
+        const insufficientFunds = remaining < 0 && recipients > 0;
+
+        lowWarn.classList.toggle("show", insufficientFunds);
+        sendBtn.disabled = insufficientFunds;
       }
 
       // ── SCHEDULE TOGGLE ──
@@ -2291,7 +2359,6 @@
           : null;
 
         const cost = recipients * smsParts * smsRatePerUnit;
-        walletBalance -= cost;
 
         let modalMsg = `Your SMS campaign to ${recipients.toLocaleString()} recipient${recipients > 1 ? "s" : ""} (${(recipients * smsParts).toLocaleString()} units) `;
         if (isScheduled && date) {
@@ -2304,8 +2371,17 @@
       }
 
       function saveDraft() {
-        const name =
-          document.getElementById("campaignName").value || "Untitled Campaign";
+        const draft = {
+          senderId:     (document.getElementById("senderId")?.value || "").trim(),
+          campaignName: (document.getElementById("campaignName")?.value || "").trim(),
+          msgBody:      (document.getElementById("msgBody")?.value || "").trim(),
+          tags:         tags.slice(),
+          schedDate:    document.getElementById("schedDate")?.value || "",
+          schedTime:    document.getElementById("schedTime")?.value || "",
+          savedAt:      new Date().toISOString(),
+        };
+        localStorage.setItem("np_sms_draft", JSON.stringify(draft));
+
         const btn = event.target;
         btn.textContent = "✓ Draft Saved!";
         btn.style.color = "var(--accent)";
@@ -2315,6 +2391,87 @@
           btn.style.color = "";
           btn.style.borderColor = "";
         }, 2000);
+      }
+
+      function loadDraft() {
+        const raw = localStorage.getItem("np_sms_draft");
+        if (!raw) {
+          alert("No draft saved yet. Compose a message and click \"Save as Draft\" first.");
+          return;
+        }
+        const draft = JSON.parse(raw);
+        if (draft.senderId)     { const el = document.getElementById("senderId");     if (el) el.value = draft.senderId; }
+        if (draft.campaignName) { const el = document.getElementById("campaignName"); if (el) el.value = draft.campaignName; }
+        if (draft.msgBody) {
+          const el = document.getElementById("msgBody");
+          if (el) { el.value = draft.msgBody; el.dispatchEvent(new Event("input")); }
+        }
+        if (Array.isArray(draft.tags) && draft.tags.length) {
+          tags = draft.tags.slice();
+          renderTags();
+          updateCost();
+        }
+        if (draft.schedDate) { const el = document.getElementById("schedDate"); if (el) el.value = draft.schedDate; }
+        if (draft.schedTime) { const el = document.getElementById("schedTime"); if (el) el.value = draft.schedTime; }
+
+        const when = draft.savedAt ? new Date(draft.savedAt).toLocaleString("en-NG") : "recently";
+        const btn = document.querySelector(".save-draft-btn");
+        if (btn) {
+          btn.textContent = `✓ Draft loaded (${when})`;
+          btn.style.color = "var(--accent)";
+          setTimeout(() => { btn.textContent = "💾 Save as Draft"; btn.style.color = ""; }, 3000);
+        }
+      }
+
+      // ── SMS TEMPLATES ──────────────────────────────────────────────
+      const SMS_TEMPLATES = [
+        { category: "Promotions", label: "Flash Sale", text: "🔥 FLASH SALE! Get 30% off all products today only. Use code SAVE30 at checkout. Shop now: {link}. Reply STOP to opt out." },
+        { category: "Promotions", label: "New Arrival", text: "New arrivals just dropped! Check out our latest collection at {link}. Limited stock — order now. Reply STOP to opt out." },
+        { category: "Reminders", label: "Appointment Reminder", text: "Hi {name}, this is a reminder for your appointment on {date} at {time}. Please arrive 10 mins early. Reply STOP to opt out." },
+        { category: "Reminders", label: "Payment Due", text: "Hi {name}, your payment of ₦{amount} is due on {date}. Pay via {link} to avoid service interruption. Reply STOP to opt out." },
+        { category: "Transactional", label: "Order Confirmed", text: "Your order #{orderid} has been confirmed! Estimated delivery: {date}. Track at {link}. Thank you for shopping with us." },
+        { category: "Transactional", label: "Delivery Update", text: "Great news! Your order #{orderid} is out for delivery and will arrive today. Track your order: {link}." },
+        { category: "Church / NGO", label: "Service Reminder", text: "Reminder: Sunday service holds by {time} at {venue}. This week's topic: \"{topic}\". Looking forward to seeing you!" },
+        { category: "Church / NGO", label: "Event Invite", text: "You're invited to {event} on {date} at {venue}. Come and bring a friend! For info call {phone}. God bless you." },
+      ];
+
+      function openTemplates() {
+        // Build modal
+        let html = `<div id="tplOverlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:1000;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px)" onclick="if(event.target===this)closeTplModal()">
+          <div style="background:var(--bg2);border:1px solid var(--card-border);border-radius:16px;padding:1.5rem;width:min(520px,92vw);max-height:80vh;overflow-y:auto">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.2rem">
+              <div style="font-family:var(--font-display);font-size:16px;font-weight:800">SMS Templates</div>
+              <button onclick="closeTplModal()" style="background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer;line-height:1">✕</button>
+            </div>`;
+        const categories = [...new Set(SMS_TEMPLATES.map(t => t.category))];
+        for (const cat of categories) {
+          html += `<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:1rem 0 .5rem">${cat}</div>`;
+          for (let i = 0; i < SMS_TEMPLATES.length; i++) {
+            const tpl = SMS_TEMPLATES[i];
+            if (tpl.category !== cat) continue;
+            html += `<div onclick="applyTemplate(${i})" style="background:var(--bg);border:1px solid var(--card-border);border-radius:10px;padding:.9rem 1rem;margin-bottom:.5rem;cursor:pointer;transition:border-color .2s" onmouseover="this.style.borderColor='rgba(0,232,122,.4)'" onmouseout="this.style.borderColor='var(--card-border)'">
+              <div style="font-size:13px;font-weight:600;margin-bottom:4px">${tpl.label}</div>
+              <div style="font-size:12px;color:var(--muted);line-height:1.5">${tpl.text}</div>
+            </div>`;
+          }
+        }
+        html += `</div></div>`;
+        const el = document.createElement('div');
+        el.innerHTML = html;
+        document.body.appendChild(el.firstChild);
+      }
+
+      function closeTplModal() {
+        const el = document.getElementById("tplOverlay");
+        if (el) el.remove();
+      }
+
+      function applyTemplate(index) {
+        const tpl = SMS_TEMPLATES[index];
+        if (!tpl) return;
+        const el = document.getElementById("msgBody");
+        if (el) { el.value = tpl.text; el.dispatchEvent(new Event("input")); }
+        closeTplModal();
       }
 
       function clearComposer() {
@@ -2347,23 +2504,32 @@
           return;
         }
 
+        const campaignName = document.getElementById("campaignName").value.trim();
+        if (!campaignName) {
+          alert("Please give your campaign a name so you can identify it later.");
+          document.getElementById("campaignName").focus();
+          return;
+        }
+
         const sendBtn   = document.getElementById("sendBtn");
         const origLabel = sendBtn.textContent;
         sendBtn.disabled    = true;
         sendBtn.textContent = "Sending…";
-
-        const campaignName = document.getElementById("campaignName").value.trim() || "Bulk SMS Campaign";
         const senderId     = document.getElementById("senderId")?.value.trim()    || "";
 
         try {
-          const { data: { session } } = await supabase.auth.getSession();
+          // ── Get session — JWT is 8hrs, no refresh needed ──
+          const { data: { session: sess } } = await supabase.auth.getSession();
+          if (!sess?.access_token) { window.location.href = "../login.html"; return; }
+
           const res = await fetch(
             "https://oilnrhqcfzkonoumsfav.supabase.co/functions/v1/send-bulk-sms",
             {
-              method: "POST",
+              method:  "POST",
               headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${session?.access_token || ""}`,
+                "Content-Type":  "application/json",
+                "Authorization": `Bearer ${sess.access_token}`,
+                "apikey":        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9pbG5yaHFjZnprb25vdW1zZmF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1NDQ3MDgsImV4cCI6MjA5MDEyMDcwOH0.uvfoi4jljNwKazh5HCKYAXg1s5OAw-EwqEz624vI2yo",
               },
               body: JSON.stringify({ recipients: recipientList, message: msg, campaignName, senderId }),
             }
@@ -2372,21 +2538,23 @@
           const data = await res.json();
 
           if (!res.ok || data?.error) {
-            alert("Send failed: " + (data?.error || "Unknown error"));
+            alert("Send failed [" + res.status + "]: " + (data?.error || JSON.stringify(data)));
             sendBtn.disabled    = false;
             sendBtn.textContent = origLabel;
             return;
           }
 
-          // Update local wallet display
-          walletBalance -= data.cost;
+          // Update local wallet display (will be refreshed from DB by loadWalletAndHistory)
+          syncBalanceUI(walletBalance);
           updateCost();
-          const topEl = document.getElementById("topbarBalance");
-          if (topEl) topEl.textContent = "₦" + walletBalance.toLocaleString("en-NG");
+
+          // Reset button immediately
+          sendBtn.disabled    = false;
+          sendBtn.textContent = origLabel;
 
           // Show success modal
           document.getElementById("modalMsg").textContent =
-            `${data.sent.toLocaleString()} message${data.sent > 1 ? "s" : ""} sent successfully via Termii. ₦${data.cost.toLocaleString("en-NG")} deducted from your wallet.`;
+            `${data.sent.toLocaleString()} message${data.sent > 1 ? "s" : ""} sent successfully. ₦${data.cost.toLocaleString("en-NG")} deducted from your wallet.`;
           document.getElementById("successModal").classList.add("show");
 
           // Refresh campaign history
@@ -2411,9 +2579,7 @@
 
         if (profile) {
           walletBalance = profile.wallet_balance || 0;
-          const fmt = "₦" + walletBalance.toLocaleString("en-NG");
-          const topEl = document.getElementById("topbarBalance");
-          if (topEl) topEl.textContent = fmt;
+          syncBalanceUI(walletBalance);
           updateCost(); // refresh "wallet after send" display
         }
 
@@ -2431,6 +2597,9 @@
           return;
         }
 
+        // Safe HTML escape — prevents XSS from user-supplied campaign names / types
+        const esc = (s) => String(s ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");
+
         tb.innerHTML = camps.map(c => {
           const sent = c.total_recipients || 0;
           const del  = c.total_delivered  || 0;
@@ -2443,14 +2612,16 @@
           const dateStr = c.sent_at || c.scheduled_at
             ? new Date(c.sent_at || c.scheduled_at).toLocaleDateString("en-NG", { day: "numeric", month: "short", year: "numeric" })
             : "—";
-          const statusClass = { sent: "sent", sending: "sending", scheduled: "scheduled", failed: "failed", draft: "paused" }[c.status] || "paused";
-          const statusLabel = c.status ? c.status.charAt(0).toUpperCase() + c.status.slice(1) : "—";
+          const allowedStatuses = ["sent", "sending", "scheduled", "failed", "draft", "paused"];
+          const rawStatus   = allowedStatuses.includes(c.status) ? c.status : "paused";
+          const statusClass = { sent: "sent", sending: "sending", scheduled: "scheduled", failed: "failed", draft: "paused" }[rawStatus] || "paused";
+          const statusLabel = rawStatus.charAt(0).toUpperCase() + rawStatus.slice(1);
           return `<tr>
-            <td><strong>${c.name}</strong><br><span style="color:var(--muted);font-size:11px">${c.type || "SMS"}</span></td>
+            <td><strong>${esc(c.name)}</strong><br><span style="color:var(--muted);font-size:11px">${esc(c.type || "SMS")}</span></td>
             <td>${sentCell}</td>
             <td>${sent ? sent.toLocaleString() : "—"}</td>
             <td>${deliveryCell}</td>
-            <td>${cost}</td>
+            <td style="white-space:nowrap">${cost}</td>
             <td><span class="status-pill ${statusClass}">${statusLabel}</span></td>
             <td style="color:var(--muted);font-size:12px">${dateStr}</td>
           </tr>`;
@@ -2460,12 +2631,13 @@
       loadWalletAndHistory();
     </script>
 
-    <!-- Paystack inline JS -->
-    <script src="https://js.paystack.co/v1/inline.js"></script>
+    <!-- Monnify inline SDK -->
+    <script src="https://sdk.monnify.com/plugin/monnify.js"></script>
     <script type="module">
       import { supabase } from "../assets/js/supabase-config.js";
 
-      const PAYSTACK_PUBLIC_KEY = "pk_test_c9b82ccf07f58e95aac6371b40b2d2b7fc4715d7";
+      const MONNIFY_API_KEY      = "MK_TEST_S9X5EPVQ0Q";
+      const MONNIFY_CONTRACT     = "4599283456";
       const SMS_RATE = 6; // ₦ per SMS unit
 
       window.openTopUp = function () {
@@ -2489,14 +2661,31 @@
         updateTopupEst(amt);
       };
 
+      function calcTopupFees(walletAmt) {
+        const vat       = Math.round(walletAmt * 0.075);
+        const psFee     = Math.min(Math.round(walletAmt * 0.015), 2000); // Monnify: 1.5%, no flat fee, capped at ₦2,000
+        const total     = walletAmt + vat + psFee;
+        return { vat, psFee, total };
+      }
+
       function updateTopupEst(amt) {
-        const est = document.getElementById("topupEst");
+        const est       = document.getElementById("topupEst");
+        const breakdown = document.getElementById("topupBreakdown");
         if (!amt || amt < 1) {
           est.innerHTML = "Enter an amount to see how many SMS credits you'll get.";
+          breakdown.style.display = "none";
           return;
         }
-        const units = Math.floor(amt / SMS_RATE);
-        est.innerHTML = `₦${amt.toLocaleString("en-NG")} = <span>${units.toLocaleString("en-NG")} SMS units</span>`;
+        const units             = Math.floor(amt / SMS_RATE);
+        const { vat, psFee, total } = calcTopupFees(amt);
+
+        est.innerHTML = `₦${amt.toLocaleString("en-NG")} = <span>${units.toLocaleString("en-NG")} SMS units</span> at ₦${SMS_RATE}/SMS`;
+
+        document.getElementById("feeWallet").textContent  = `₦${amt.toLocaleString("en-NG")}`;
+        document.getElementById("feeVAT").textContent     = `₦${vat.toLocaleString("en-NG")}`;
+        document.getElementById("feePaystack").textContent = `₦${psFee.toLocaleString("en-NG")}`;
+        document.getElementById("feeTotal").textContent   = `₦${total.toLocaleString("en-NG")}`;
+        breakdown.style.display = "block";
       }
 
       window.initiateTopup = async function () {
@@ -2506,62 +2695,64 @@
           return;
         }
 
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session) return;
+        const { data: { session } } = await supabase.auth.refreshSession();
+        if (!session) { window.location.href = "../login.html"; return; }
 
         const btn = document.getElementById("topupPayBtn");
         btn.disabled = true;
         btn.textContent = "Opening payment…";
 
-        const handler = PaystackPop.setup({
-          key:      PAYSTACK_PUBLIC_KEY,
-          email:    session.user.email,
-          amount:   amt * 100, // Paystack uses kobo
-          currency: "NGN",
-          ref:      "NFYPRO-" + Date.now() + "-" + Math.random().toString(36).slice(2, 7).toUpperCase(),
-          metadata: { user_id: session.user.id, purpose: "wallet_topup" },
-          callback: function (response) {
+        const { total } = calcTopupFees(amt); // charge total (wallet + VAT + Monnify fee)
+
+        MonnifySDK.initialize({
+          apiKey:             MONNIFY_API_KEY,
+          contractCode:       MONNIFY_CONTRACT,
+          amount:             total, // Monnify uses Naira (not kobo)
+          currency:           "NGN",
+          reference:          "NFYPRO-" + Date.now() + "-" + Math.random().toString(36).slice(2, 7).toUpperCase(),
+          customerFullName:   session.user.user_metadata?.first_name
+                                ? session.user.user_metadata.first_name + " " + (session.user.user_metadata.last_name || "")
+                                : session.user.email,
+          customerEmail:      session.user.email,
+          paymentDescription: "NotifyPro Wallet Top-Up",
+          isTestMode:         true,
+          paymentMethods:     ["CARD", "ACCOUNT_TRANSFER"],
+          metadata:           { user_id: session.user.id, purpose: "wallet_topup", wallet_credit: amt },
+          onLoadStart:        () => {},
+          onLoadComplete:     () => {},
+          onComplete: function (response) {
             btn.disabled = false;
-            btn.textContent = "Pay with Paystack";
-            creditWallet(session, amt, response.reference);
+            btn.textContent = "Pay with Monnify";
+            if (response.paymentStatus === "PAID") {
+              creditWallet(session, amt, response.paymentReference);
+            }
           },
           onClose: function () {
             btn.disabled = false;
-            btn.textContent = "Pay with Paystack";
+            btn.textContent = "Pay with Monnify";
           },
         });
-        handler.openIframe();
       };
 
       async function creditWallet(session, amt, reference) {
-        // Fetch current balance then increment
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("wallet_balance")
-          .eq("id", session.user.id)
-          .single();
+        // Atomic increment via RPC — prevents race condition on concurrent top-ups
+        const { data: result, error } = await supabase.rpc("credit_wallet_atomic", {
+          p_user_id: session.user.id,
+          p_amount:  amt,
+        });
 
-        const newBalance = (profile?.wallet_balance || 0) + amt;
-
-        const { error } = await supabase
-          .from("profiles")
-          .update({ wallet_balance: newBalance })
-          .eq("id", session.user.id);
-
-        if (error) {
+        if (error || !result?.success) {
           alert("Payment received but balance update failed. Contact support with reference: " + reference);
           return;
         }
 
-        // Update local state
-        walletBalance = newBalance;
-        const fmt = "₦" + newBalance.toLocaleString("en-NG");
-        const topEl = document.getElementById("topbarBalance");
-        if (topEl) topEl.textContent = fmt;
+        // Update local state with the confirmed new balance returned by RPC
+        walletBalance = result.new_balance;
+        syncBalanceUI(walletBalance);
         updateCost();
 
         document.getElementById("topupModal").classList.remove("show");
-        alert(`✅ ₦${amt.toLocaleString("en-NG")} added! New balance: ₦${newBalance.toLocaleString("en-NG")}`);
+        alert(`✅ ₦${amt.toLocaleString("en-NG")} added! New balance: ₦${Number(result.new_balance).toLocaleString("en-NG")}`);
       }
     </script>
   </body>

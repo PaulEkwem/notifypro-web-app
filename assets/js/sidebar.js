@@ -17,10 +17,14 @@
       section: 'Overview',
       items: [
         { id: 'dashboard',  label: 'Dashboard',       href: 'dashboard.html',  icon: iconDashboard(),  badge: null },
-        { id: 'bulk-sms',   label: 'Bulk SMS',        href: 'bulk-sms.html',   icon: iconSMS(),        badge: null },
-        { id: 'email',      label: 'Email Campaigns', href: 'email.html',      icon: iconEmail(),      badge: null },
-        { id: 'otp',        label: 'OTP & Verification', href: 'otp.html',      icon: iconLock(),       badge: null },
-        { id: 'whatsapp',   label: 'WhatsApp',         href: 'whatsapp.html',   icon: iconWhatsApp(),   badge: 'Soon', badgeStyle: 'background:rgba(37,211,102,0.15);color:#25D366;border:1px solid rgba(37,211,102,0.3)' },
+      ],
+    },
+    {
+      section: 'Services',
+      items: [
+        { id: 'bulk-sms',   label: 'Campaigns',       href: 'bulk-sms.html',   icon: iconSMS(),        badge: null },
+        { id: 'email',      label: 'Email',           href: 'email.html',      icon: iconEmail(),      badge: null },
+        { id: 'otp',        label: 'Security & Verify', href: 'otp.html',      icon: iconLock(),       badge: null },
       ],
     },
     {
@@ -85,6 +89,7 @@
           </div>
           <div class="wallet-amount">₦<em id="walletBalance">47,500</em></div>
           <div class="wallet-est" id="walletEst">≈ 11,875 SMS remaining</div>
+          <div class="wallet-health" id="walletHealth"></div>
         </div>
         <div class="usage-wrap">
           <div class="usage-top">

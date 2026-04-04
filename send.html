@@ -1,0 +1,1181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Send a Bulk SMS to Everyone at Once — NotifyPro</title>
+<meta name="description" content="Write your message, add your contacts, hit send. Personalised or one blast — no account needed to start." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #07090f; --bg2: #0d1117; --bg3: #131b24; --bg4: #192030;
+  --accent: #00e87a; --accent2: #00bfff; --accent3: #ffb800; --danger: #ff5757;
+  --text: #f0f4ff; --muted: #8892a4; --muted2: #5a6478;
+  --border: rgba(255,255,255,0.07); --border2: rgba(255,255,255,0.04);
+  --font: 'DM Sans', sans-serif; --display: 'Syne', sans-serif;
+  --radius: 14px; --radius-sm: 10px;
+}
+html { scroll-behavior: smooth; }
+body { background: var(--bg); color: var(--text); font-family: var(--font); font-size: 15px; line-height: 1.6; min-height: 100vh; }
+
+/* ── NAV ── */
+nav { display: flex; align-items: center; justify-content: space-between; padding: 0 2rem; height: 60px; border-bottom: 1px solid var(--border2); position: sticky; top: 0; background: rgba(7,9,15,0.92); backdrop-filter: blur(12px); z-index: 50; }
+.logo { font-family: var(--display); font-size: 18px; font-weight: 800; color: var(--text); text-decoration: none; }
+.logo span { color: var(--accent); }
+.nav-cta { font-size: 13px; color: var(--muted); text-decoration: none; }
+.nav-cta:hover { color: var(--text); }
+
+/* ── HERO ── */
+.hero { text-align: center; padding: 4rem 1.5rem 2rem; max-width: 680px; margin: 0 auto; }
+.badge { display: inline-flex; align-items: center; gap: 8px; background: rgba(255,184,0,0.08); border: 1px solid rgba(255,184,0,0.2); border-radius: 100px; padding: 5px 14px; font-size: 12px; color: var(--accent3); font-weight: 600; margin-bottom: 1.5rem; letter-spacing: 0.3px; text-transform: uppercase; }
+.hero h1 { font-family: var(--display); font-size: clamp(30px, 6vw, 52px); font-weight: 800; letter-spacing: -1.5px; line-height: 1.1; margin-bottom: 1.25rem; }
+.hero h1 em { font-style: normal; color: var(--accent); }
+.hero p { color: var(--muted); font-size: 17px; max-width: 480px; margin: 0 auto 2.5rem; }
+
+/* ── WIZARD SHELL ── */
+.wizard { max-width: 980px; margin: 0 auto; padding: 0 1.25rem 6rem; }
+
+/* ── STEP INDICATOR ── */
+.step-bar { display: flex; align-items: center; justify-content: center; gap: 0; margin-bottom: 2.5rem; }
+.sb-item { display: flex; align-items: center; gap: 10px; }
+.sb-dot { width: 32px; height: 32px; border-radius: 50%; border: 1.5px solid var(--border); background: var(--bg2); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: var(--muted2); font-family: var(--display); transition: all 0.25s; flex-shrink: 0; }
+.sb-dot.active { border-color: var(--accent); color: var(--accent); background: rgba(0,232,122,0.08); }
+.sb-dot.done { border-color: var(--accent); background: var(--accent); color: #000; }
+.sb-label { font-size: 13px; color: var(--muted2); font-weight: 500; white-space: nowrap; }
+.sb-label.active { color: var(--text); }
+.sb-line { width: 48px; height: 1px; background: var(--border); margin: 0 10px; }
+.sb-line.done { background: rgba(0,232,122,0.3); }
+
+/* ── STEP PANELS ── */
+.step-panel { display: none; }
+.step-panel.active { display: block; }
+
+/* ── LAYOUT: editor + phone ── */
+.editor-layout { display: grid; grid-template-columns: 1fr 300px; gap: 1.5rem; align-items: start; }
+@media (max-width: 700px) { .editor-layout { grid-template-columns: 1fr; } .phone-col { order: -1; } }
+
+/* ── CARD ── */
+.card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; }
+.card-title { font-size: 13px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 1.25rem; }
+
+/* ── FORM ELEMENTS ── */
+.field { margin-bottom: 1.25rem; }
+.field:last-child { margin-bottom: 0; }
+label { display: block; font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 7px; }
+input[type="text"], input[type="email"], input[type="tel"], textarea, select {
+  width: 100%; background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius-sm);
+  padding: 11px 14px; color: var(--text); font-size: 14px; font-family: var(--font);
+  outline: none; transition: border-color 0.2s; appearance: none;
+}
+input:focus, textarea:focus, select:focus { border-color: rgba(0,232,122,0.35); }
+input.err, textarea.err { border-color: var(--danger) !important; }
+textarea { resize: none; line-height: 1.75; min-height: 160px; }
+
+.input-hint { font-size: 12px; color: var(--muted2); margin-top: 6px; }
+.err-text { font-size: 12px; color: var(--danger); margin-top: 6px; display: none; }
+.err-text.show { display: block; }
+
+/* ── SMS ANALYSIS ── */
+.sms-analysis { margin-top: 10px; }
+.sms-analysis.hidden { display: none; }
+.encoding-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.encoding-badge { display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px; border-radius: 100px; font-size: 11px; font-weight: 700; letter-spacing: 0.2px; }
+.encoding-badge.gsm { background: rgba(0,232,122,0.1); border: 1px solid rgba(0,232,122,0.25); color: var(--accent); }
+.encoding-badge.unicode { background: rgba(255,184,0,0.1); border: 1px solid rgba(255,184,0,0.3); color: var(--accent3); }
+.char-row { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted2); }
+.char-row .parts { color: var(--accent2); font-weight: 600; }
+.chars-left-wrap { font-size: 12px; color: var(--muted2); }
+.unicode-warn { display: none; background: rgba(255,184,0,0.06); border: 1px solid rgba(255,184,0,0.2); border-radius: var(--radius-sm); padding: 10px 12px; margin-top: 8px; font-size: 13px; color: var(--accent3); line-height: 1.6; }
+.unicode-warn.show { display: block; }
+.unicode-warn p { margin-bottom: 8px; color: var(--muted); font-size: 12px; }
+.unicode-chars { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+
+/* ── TOKEN BAR ── */
+.token-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 10px; }
+.token-bar-label { font-size: 11px; color: var(--muted2); font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px; margin-right: 2px; }
+.token-chip { background: var(--bg3); border: 1px solid var(--border); border-radius: 100px; padding: 4px 12px; font-size: 12px; font-weight: 600; color: var(--muted); cursor: pointer; font-family: var(--font); transition: all 0.15s; white-space: nowrap; }
+.token-chip:hover { border-color: rgba(0,191,255,0.4); color: var(--accent2); background: rgba(0,191,255,0.06); }
+.token-chip.active { border-color: rgba(0,191,255,0.4); color: var(--accent2); background: rgba(0,191,255,0.08); }
+.token-chip-custom { color: var(--muted2); }
+.token-chip-custom:hover { border-color: rgba(0,232,122,0.3); color: var(--accent); background: rgba(0,232,122,0.06); }
+/* contacts required note */
+.mode-info { font-size: 13px; color: var(--muted); background: var(--bg3); border-radius: var(--radius-sm); padding: 10px 12px; margin-bottom: 1.25rem; line-height: 1.6; border: 1px solid var(--border2); }
+.mode-info b { color: var(--text); }
+
+/* ── iPHONE MOCK ── */
+.phone-col { position: sticky; top: 80px; }
+.iphone-wrap { display: flex; justify-content: center; }
+.iphone {
+  width: 260px;
+  background: #1a1a1e;
+  border-radius: 44px;
+  border: 1.5px solid rgba(255,255,255,0.13);
+  box-shadow:
+    0 0 0 6px #0f0f12,
+    0 0 0 7.5px rgba(255,255,255,0.06),
+    0 32px 64px rgba(0,0,0,0.7);
+  overflow: hidden;
+  padding: 12px 0 20px;
+  position: relative;
+}
+/* Dynamic Island */
+.iphone-island {
+  width: 90px; height: 26px;
+  background: #000;
+  border-radius: 20px;
+  margin: 0 auto 10px;
+  position: relative;
+  z-index: 2;
+}
+/* Status bar */
+.iphone-status {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 0 20px 8px;
+  font-size: 11px; font-weight: 600; color: #fff; font-family: -apple-system, sans-serif;
+  letter-spacing: -0.2px;
+}
+.iphone-status .i-time { font-size: 14px; font-weight: 700; }
+.iphone-status .i-icons { display: flex; align-items: center; gap: 5px; }
+/* Messages header bar */
+.iphone-header {
+  background: rgba(30,30,34,0.95);
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  padding: 8px 14px 10px;
+  display: flex; align-items: center; gap: 10px;
+}
+.iphone-back { color: #007AFF; font-size: 13px; font-family: -apple-system,sans-serif; display: flex; align-items: center; gap: 2px; }
+.iphone-back svg { width: 8px; height: 13px; }
+.iphone-contact-wrap { flex: 1; text-align: center; }
+.iphone-contact-avatar {
+  width: 34px; height: 34px; border-radius: 50%;
+  background: linear-gradient(135deg, #4fc3f7, #0288d1);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px; margin: 0 auto 3px;
+}
+.iphone-contact-name { font-size: 12px; font-weight: 600; color: #fff; font-family: -apple-system, sans-serif; }
+.iphone-contact-sub { font-size: 10px; color: rgba(255,255,255,0.45); font-family: -apple-system, sans-serif; }
+/* Chat area */
+.iphone-chat { padding: 14px 12px 10px; min-height: 180px; background: #000; }
+.iphone-date-label { text-align: center; font-size: 10px; color: rgba(255,255,255,0.35); font-family: -apple-system, sans-serif; margin-bottom: 10px; }
+.sms-bubble {
+  background: #1c1c1e;
+  border-radius: 18px 18px 4px 18px;
+  padding: 10px 13px;
+  font-size: 13px; line-height: 1.55;
+  color: #fff;
+  font-family: -apple-system, sans-serif;
+  white-space: pre-wrap; word-break: break-word;
+  max-height: 220px; overflow-y: auto;
+  display: inline-block; max-width: 100%;
+}
+.bubble-tail { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
+.bubble-meta { font-size: 10px; color: rgba(255,255,255,0.3); font-family: -apple-system, sans-serif; padding-left: 4px; margin-top: 4px; }
+/* Input bar at bottom */
+.iphone-inputbar {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 12px 0;
+  background: #000;
+  border-top: 1px solid rgba(255,255,255,0.06);
+}
+.iphone-inputbar-field {
+  flex: 1; background: #2c2c2e; border-radius: 18px; height: 32px;
+  border: 1px solid rgba(255,255,255,0.08);
+}
+.iphone-send-btn {
+  width: 30px; height: 30px; border-radius: 50%;
+  background: #007AFF; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.iphone-send-btn svg { width: 14px; height: 14px; }
+/* Home indicator */
+.iphone-home { width: 100px; height: 4px; background: rgba(255,255,255,0.25); border-radius: 3px; margin: 12px auto 0; }
+/* phone label below */
+.phone-label { font-size: 11px; color: var(--muted2); text-align: center; margin-top: 14px; }
+
+/* ── CONTACTS STEP ── */
+.contacts-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; align-items: start; }
+@media (max-width: 640px) { .contacts-layout { grid-template-columns: 1fr; } }
+
+.picker-btn { display: flex; align-items: center; gap: 14px; padding: 14px 16px; background: var(--bg3); border: 1.5px solid var(--border); border-radius: var(--radius-sm); cursor: pointer; font-family: var(--font); transition: border-color 0.2s; width: 100%; text-align: left; }
+.picker-btn:hover { border-color: rgba(0,232,122,0.3); }
+.picker-icon { font-size: 24px; flex-shrink: 0; }
+.picker-text { font-size: 14px; font-weight: 600; color: var(--text); }
+.picker-sub { font-size: 12px; color: var(--muted); margin-top: 1px; }
+.or-line { display: flex; align-items: center; gap: 10px; margin: 12px 0; font-size: 12px; color: var(--muted2); }
+.or-line::before, .or-line::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+.add-row { display: flex; gap: 8px; }
+.add-row input { flex: 1; margin: 0; }
+.add-row .name-in { max-width: 130px; }
+.add-btn { background: rgba(0,232,122,0.1); border: 1.5px solid rgba(0,232,122,0.25); border-radius: var(--radius-sm); color: var(--accent); font-size: 13px; font-weight: 700; padding: 0 16px; cursor: pointer; font-family: var(--font); white-space: nowrap; transition: background 0.15s; flex-shrink: 0; }
+.add-btn:hover { background: rgba(0,232,122,0.18); }
+
+/* chips */
+.chips-area { min-height: 48px; margin-top: 14px; }
+.chips-list { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { display: inline-flex; align-items: center; gap: 6px; background: rgba(0,232,122,0.07); border: 1px solid rgba(0,232,122,0.18); border-radius: 100px; padding: 4px 10px 4px 12px; font-size: 13px; color: var(--accent); }
+.chip button { background: none; border: none; color: var(--accent); cursor: pointer; font-size: 16px; line-height: 1; padding: 0; opacity: 0.5; display: flex; align-items: center; }
+.chip button:hover { opacity: 1; }
+.chips-empty { font-size: 13px; color: var(--muted2); }
+
+/* contacts summary card */
+.contacts-summary { display: flex; align-items: center; gap: 14px; padding: 16px; background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius-sm); }
+.cs-num { font-family: var(--display); font-size: 32px; font-weight: 800; color: var(--accent); line-height: 1; }
+.cs-label { font-size: 13px; color: var(--muted); }
+.cs-label strong { color: var(--text); font-size: 14px; display: block; }
+
+/* ── PREVIEW STEP ── */
+.preview-layout { display: grid; grid-template-columns: 1fr 300px; gap: 1.5rem; align-items: start; }
+@media (max-width: 700px) { .preview-layout { grid-template-columns: 1fr; } }
+.preview-table { width: 100%; border-collapse: collapse; }
+.preview-table tr { border-bottom: 1px solid var(--border); }
+.preview-table tr:last-child { border-bottom: none; }
+.preview-table td { padding: 10px 0; font-size: 14px; vertical-align: top; }
+.preview-table td:first-child { color: var(--muted); width: 40%; }
+.preview-table td:last-child { font-weight: 500; text-align: right; }
+.personalised-tag { display: inline-flex; align-items: center; gap: 4px; background: rgba(0,191,255,0.1); border: 1px solid rgba(0,191,255,0.2); border-radius: 100px; padding: 2px 10px; font-size: 12px; color: var(--accent2); }
+.general-tag { display: inline-flex; align-items: center; gap: 4px; background: rgba(0,232,122,0.08); border: 1px solid rgba(0,232,122,0.15); border-radius: 100px; padding: 2px 10px; font-size: 12px; color: var(--accent); }
+
+/* ── BUTTONS ── */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 13px 28px; border-radius: var(--radius-sm); font-size: 15px; font-weight: 700; cursor: pointer; border: none; font-family: var(--font); transition: all 0.15s; text-decoration: none; }
+.btn-primary { background: var(--accent); color: #000; width: 100%; margin-top: 1.5rem; }
+.btn-primary:hover { opacity: 0.88; transform: translateY(-1px); }
+.btn-ghost { background: none; border: 1px solid var(--border); color: var(--muted); width: 100%; margin-top: 10px; font-size: 14px; font-weight: 500; }
+.btn-ghost:hover { border-color: rgba(255,255,255,0.15); color: var(--text); }
+.btn-back { background: none; border: none; color: var(--muted); font-size: 13px; cursor: pointer; font-family: var(--font); padding: 0; display: flex; align-items: center; gap: 6px; margin-bottom: 1.75rem; }
+.btn-back:hover { color: var(--text); }
+
+/* ── MODAL ── */
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(10px); z-index: 200; display: none; align-items: center; justify-content: center; padding: 1.5rem; }
+.modal-overlay.open { display: flex; }
+.modal { background: var(--bg2); border: 1px solid rgba(0,232,122,0.15); border-radius: 20px; padding: 2rem; max-width: 440px; width: 100%; animation: pop 0.2s ease; }
+@keyframes pop { from { opacity: 0; transform: scale(0.97) translateY(10px); } to { opacity: 1; transform: none; } }
+.modal-header { text-align: center; margin-bottom: 1.75rem; }
+.modal-emoji { font-size: 40px; display: block; margin-bottom: .75rem; }
+.modal-title { font-family: var(--display); font-size: 22px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 6px; }
+.modal-sub { font-size: 14px; color: var(--muted); line-height: 1.6; }
+.modal .field { margin-bottom: 1.5rem; }
+.type-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 1.25rem; }
+.type-card { background: var(--bg3); border: 1.5px solid var(--border); border-radius: var(--radius); padding: 1.25rem 1rem; text-align: center; cursor: pointer; transition: all 0.15s; }
+.type-card:hover, .type-card.selected { border-color: rgba(0,232,122,0.4); background: rgba(0,232,122,0.05); }
+.type-card .tc-icon { font-size: 28px; margin-bottom: 8px; }
+.type-card .tc-name { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 3px; }
+.type-card .tc-desc { font-size: 11px; color: var(--muted); line-height: 1.5; }
+.modal-login { font-size: 12px; color: var(--muted); text-align: center; margin-top: .75rem; }
+.modal-login a { color: var(--accent); text-decoration: none; }
+.modal-back { background: none; border: none; color: var(--muted2); font-size: 13px; cursor: pointer; font-family: var(--font); display: block; margin: 1rem auto 0; }
+.modal-back:hover { color: var(--muted); }
+
+/* ── FOOTER ── */
+footer { text-align: center; padding: 2rem 1rem 3rem; font-size: 13px; color: var(--muted2); border-top: 1px solid var(--border2); }
+footer a { color: var(--accent); text-decoration: none; }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="index.html" class="logo">Notify<span>Pro</span></a>
+  <a href="login.html" class="nav-cta">Already have an account? Log in →</a>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="badge">Nigeria's reliable messaging platform</div>
+  <h1>Reach Millions.<br><em>Instantly.</em><br>Anywhere in Nigeria.</h1>
+  <p>Write your message, add your contacts, hit send. Personalised for each person or one blast for all — you choose.</p>
+</div>
+
+<!-- WIZARD -->
+<div class="wizard">
+
+  <!-- Step bar -->
+  <div class="step-bar" id="stepBar">
+    <div class="sb-item">
+      <div class="sb-dot active" id="sd1">1</div>
+      <div class="sb-label active" id="sl1">Message</div>
+    </div>
+    <div class="sb-line" id="sbl1"></div>
+    <div class="sb-item">
+      <div class="sb-dot" id="sd2">2</div>
+      <div class="sb-label" id="sl2">Contacts</div>
+    </div>
+    <div class="sb-line" id="sbl2"></div>
+    <div class="sb-item">
+      <div class="sb-dot" id="sd3">3</div>
+      <div class="sb-label" id="sl3">Preview &amp; Send</div>
+    </div>
+  </div>
+
+  <!-- ═══ STEP 1: MESSAGE ═══ -->
+  <div class="step-panel active" id="panel1">
+    <div class="editor-layout">
+
+      <!-- Left: editor -->
+      <div>
+        <div class="card">
+          <div class="field">
+            <label>Your message</label>
+            <textarea id="msgBody" maxlength="320" oninput="onMsgInput()"></textarea>
+            <div class="token-bar" id="tokenBar">
+              <span class="token-bar-label">Personalise:</span>
+              <button class="token-chip" onclick="insertToken('FIRST NAME')">+ First Name</button>
+              <button class="token-chip" onclick="insertToken('LAST NAME')">+ Last Name</button>
+              <button class="token-chip" onclick="insertToken('ID')">+ ID</button>
+              <button class="token-chip" onclick="insertToken('EMAIL')">+ Email</button>
+              <button class="token-chip" onclick="insertToken('USERNAME')">+ Username</button>
+              <button class="token-chip token-chip-custom" onclick="toggleCustomToken()">+ Others</button>
+            </div>
+            <div id="customTokenWrap" style="display:none;margin-top:8px">
+              <div class="add-row">
+                <input type="text" id="customTokenInput" placeholder="e.g. Company, Title, Region…" style="margin:0" onkeydown="if(event.key==='Enter')insertCustomToken()" />
+                <button class="add-btn" onclick="insertCustomToken()">Insert</button>
+              </div>
+            </div>
+            <div class="sms-analysis hidden" id="smsAnalysis">
+              <div class="encoding-row">
+                <span class="encoding-badge gsm" id="encodingBadge">GSM-7 · Standard</span>
+                <span class="chars-left-wrap"><span id="charsLeft">160</span> chars left</span>
+              </div>
+              <div class="char-row">
+                <span><span id="charCount">0</span> / 320 chars</span>
+                <span class="parts"><span id="smsParts">1</span> SMS part</span>
+              </div>
+              <div class="unicode-warn" id="unicodeWarn">
+                ⚠️ Unicode detected — reduces to 70 chars per SMS part
+                <p>These characters are causing it. Consider replacing them with standard alternatives.</p>
+                <div class="unicode-chars" id="unicodeCharList"></div>
+              </div>
+            </div>
+            <div class="err-text" id="msgErr">Please write a message before continuing</div>
+          </div>
+        </div>
+
+        <button class="btn btn-primary" onclick="goToStep2()">Next — Add contacts →</button>
+      </div>
+
+      <!-- Right: live phone preview -->
+      <div class="phone-col">
+        <div class="iphone-wrap">
+          <div class="iphone">
+            <div class="iphone-island"></div>
+            <div class="iphone-status">
+              <span class="i-time">9:41</span>
+              <div class="i-icons">
+                <svg width="16" height="11" viewBox="0 0 16 11" fill="white"><rect x="0" y="4" width="3" height="7" rx="1"/><rect x="4.5" y="2.5" width="3" height="8.5" rx="1"/><rect x="9" y="0.5" width="3" height="10.5" rx="1"/><rect x="13.5" y="0" width="2" height="11" rx="0.5" opacity="0.3"/></svg>
+                <svg width="15" height="11" viewBox="0 0 15 11" fill="white"><path d="M7.5 2.2C9.7 2.2 11.7 3.1 13.1 4.6L14.5 3.1C12.7 1.2 10.2 0 7.5 0S2.3 1.2 0.5 3.1L1.9 4.6C3.3 3.1 5.3 2.2 7.5 2.2z" opacity="0.4"/><path d="M7.5 5C9 5 10.3 5.6 11.3 6.6L12.7 5.1C11.3 3.8 9.5 3 7.5 3S3.7 3.8 2.3 5.1L3.7 6.6C4.7 5.6 6 5 7.5 5z"/><circle cx="7.5" cy="9" r="2"/></svg>
+                <svg width="25" height="11" viewBox="0 0 25 11" fill="none"><rect x="0.5" y="0.5" width="21" height="10" rx="3.5" stroke="white" stroke-opacity="0.35"/><rect x="2" y="2" width="17" height="7" rx="2" fill="white"/><path d="M23 3.5V7.5C23.8 7.2 24.5 6.5 24.5 5.5C24.5 4.5 23.8 3.8 23 3.5Z" fill="white" opacity="0.4"/></svg>
+              </div>
+            </div>
+            <div class="iphone-header">
+              <div class="iphone-back">
+                <svg viewBox="0 0 8 13" fill="none" stroke="#007AFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="7,1 1,6.5 7,12"/></svg>
+                SMS
+              </div>
+              <div class="iphone-contact-wrap">
+                <div class="iphone-contact-avatar">💬</div>
+                <div class="iphone-contact-name">NotifyPro</div>
+                <div class="iphone-contact-sub">text message</div>
+              </div>
+              <div style="width:40px"></div>
+            </div>
+            <div class="iphone-chat">
+              <div class="iphone-date-label">Today</div>
+              <div class="bubble-tail">
+                <div class="sms-bubble" id="previewBubble1">Your message will appear here as you type…</div>
+                <div class="bubble-meta" id="previewMeta">0 chars · 1 part</div>
+              </div>
+            </div>
+            <div class="iphone-inputbar">
+              <div class="iphone-inputbar-field"></div>
+              <div class="iphone-send-btn">
+                <svg viewBox="0 0 14 14" fill="white"><path d="M7 1L7 13M7 1L2 6M7 1L12 6" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+              </div>
+            </div>
+            <div class="iphone-home"></div>
+          </div>
+        </div>
+        <div class="phone-label">Live preview · SMS app</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ STEP 2: CONTACTS ═══ -->
+  <div class="step-panel" id="panel2">
+    <button class="btn-back" onclick="goToStep(1)">← Back to message</button>
+
+    <div class="contacts-layout">
+
+      <!-- Left: add contacts -->
+      <div>
+        <div class="card">
+          <div class="card-title">Add contacts</div>
+          <div class="mode-info" id="contactsRequiredNote" style="display:none"></div>
+
+          <button class="picker-btn" onclick="pickFromPhone()" id="phonePickerBtn">
+            <span class="picker-icon">📱</span>
+            <div>
+              <div class="picker-text">Pick from phonebook</div>
+              <div class="picker-sub">Tap to access your phone contacts directly</div>
+            </div>
+          </button>
+
+          <button class="picker-btn" onclick="document.getElementById('excelFileInput').click()" style="margin-top:8px">
+            <span class="picker-icon">📊</span>
+            <div>
+              <div class="picker-text">Upload Excel or CSV</div>
+              <div class="picker-sub">.xlsx, .xls, .csv — we detect the phone & name columns</div>
+            </div>
+          </button>
+          <input type="file" id="excelFileInput" accept=".xlsx,.xls,.csv" style="display:none" onchange="handleExcelUpload(event)" />
+
+          <div class="or-line">or add manually</div>
+          <div id="manualContactForm"></div>
+
+          <div class="err-text" id="contactErr"></div>
+        </div>
+
+        <div id="contactsGate" style="text-align:center;font-size:13px;color:var(--muted2);margin-top:1.5rem">Add at least one contact to continue</div>
+        <button class="btn btn-primary" id="toPreviewBtn" onclick="goToStep3()" style="display:none">Review &amp; send →</button>
+      </div>
+
+      <!-- Right: contacts list -->
+      <div>
+        <div class="card">
+          <div class="contacts-summary" id="contactsSummary" style="display:none;margin-bottom:1rem">
+            <div class="cs-num" id="csNum">0</div>
+            <div>
+              <div class="cs-label"><strong id="csStrong">0 contacts</strong> ready to receive your message</div>
+            </div>
+          </div>
+          <div class="chips-area">
+            <div class="chips-list" id="chipsList"></div>
+            <div class="chips-empty" id="chipsEmpty">No contacts added yet</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ STEP 3: PREVIEW ═══ -->
+  <div class="step-panel" id="panel3">
+    <button class="btn-back" onclick="goToStep(2)">← Back to contacts</button>
+
+    <div class="preview-layout">
+
+      <!-- Left: summary -->
+      <div>
+        <div class="card">
+          <div class="card-title">Message summary</div>
+          <table class="preview-table">
+            <tr><td>Recipients</td><td id="pvRecipients">—</td></tr>
+            <tr><td>Message length</td><td id="pvLength">—</td></tr>
+            <tr><td>SMS parts</td><td id="pvParts">—</td></tr>
+            <tr><td>Estimated cost</td><td id="pvCost" style="color:var(--accent3)">—</td></tr>
+            <tr><td>Delivery speed</td><td style="color:var(--accent)">Instant · All networks</td></tr>
+          </table>
+        </div>
+        <div class="preview-note" id="pvNote" style="font-size:12px;color:var(--accent2);margin-top:10px;display:none"></div>
+        <button class="btn btn-primary" onclick="openModal()">🚀 Send to everyone now →</button>
+        <button class="btn btn-ghost" onclick="goToStep(2)">← Edit contacts</button>
+      </div>
+
+      <!-- Right: phone -->
+      <div>
+        <div class="iphone-wrap">
+          <div class="iphone">
+            <div class="iphone-island"></div>
+            <div class="iphone-status">
+              <span class="i-time">9:41</span>
+              <div class="i-icons">
+                <svg width="16" height="11" viewBox="0 0 16 11" fill="white"><rect x="0" y="4" width="3" height="7" rx="1"/><rect x="4.5" y="2.5" width="3" height="8.5" rx="1"/><rect x="9" y="0.5" width="3" height="10.5" rx="1"/><rect x="13.5" y="0" width="2" height="11" rx="0.5" opacity="0.3"/></svg>
+                <svg width="15" height="11" viewBox="0 0 15 11" fill="white"><path d="M7.5 2.2C9.7 2.2 11.7 3.1 13.1 4.6L14.5 3.1C12.7 1.2 10.2 0 7.5 0S2.3 1.2 0.5 3.1L1.9 4.6C3.3 3.1 5.3 2.2 7.5 2.2z" opacity="0.4"/><path d="M7.5 5C9 5 10.3 5.6 11.3 6.6L12.7 5.1C11.3 3.8 9.5 3 7.5 3S3.7 3.8 2.3 5.1L3.7 6.6C4.7 5.6 6 5 7.5 5z"/><circle cx="7.5" cy="9" r="2"/></svg>
+                <svg width="25" height="11" viewBox="0 0 25 11" fill="none"><rect x="0.5" y="0.5" width="21" height="10" rx="3.5" stroke="white" stroke-opacity="0.35"/><rect x="2" y="2" width="17" height="7" rx="2" fill="white"/><path d="M23 3.5V7.5C23.8 7.2 24.5 6.5 24.5 5.5C24.5 4.5 23.8 3.8 23 3.5Z" fill="white" opacity="0.4"/></svg>
+              </div>
+            </div>
+            <div class="iphone-header">
+              <div class="iphone-back">
+                <svg viewBox="0 0 8 13" fill="none" stroke="#007AFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="7,1 1,6.5 7,12"/></svg>
+                SMS
+              </div>
+              <div class="iphone-contact-wrap">
+                <div class="iphone-contact-avatar">💬</div>
+                <div class="iphone-contact-name">NotifyPro</div>
+                <div class="iphone-contact-sub">text message</div>
+              </div>
+              <div style="width:40px"></div>
+            </div>
+            <div class="iphone-chat">
+              <div class="iphone-date-label">Today</div>
+              <div class="bubble-tail">
+                <div class="sms-bubble" id="previewBubble3">Loading preview…</div>
+                <div class="bubble-meta" id="pvBubbleMeta"></div>
+              </div>
+            </div>
+            <div class="iphone-inputbar">
+              <div class="iphone-inputbar-field"></div>
+              <div class="iphone-send-btn">
+                <svg viewBox="0 0 14 14" fill="white"><path d="M7 1L7 13M7 1L2 6M7 1L12 6" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+              </div>
+            </div>
+            <div class="iphone-home"></div>
+          </div>
+        </div>
+        <div class="phone-label" id="pvPhoneNote">Live preview · SMS app</div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /wizard -->
+
+<!-- COLUMN MAP MODAL -->
+<div class="modal-overlay" id="colMapModal">
+  <div class="modal" style="max-width:480px">
+    <div class="modal-header" style="margin-bottom:1.25rem">
+      <span class="modal-emoji">📊</span>
+      <div class="modal-title" style="font-size:18px">Map your columns</div>
+      <div class="modal-sub" id="colMapSub">We found your file. Tell us which columns are phone and name.</div>
+    </div>
+    <div id="colMapFields"></div>
+    <div class="err-text" id="colMapErr" style="margin-bottom:8px"></div>
+    <button class="btn btn-primary" style="margin-top:.5rem" onclick="importFromExcel()">Import contacts →</button>
+    <button class="modal-back" onclick="closeColMap()">Cancel</button>
+  </div>
+</div>
+
+<!-- SIGNUP MODAL -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-emoji">🎉</span>
+      <div class="modal-title">One last step</div>
+      <div class="modal-sub">Create your free account — we'll send your SMS delivery report and payment receipt to your email.</div>
+    </div>
+
+    <div class="field">
+      <label>Your email address</label>
+      <input type="email" id="signupEmail" placeholder="you@example.com" oninput="clearEmailErr()" />
+      <div class="input-hint">For your delivery report &amp; receipt — no spam, ever</div>
+      <div class="err-text" id="emailErr">Please enter a valid email address</div>
+    </div>
+
+    <div style="font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:0.4px;font-weight:600;margin-bottom:10px">I am a…</div>
+    <div class="type-row">
+      <div class="type-card" id="cardIndividual" onclick="selectType('individual')">
+        <div class="tc-icon">👤</div>
+        <div class="tc-name">Individual</div>
+        <div class="tc-desc">Sending to friends, family &amp; personal contacts</div>
+      </div>
+      <div class="type-card" id="cardBusiness" onclick="selectType('business')">
+        <div class="tc-icon">🏢</div>
+        <div class="tc-name">Business</div>
+        <div class="tc-desc">Sending to customers, staff or your audience</div>
+      </div>
+    </div>
+
+    <button class="btn btn-primary" id="signupGoBtn" onclick="proceedSignup()" style="margin-top:.25rem">Create account &amp; send →</button>
+    <div class="modal-login">Already have an account? <a href="login.html">Log in →</a></div>
+    <button class="modal-back" onclick="closeModal()">← Go back</button>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <a href="index.html">NotifyPro.ng</a> · Nigeria's reliable messaging platform · <a href="privacy.html">Privacy</a> · Need help? <a href="mailto:support@notifypro.com">support@notifypro.com</a>
+</footer>
+
+<script>
+// ── State ──
+let contacts    = [];
+let msgEdited   = false;
+let selectedType = null;
+let customTokens = []; // user-defined token keys
+
+const DEFAULT_TEMPLATE = `Hello,\n\nThinking of you and wishing you and your loved ones the very best. May your days be filled with peace, joy, and endless blessings.\n\n- [Sender name]`;
+
+// Known tokens: key = what appears in [brackets], label = display name, hints = Excel column name guesses
+const KNOWN_TOKENS = [
+  { key: 'FIRST NAME', label: 'First Name', hints: ['first','firstname','fname','given'] },
+  { key: 'LAST NAME',  label: 'Last Name',  hints: ['last','lastname','lname','surname'] },
+  { key: 'ID',         label: 'ID',         hints: ['id','ref','code','number'] },
+  { key: 'EMAIL',      label: 'Email',      hints: ['email','mail'] },
+  { key: 'USERNAME',   label: 'Username',   hints: ['user','username','handle'] },
+];
+
+// ── Boot ──
+document.addEventListener('DOMContentLoaded', function() {
+  document.getElementById('msgBody').value = DEFAULT_TEMPLATE;
+  updateMsgUI();
+  syncContactsForm();
+});
+
+
+// ── Encoding helpers (ported from bulk-sms) ──
+const GSM7_RE = /^[@£$¥èéùìòÇ\nØø\rÅåΔ_ΦΓΛΩΠΨΣΘΞ\x1BÆæßÉ !"#¤%&'()*+,\-.\/0-9:;<=>?¡A-ZÄÖÑÜ§¿a-zäöñüà]*$/;
+const GSM7_SET = /[@£$¥èéùìòÇ\nØø\rÅåΔ_ΦΓΛΩΠΨΣΘΞ\x1BÆæßÉ !"#¤%&'()*+,\-.\/0-9:;<=>?¡A-ZÄÖÑÜ§¿a-zäöñüà]/;
+
+function detectGSM7(text) { return GSM7_RE.test(text); }
+
+function calcParts(len, unicode) {
+  if (unicode) return len <= 70  ? 1 : Math.ceil(len / 67);
+  else         return len <= 160 ? 1 : Math.ceil(len / 153);
+}
+
+// ── Token helpers ──
+function getUsedTokens() {
+  const v = document.getElementById('msgBody').value;
+  const used = [];
+  KNOWN_TOKENS.forEach(t => { if (v.includes('[' + t.key + ']')) used.push(t.key); });
+  customTokens.forEach(k => { if (v.includes('[' + k + ']')) used.push(k); });
+  return used;
+}
+
+function insertToken(key) {
+  const token = '[' + key + ']';
+  const ta = document.getElementById('msgBody');
+  const s = ta.selectionStart, e = ta.selectionEnd;
+  ta.value = ta.value.substring(0, s) + token + ta.value.substring(e);
+  ta.selectionStart = ta.selectionEnd = s + token.length;
+  ta.focus();
+  msgEdited = true;
+  updateMsgUI();
+  syncContactsForm();
+  // highlight the chip
+  highlightTokenChips();
+}
+
+function toggleCustomToken() {
+  const w = document.getElementById('customTokenWrap');
+  w.style.display = w.style.display === 'none' ? 'block' : 'none';
+  if (w.style.display === 'block') document.getElementById('customTokenInput').focus();
+}
+
+function insertCustomToken() {
+  const raw = document.getElementById('customTokenInput').value.trim().toUpperCase();
+  if (!raw) return;
+  const key = raw.replace(/[^A-Z0-9 ]/g, '').trim();
+  if (!key) return;
+  if (!customTokens.includes(key)) customTokens.push(key);
+  insertToken(key);
+  document.getElementById('customTokenInput').value = '';
+  document.getElementById('customTokenWrap').style.display = 'none';
+}
+
+function highlightTokenChips() {
+  const used = getUsedTokens();
+  document.querySelectorAll('.token-chip[data-key]').forEach(btn => {
+    btn.classList.toggle('active', used.includes(btn.dataset.key));
+  });
+}
+
+// ── Msg input ──
+function onMsgInput() {
+  msgEdited = true;
+  updateMsgUI();
+  syncContactsForm();
+  highlightTokenChips();
+}
+
+function updateMsgUI() {
+  const v   = document.getElementById('msgBody').value;
+  const len = v.length;
+
+  const analysis = document.getElementById('smsAnalysis');
+  if (!v) {
+    analysis.classList.add('hidden');
+    document.getElementById('previewBubble1').textContent = 'Your message will appear here as you type…';
+    return;
+  }
+  analysis.classList.remove('hidden');
+
+  const unicode = !detectGSM7(v);
+  const maxPer  = unicode ? 70 : 160;
+  const parts   = calcParts(len, unicode);
+  const partMax = parts === 1 ? maxPer : (unicode ? 67 : 153);
+  const left    = parts * partMax - len;
+
+  document.getElementById('charCount').textContent = len;
+  document.getElementById('smsParts').textContent  = parts;
+  const leftEl = document.getElementById('charsLeft');
+  leftEl.textContent = left;
+  leftEl.style.color = left < 10 ? 'var(--danger)' : left < 30 ? 'var(--accent3)' : '';
+
+  const badge = document.getElementById('encodingBadge');
+  badge.className   = 'encoding-badge ' + (unicode ? 'unicode' : 'gsm');
+  badge.textContent = unicode ? 'Unicode · 70 chars/SMS' : 'GSM-7 · Standard';
+
+  const warn = document.getElementById('unicodeWarn');
+  warn.classList.toggle('show', unicode);
+  if (unicode) {
+    const badChars = [...new Set([...v].filter(c => !GSM7_SET.test(c)))];
+    document.getElementById('unicodeCharList').innerHTML = badChars.map(c =>
+      `<span style="display:inline-flex;align-items:center;gap:4px;background:rgba(255,184,0,0.12);border:1px solid rgba(255,184,0,0.3);border-radius:4px;padding:2px 8px;font-size:12px;font-family:monospace;color:#FFB800;">` +
+      `<span style="font-size:15px">${c}</span>` +
+      `<span style="color:#8892A4;font-size:10px">U+${c.codePointAt(0).toString(16).toUpperCase().padStart(4,'0')}</span>` +
+      `</span>`
+    ).join('');
+  }
+
+  // Preview: replace tokens with first contact's values or placeholder labels
+  let previewText = v;
+  const used = getUsedTokens();
+  if (used.length > 0 && contacts.length > 0) {
+    used.forEach(key => {
+      const val = contacts[0].fields?.[key] || key;
+      previewText = previewText.split('[' + key + ']').join(val);
+    });
+  } else if (used.length > 0) {
+    // No contacts yet — show token label as placeholder e.g. [John] style
+    used.forEach(key => {
+      const t = KNOWN_TOKENS.find(t => t.key === key);
+      const sample = t ? t.label : key;
+      previewText = previewText.split('[' + key + ']').join(sample);
+    });
+  }
+  document.getElementById('previewBubble1').textContent = previewText || 'Your message will appear here as you type…';
+  document.getElementById('previewMeta').textContent    = len + ' chars · ' + parts + ' part' + (parts > 1 ? 's' : '');
+}
+
+// Wire data-key attributes to token chips after DOM ready
+document.addEventListener('DOMContentLoaded', () => {
+  KNOWN_TOKENS.forEach(t => {
+    const btn = [...document.querySelectorAll('.token-chip')].find(b => b.textContent.includes(t.label));
+    if (btn) btn.dataset.key = t.key;
+  });
+});
+
+// ── Step navigation ──
+function goToStep(n) {
+  document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel' + n).classList.add('active');
+  updateStepBar(n);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function updateStepBar(active) {
+  [1,2,3].forEach(i => {
+    const dot = document.getElementById('sd' + i);
+    const lbl = document.getElementById('sl' + i);
+    dot.className = 'sb-dot';
+    lbl.className = 'sb-label';
+    if (i < active) { dot.classList.add('done'); dot.textContent = '✓'; }
+    else if (i === active) { dot.classList.add('active'); lbl.classList.add('active'); dot.textContent = i; }
+    else { dot.textContent = i; }
+    if (i < 3) document.getElementById('sbl' + i).className = 'sb-line' + (i < active ? ' done' : '');
+  });
+}
+
+function goToStep2() {
+  const msg = document.getElementById('msgBody').value.trim();
+  if (!msg) {
+    document.getElementById('msgErr').classList.add('show');
+    document.getElementById('msgBody').focus();
+    return;
+  }
+  document.getElementById('msgErr').classList.remove('show');
+  syncContactsForm();
+  goToStep(2);
+}
+
+function goToStep3() {
+  // Validate: if tokens used, every contact must have those fields
+  const used = getUsedTokens();
+  if (used.length > 0) {
+    const missing = contacts.filter(c => used.some(key => !(c.fields?.[key] || '').trim()));
+    if (missing.length > 0) {
+      showContactErr(`${missing.length} contact${missing.length > 1 ? 's are' : ' is'} missing required field${used.length > 1 ? 's' : ''}: ${used.map(k => '[' + k + ']').join(', ')}. Please add them or remove the tokens from your message.`);
+      return;
+    }
+  }
+  buildPreview3();
+  goToStep(3);
+}
+
+// ── Sync contacts form based on used tokens ──
+function syncContactsForm() {
+  const used    = getUsedTokens();
+  const noteEl  = document.getElementById('contactsRequiredNote');
+  const formEl  = document.getElementById('manualContactForm');
+
+  if (used.length > 0) {
+    const labels = used.map(k => {
+      const t = KNOWN_TOKENS.find(t => t.key === k);
+      return `<b>${t ? t.label : k}</b>`;
+    }).join(', ');
+    noteEl.innerHTML = `✨ Your message uses ${labels}. Each contact must have ${used.length > 1 ? 'these fields' : 'this field'} + phone number.`;
+    noteEl.style.display = 'block';
+  } else {
+    noteEl.style.display = 'none';
+  }
+
+  // Build manual entry form
+  let html = '';
+  used.forEach(key => {
+    const t = KNOWN_TOKENS.find(t => t.key === key);
+    const label = t ? t.label : key;
+    const id = 'mf_' + key.replace(/\s+/g, '_');
+    html += `<input type="text" id="${id}" placeholder="${label}" data-token="${key}" style="margin:0 0 6px" />`;
+  });
+  // Phone always last
+  html += `<div class="add-row" style="margin-top:${used.length ? '2px' : '0'}">
+    <input type="tel" id="mf_phone" placeholder="e.g. 08012345678" style="margin:0" onkeydown="if(event.key==='Enter')addManual()" />
+    <button class="add-btn" onclick="addManual()">Add</button>
+  </div>`;
+  if (!used.length) {
+    html += `<div class="input-hint" style="margin-top:8px">Paste multiple numbers separated by commas or new lines</div>`;
+  }
+  formEl.innerHTML = html;
+}
+
+// ── Contact Picker ──
+async function pickFromPhone() {
+  if (!('contacts' in navigator && 'ContactsManager' in window)) {
+    document.getElementById('phonePickerBtn').innerHTML = `
+      <span class="picker-icon">⌨️</span>
+      <div><div class="picker-text">Use the form below</div><div class="picker-sub">Phonebook access not supported on this browser</div></div>`;
+    document.getElementById('mf_phone')?.focus();
+    return;
+  }
+  const used = getUsedTokens();
+  try {
+    const picked = await navigator.contacts.select(['name','tel','email'], { multiple: true });
+    let skipped = 0;
+    picked.forEach(p => {
+      const fullName  = (p.name && p.name[0]) || '';
+      const nameParts = fullName.trim().split(/\s+/);
+      const fields = {};
+      if (used.includes('FIRST NAME')) fields['FIRST NAME'] = nameParts[0] || '';
+      if (used.includes('LAST NAME'))  fields['LAST NAME']  = nameParts.slice(1).join(' ') || '';
+      if (used.includes('EMAIL'))      fields['EMAIL']      = (p.email && p.email[0]) || '';
+
+      const missingRequired = used.some(key => !fields[key] && !['ID','USERNAME'].includes(key));
+      (p.tel || []).forEach(num => {
+        const clean = normalise(num);
+        if (!clean) return;
+        if (contacts.find(c => c.num === clean)) return;
+        if (missingRequired) { skipped++; return; }
+        contacts.push({ num: clean, fields });
+      });
+    });
+    if (skipped) showContactErr(skipped + ' contact(s) skipped — required fields missing from phonebook record.');
+    renderChips();
+  } catch(e) {}
+}
+
+// ── Manual add ──
+function addManual() {
+  hideContactErr();
+  const used    = getUsedTokens();
+  const phoneEl = document.getElementById('mf_phone');
+  const raw     = phoneEl?.value.trim() || '';
+
+  // Collect token field values
+  const fields = {};
+  let missingField = null;
+  for (const key of used) {
+    const id  = 'mf_' + key.replace(/\s+/g, '_');
+    const val = document.getElementById(id)?.value.trim() || '';
+    if (!val) { missingField = key; break; }
+    fields[key] = val;
+  }
+  if (missingField) {
+    const t = KNOWN_TOKENS.find(t => t.key === missingField);
+    showContactErr((t ? t.label : missingField) + ' is required.');
+    document.getElementById('mf_' + missingField.replace(/\s+/g,'_'))?.focus();
+    return;
+  }
+  if (!raw) {
+    showContactErr('Enter a phone number.');
+    phoneEl?.focus();
+    return;
+  }
+
+  splitNums(raw).forEach(n => {
+    if (!contacts.find(c => c.num === n)) contacts.push({ num: n, fields: { ...fields } });
+  });
+
+  // Clear inputs
+  used.forEach(key => {
+    const el = document.getElementById('mf_' + key.replace(/\s+/g, '_'));
+    if (el) el.value = '';
+  });
+  phoneEl.value = '';
+  // Focus first token field or phone
+  const firstInput = used.length
+    ? document.getElementById('mf_' + used[0].replace(/\s+/g,'_'))
+    : phoneEl;
+  firstInput?.focus();
+
+  renderChips();
+}
+
+function splitNums(raw) {
+  return raw.split(/[\n,]+/).map(s => normalise(s)).filter(Boolean);
+}
+
+function normalise(raw) {
+  let s = raw.replace(/\s+/g,'').replace(/[()–\-]/g,'');
+  if (/^0\d{9,10}$/.test(s)) s = '+234' + s.slice(1);
+  return s.length >= 7 ? s : null;
+}
+
+function removeContact(i) { contacts.splice(i, 1); renderChips(); }
+
+function renderChips() {
+  const list  = document.getElementById('chipsList');
+  const empty = document.getElementById('chipsEmpty');
+  const summ  = document.getElementById('contactsSummary');
+  const gate  = document.getElementById('contactsGate');
+  const toBtn = document.getElementById('toPreviewBtn');
+  const used  = getUsedTokens();
+
+  list.innerHTML = contacts.map((c, i) => {
+    const fieldParts = used.map(key => c.fields?.[key]).filter(Boolean);
+    const label = fieldParts.length ? fieldParts.join(' ') + ' · ' + c.num : c.num;
+    return `<div class="chip">${label}<button onclick="removeContact(${i})">×</button></div>`;
+  }).join('');
+
+  const n = contacts.length;
+  empty.style.display = n === 0 ? 'block' : 'none';
+  summ.style.display  = n > 0 ? 'flex' : 'none';
+  document.getElementById('csNum').textContent    = n;
+  document.getElementById('csStrong').textContent = n + ' contact' + (n !== 1 ? 's' : '');
+  gate.style.display  = n === 0 ? 'block' : 'none';
+  toBtn.style.display = n > 0 ? 'flex' : 'none';
+}
+
+function showContactErr(msg) { const e = document.getElementById('contactErr'); e.textContent = msg; e.classList.add('show'); }
+function hideContactErr() { document.getElementById('contactErr').classList.remove('show'); }
+
+// ── Preview step 3 ──
+function buildPreview3() {
+  const msg = document.getElementById('msgBody').value;
+  const n   = contacts.length;
+  const unicode = !detectGSM7(msg);
+  const parts  = calcParts(msg.length, unicode);
+  const cost   = n * parts * 6;
+  const used   = getUsedTokens();
+
+  // Replace tokens with first contact's values for preview
+  let previewMsg = msg;
+  if (used.length > 0 && contacts.length > 0) {
+    used.forEach(key => {
+      const val = contacts[0].fields?.[key] || key;
+      previewMsg = previewMsg.split('[' + key + ']').join(val);
+    });
+    const t = KNOWN_TOKENS.find(t => t.key === used[0]);
+    const sampleVal = contacts[0].fields?.[used[0]] || used[0];
+    document.getElementById('pvNote').textContent = `Preview for "${sampleVal}" — each contact gets their own message`;
+    document.getElementById('pvNote').style.display = 'block';
+    document.getElementById('pvPhoneNote').textContent = `Preview for ${sampleVal}`;
+  } else {
+    document.getElementById('pvNote').style.display = 'none';
+    document.getElementById('pvPhoneNote').textContent = 'Preview';
+  }
+
+  document.getElementById('previewBubble3').textContent = previewMsg;
+  document.getElementById('pvBubbleMeta').textContent   = msg.length + ' chars · ' + parts + ' part' + (parts > 1 ? 's' : '');
+  document.getElementById('pvRecipients').textContent   = n + ' contact' + (n !== 1 ? 's' : '');
+  document.getElementById('pvLength').textContent       = msg.length + ' characters';
+  document.getElementById('pvParts').textContent        = parts + ' part' + (parts !== 1 ? 's' : '') + ' × ' + n + ' contacts';
+  document.getElementById('pvCost').textContent         = '≈ ₦' + cost.toLocaleString('en-NG');
+}
+
+// ── Modal ──
+function openModal() {
+  sessionStorage.setItem('np_sms_msg',      document.getElementById('msgBody').value);
+  sessionStorage.setItem('np_sms_contacts', JSON.stringify(contacts));
+  sessionStorage.setItem('np_sms_tokens',   JSON.stringify(getUsedTokens()));
+  document.getElementById('modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  document.getElementById('signupEmail').focus();
+}
+function closeModal() {
+  document.getElementById('modal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+document.getElementById('modal').addEventListener('click', e => { if (e.target === document.getElementById('modal')) closeModal(); });
+
+function selectType(t) {
+  selectedType = t;
+  document.getElementById('cardIndividual').classList.toggle('selected', t === 'individual');
+  document.getElementById('cardBusiness').classList.toggle('selected',   t === 'business');
+}
+
+function clearEmailErr() { document.getElementById('emailErr').classList.remove('show'); }
+
+function proceedSignup() {
+  const email = document.getElementById('signupEmail').value.trim();
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    document.getElementById('emailErr').classList.add('show');
+    document.getElementById('signupEmail').focus();
+    return;
+  }
+  if (!selectedType) {
+    document.getElementById('cardIndividual').style.borderColor = 'rgba(255,184,0,0.5)';
+    document.getElementById('cardBusiness').style.borderColor  = 'rgba(255,184,0,0.5)';
+    setTimeout(() => {
+      document.getElementById('cardIndividual').style.borderColor = '';
+      document.getElementById('cardBusiness').style.borderColor  = '';
+    }, 1500);
+    return;
+  }
+  sessionStorage.setItem('np_sms_email', email);
+  window.location.href = `signup.html?type=${selectedType}&ref=sms&email=${encodeURIComponent(email)}`;
+}
+
+// ── EXCEL / CSV UPLOAD ──
+let _sheetRows = [];   // raw rows from parsed file
+let _sheetHeaders = []; // column headers
+
+async function handleExcelUpload(e) {
+  const file = e.target.files[0];
+  e.target.value = ''; // reset so same file can be re-selected
+  if (!file) return;
+
+  // Lazy-load SheetJS
+  if (!window.XLSX) {
+    await new Promise((res, rej) => {
+      const s = document.createElement('script');
+      s.src = 'https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js';
+      s.onload = res; s.onerror = rej;
+      document.head.appendChild(s);
+    });
+  }
+
+  const buf  = await file.arrayBuffer();
+  const wb   = XLSX.read(buf, { type: 'array' });
+  const ws   = wb.Sheets[wb.SheetNames[0]];
+  const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+
+  if (rows.length < 2) {
+    showContactErr('The file appears to be empty.');
+    return;
+  }
+
+  _sheetHeaders = rows[0].map(h => String(h).trim());
+  _sheetRows    = rows.slice(1).filter(r => r.some(c => c !== ''));
+
+  openColMap();
+}
+
+function openColMap() {
+  const PHONE_HINTS = ['phone','mobile','tel','number','gsm','contact'];
+  const used = getUsedTokens();
+
+  const guess = (hints) => {
+    const idx = _sheetHeaders.findIndex(h =>
+      hints.some(hint => h.toLowerCase().includes(hint))
+    );
+    return idx >= 0 ? idx : '';
+  };
+
+  const options = _sheetHeaders.map((h, i) =>
+    `<option value="${i}">${h || '(column ' + (i+1) + ')'}</option>`
+  ).join('');
+
+  document.getElementById('colMapSub').textContent =
+    `Found ${_sheetRows.length} rows. Match the columns below.`;
+
+  let html = `
+    <div class="field">
+      <label>Phone number column</label>
+      <select id="colPhone" style="margin:0">
+        <option value="">— select column —</option>${options}
+      </select>
+    </div>`;
+
+  used.forEach(key => {
+    const t = KNOWN_TOKENS.find(t => t.key === key);
+    const label = t ? t.label : key;
+    const guessed = t ? guess(t.hints) : '';
+    html += `
+    <div class="field" style="margin-top:1rem">
+      <label>${label} column <span style="color:var(--muted2);font-weight:400;text-transform:none">(required)</span></label>
+      <select id="colToken_${key.replace(/\s+/g,'_')}" style="margin:0">
+        <option value="">— select column —</option>${options}
+      </select>
+    </div>`;
+    // store guess to apply after render
+    if (guessed !== '') setTimeout(() => {
+      const sel = document.getElementById('colToken_' + key.replace(/\s+/g,'_'));
+      if (sel) sel.value = guessed;
+    }, 0);
+  });
+
+  document.getElementById('colMapFields').innerHTML = html;
+
+  // Apply phone guess
+  const gp = guess(PHONE_HINTS);
+  if (gp !== '') setTimeout(() => {
+    const el = document.getElementById('colPhone');
+    if (el) el.value = gp;
+  }, 0);
+
+  document.getElementById('colMapModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeColMap() {
+  document.getElementById('colMapModal').classList.remove('open');
+  document.body.style.overflow = '';
+  document.getElementById('colMapErr').classList.remove('show');
+}
+
+function importFromExcel() {
+  const phoneCol = document.getElementById('colPhone').value;
+  const errEl    = document.getElementById('colMapErr');
+  const used     = getUsedTokens();
+
+  if (phoneCol === '') {
+    errEl.textContent = 'Please select the phone number column.';
+    errEl.classList.add('show');
+    return;
+  }
+
+  // Check all required token columns are selected
+  for (const key of used) {
+    const sel = document.getElementById('colToken_' + key.replace(/\s+/g,'_'));
+    if (!sel || sel.value === '') {
+      const t = KNOWN_TOKENS.find(t => t.key === key);
+      errEl.textContent = 'Please select the column for: ' + (t ? t.label : key);
+      errEl.classList.add('show');
+      return;
+    }
+  }
+
+  let added = 0, skipped = 0;
+  _sheetRows.forEach(row => {
+    const rawPhone = String(row[phoneCol] || '').trim();
+    const phone    = normalise(rawPhone);
+    if (!phone) { skipped++; return; }
+    if (contacts.find(c => c.num === phone)) return;
+
+    const fields = {};
+    let ok = true;
+    for (const key of used) {
+      const sel = document.getElementById('colToken_' + key.replace(/\s+/g,'_'));
+      const val = String(row[sel.value] || '').trim();
+      if (!val) { skipped++; ok = false; break; }
+      fields[key] = val;
+    }
+    if (!ok) return;
+    contacts.push({ num: phone, fields });
+    added++;
+  });
+
+  closeColMap();
+  renderChips();
+
+  if (skipped > 0) {
+    showContactErr(`Imported ${added} contact${added !== 1 ? 's' : ''}. ${skipped} row${skipped !== 1 ? 's' : ''} skipped (missing phone or required fields).`);
+  }
+}
+
+document.getElementById('colMapModal').addEventListener('click', function(e) {
+  if (e.target === this) closeColMap();
+});
+</script>
+</body>
+</html>

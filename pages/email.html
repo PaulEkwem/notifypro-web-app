@@ -503,22 +503,22 @@
               <div class="stat-card blue">
                 <div class="stat-card-top"><div class="stat-label">Emails Sent</div><div class="stat-icon blue">📧</div></div>
                 <div class="stat-val blue" id="statSent">0</div>
-                <div class="stat-change up">↑ 8.1% <span>vs last month</span></div>
+                <div class="stat-change" id="statSentChange">— vs last month</div>
               </div>
               <div class="stat-card green">
-                <div class="stat-card-top"><div class="stat-label">Open Rate</div><div class="stat-icon green">👁</div></div>
-                <div class="stat-val green">42.8%</div>
-                <div class="stat-change up">↑ 3.2% <span>vs last month</span></div>
+                <div class="stat-card-top"><div class="stat-label">Delivered</div><div class="stat-icon green">✅</div></div>
+                <div class="stat-val green" id="statDelivered">0</div>
+                <div class="stat-change" id="statDeliveredChange">— vs last month</div>
               </div>
               <div class="stat-card amber">
-                <div class="stat-card-top"><div class="stat-label">Click Rate</div><div class="stat-icon amber">🖱</div></div>
-                <div class="stat-val amber">18.4%</div>
-                <div class="stat-change up">↑ 1.9% <span>vs last month</span></div>
+                <div class="stat-card-top"><div class="stat-label">Delivery Rate</div><div class="stat-icon amber">📊</div></div>
+                <div class="stat-val amber" id="statDeliveryRate">—</div>
+                <div class="stat-change" id="statRateChange">— vs last month</div>
               </div>
               <div class="stat-card red">
-                <div class="stat-card-top"><div class="stat-label">Unsubscribes</div><div class="stat-icon red">🚫</div></div>
-                <div class="stat-val red">0.8%</div>
-                <div class="stat-change down">↑ 0.1% <span>vs last month</span></div>
+                <div class="stat-card-top"><div class="stat-label">Total Spend</div><div class="stat-icon red">💰</div></div>
+                <div class="stat-val red" id="statSpend">₦0</div>
+                <div class="stat-change" id="statSpendChange">— vs last month</div>
               </div>
             </div>
 
@@ -707,8 +707,9 @@
       </div>
     </div>
 
-    <script>window.NP_PAGE = "email";</script>
+    <script>window.NP_PAGE = "email"; window.NP_TITLE = "Email Campaigns";</script>
     <script src="../assets/js/sidebar.js"></script>
+    <script src="../assets/js/topbar.js"></script>
     <script type="module" src="../assets/js/auth-guard.js"></script>
     <script src="https://editor.unlayer.com/embed.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
@@ -1913,7 +1914,7 @@
           if (c >= target) clearInterval(iv);
         }, 16);
       }
-      setTimeout(() => animateCount('statSent', 218045), 300);
+      // Stats loaded by the module script below
 
       // ── Chart ──
       const ctx = document.getElementById('emailChart').getContext('2d');
@@ -2508,6 +2509,61 @@
         emailChart.data.datasets[1].data = chartData[key].clicks;
         emailChart.update('active');
       }
+    </script>
+    <script type="module">
+      import { supabase } from "../assets/js/supabase-config.js";
+
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      const thirtyAgo = new Date(); thirtyAgo.setDate(thirtyAgo.getDate() - 30);
+      const sixtyAgo  = new Date(); sixtyAgo.setDate(sixtyAgo.getDate()  - 60);
+
+      const { data: msgs } = await supabase
+        .from("messages")
+        .select("status, cost, created_at")
+        .eq("user_id", session.user.id)
+        .eq("type", "email")
+        .gte("created_at", sixtyAgo.toISOString());
+
+      const rows     = (msgs || []).filter(m => new Date(m.created_at) >= thirtyAgo);
+      const prevRows = (msgs || []).filter(m => new Date(m.created_at) < thirtyAgo);
+
+      const sent      = rows.length;
+      const delivered = rows.filter(m => m.status === "delivered").length;
+      const rate      = sent > 0 ? ((delivered / sent) * 100).toFixed(1) + "%" : "—";
+      const spend     = rows.reduce((s, m) => s + (Number(m.cost)||0), 0);
+
+      const pSent     = prevRows.length;
+      const pDel      = prevRows.filter(m => m.status === "delivered").length;
+      const pSpend    = prevRows.reduce((s, m) => s + (Number(m.cost)||0), 0);
+      const pRate     = pSent > 0 ? (pDel / pSent) * 100 : null;
+
+      function fmt(n) { return n >= 1000 ? "₦" + (n/1000).toFixed(1) + "K" : "₦" + n.toLocaleString("en-NG"); }
+      function badge(cur, prev, higherGood = true) {
+        if (prev === 0) return '<span class="stat-change">— vs last month</span>';
+        const diff = (((cur - prev) / prev) * 100).toFixed(1);
+        const good = higherGood ? cur >= prev : cur <= prev;
+        return `<span class="stat-change ${good ? 'up' : 'down'}">${cur >= prev ? '↑' : '↓'} ${Math.abs(diff)}% vs last month</span>`;
+      }
+
+      const sentEl = document.getElementById("statSent");
+      if (sentEl) { sentEl.textContent = sent.toLocaleString("en-NG"); }
+      const delEl = document.getElementById("statDelivered");
+      if (delEl) delEl.textContent = delivered.toLocaleString("en-NG");
+      const rateEl = document.getElementById("statDeliveryRate");
+      if (rateEl) rateEl.textContent = rate;
+      const spendEl = document.getElementById("statSpend");
+      if (spendEl) spendEl.textContent = fmt(spend);
+
+      const sc = document.getElementById("statSentChange");
+      if (sc) sc.innerHTML = badge(sent, pSent, true);
+      const dc = document.getElementById("statDeliveredChange");
+      if (dc) dc.innerHTML = badge(delivered, pDel, true);
+      const rc = document.getElementById("statRateChange");
+      if (rc && pRate !== null) rc.innerHTML = badge(parseFloat(rate), pRate, true);
+      const spc = document.getElementById("statSpendChange");
+      if (spc) spc.innerHTML = badge(spend, pSpend, true);
     </script>
   </body>
 </html>
