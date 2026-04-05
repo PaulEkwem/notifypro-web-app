@@ -13,7 +13,7 @@ emailjs.init(EJS_KEY);
 
 // ── STATE ─────────────────────────────────────────────────────
 let currentStep  = 1;
-const totalSteps = 4;
+const totalSteps = 2;
 let timerInterval;
 let generatedOtp = '';
 
@@ -123,8 +123,8 @@ window.verifyOtp = async function () {
 
   const email    = document.getElementById('email').value.trim();
   const password = document.getElementById('password').value;
-  const plan     = getSelectedPlan();
-  const services = getSelectedServices();
+  const plan     = 'starter';
+  const services = ['sms'];
 
   const { data, error } = await supabase.auth.signUp({
     email,
@@ -168,8 +168,9 @@ window.verifyOtp = async function () {
   document.getElementById('step-4').classList.remove('active');
   document.getElementById('step-5').classList.add('active');
   document.getElementById('progress-fill').style.width = '100%';
-  ['lbl-1','lbl-2','lbl-3','lbl-4'].forEach(id => {
+  ['lbl-1','lbl-2'].forEach(id => {
     const el = document.getElementById(id);
+    if (!el) return;
     el.classList.remove('active');
     el.classList.add('done');
   });
@@ -180,7 +181,7 @@ window.verifyOtp = async function () {
   const hasPending = sessionStorage.getItem('np_sms_msg') && sessionStorage.getItem('np_sms_contacts');
 
   if (ref === 'sms' && hasPending) {
-    const note = document.querySelector('#step-5 p');
+    const note = document.getElementById('success-msg');
     if (note) note.textContent = 'Account created! Taking you back to finish sending your message…';
     setTimeout(() => { window.location.href = 'send.html?resume=1'; }, 2000);
   } else {
@@ -253,34 +254,6 @@ document.getElementById('password')?.addEventListener('input', function () {
   label.style.color     = colors[strength] || '';
 });
 
-
-// ── PLAN SELECT ───────────────────────────────────────────────
-window.selectPlan = function (plan) {
-  ['starter','business','enterprise'].forEach(p =>
-    document.getElementById('plan-' + p).classList.remove('selected')
-  );
-  document.getElementById('plan-' + plan).classList.add('selected');
-};
-
-function getSelectedPlan() {
-  return document.querySelector('.plan-card.selected input[type="radio"]')?.value || 'starter';
-}
-
-// ── SERVICE TOGGLE ────────────────────────────────────────────
-['sms','email','otp','2fa'].forEach(svc => {
-  document.getElementById('svc-' + svc)?.addEventListener('click', () => {
-    const card = document.getElementById('svc-' + svc);
-    card.classList.toggle('selected');
-    card.querySelector('.service-check').textContent =
-      card.classList.contains('selected') ? '✓' : '';
-  });
-});
-
-function getSelectedServices() {
-  return ['sms','email','otp','2fa'].filter(svc =>
-    document.getElementById('svc-' + svc)?.classList.contains('selected')
-  );
-}
 
 // ── OTP INPUT NAVIGATION ──────────────────────────────────────
 window.otpPaste = function (e) {

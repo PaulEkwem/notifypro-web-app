@@ -64,7 +64,7 @@ nav { display: flex; align-items: center; justify-content: space-between; paddin
 .field { margin-bottom: 1.25rem; }
 .field:last-child { margin-bottom: 0; }
 label { display: block; font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 7px; }
-input[type="text"], input[type="email"], input[type="tel"], textarea, select {
+input[type="text"], input[type="email"], input[type="tel"], input[type="password"], textarea, select {
   width: 100%; background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius-sm);
   padding: 11px 14px; color: var(--text); font-size: 14px; font-family: var(--font);
   outline: none; transition: border-color 0.2s; appearance: none;
@@ -245,6 +245,9 @@ textarea { resize: none; line-height: 1.75; min-height: 160px; }
 .btn-ghost:hover { border-color: rgba(255,255,255,0.15); color: var(--text); }
 .btn-back { background: none; border: none; color: var(--muted); font-size: 13px; cursor: pointer; font-family: var(--font); padding: 0; display: flex; align-items: center; gap: 6px; margin-bottom: 1.75rem; }
 .btn-back:hover { color: var(--text); }
+.topup-preset { background: var(--bg3); border: 1.5px solid var(--border); border-radius: 8px; color: var(--text); font-size: 13px; font-weight: 600; font-family: var(--font); padding: 8px 14px; cursor: pointer; transition: border-color 0.2s, background 0.2s; }
+.topup-preset:hover { border-color: rgba(0,232,122,0.4); }
+.topup-preset.active { border-color: var(--accent); background: rgba(0,232,122,0.08); color: var(--accent); }
 
 /* ── MODAL ── */
 .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(10px); z-index: 200; display: none; align-items: center; justify-content: center; padding: 1.5rem; }
@@ -277,7 +280,7 @@ footer a { color: var(--accent); text-decoration: none; }
 <!-- NAV -->
 <nav>
   <a href="index.html" class="logo">Notify<span>Pro</span></a>
-  <a href="login.html" class="nav-cta">Already have an account? Log in →</a>
+  <a href="login.html" class="nav-cta">Log in →</a>
 </nav>
 
 <!-- HERO -->
@@ -304,7 +307,17 @@ footer a { color: var(--accent); text-decoration: none; }
     <div class="sb-line" id="sbl2"></div>
     <div class="sb-item">
       <div class="sb-dot" id="sd3">3</div>
-      <div class="sb-label" id="sl3">Preview &amp; Send</div>
+      <div class="sb-label" id="sl3">Preview</div>
+    </div>
+    <div class="sb-line" id="sbl3"></div>
+    <div class="sb-item">
+      <div class="sb-dot" id="sd4">4</div>
+      <div class="sb-label" id="sl4">Account</div>
+    </div>
+    <div class="sb-line" id="sbl4"></div>
+    <div class="sb-item">
+      <div class="sb-dot" id="sd5">5</div>
+      <div class="sb-label" id="sl5">Payment</div>
     </div>
   </div>
 
@@ -314,10 +327,18 @@ footer a { color: var(--accent); text-decoration: none; }
 
       <!-- Left: editor -->
       <div>
+        <div class="card" style="margin-bottom:1rem">
+          <div class="field" style="margin:0">
+            <label>Your email</label>
+            <input type="email" id="senderEmail" placeholder="you@example.com" oninput="clearSenderEmailErr()" />
+            <div class="err-text" id="senderEmailErr">Enter a valid email address</div>
+          </div>
+        </div>
+
         <div class="card">
           <div class="field">
             <label>Your message</label>
-            <textarea id="msgBody" maxlength="320" oninput="onMsgInput()"></textarea>
+            <textarea id="msgBody" maxlength="1600" oninput="onMsgInput()"></textarea>
             <div class="token-bar" id="tokenBar">
               <span class="token-bar-label">Personalise:</span>
               <button class="token-chip" onclick="insertToken('FIRST NAME')">+ First Name</button>
@@ -339,7 +360,7 @@ footer a { color: var(--accent); text-decoration: none; }
                 <span class="chars-left-wrap"><span id="charsLeft">160</span> chars left</span>
               </div>
               <div class="char-row">
-                <span><span id="charCount">0</span> / 320 chars</span>
+                <span><span id="charCount">0</span> / <span id="charMax">160</span> chars</span>
                 <span class="parts"><span id="smsParts">1</span> SMS part</span>
               </div>
               <div class="unicode-warn" id="unicodeWarn">
@@ -350,6 +371,14 @@ footer a { color: var(--accent); text-decoration: none; }
             </div>
             <div class="err-text" id="msgErr">Please write a message before continuing</div>
           </div>
+        </div>
+
+        <div class="field" style="margin-top:1rem">
+          <label style="text-transform:none;font-size:13px;font-weight:400;color:var(--muted);display:flex;align-items:flex-start;gap:10px;cursor:pointer">
+            <input type="checkbox" id="step1PrivacyCheck" style="width:16px;height:16px;flex-shrink:0;margin-top:2px;accent-color:var(--accent)" />
+            <span>I agree to NotifyPro's <a href="privacy.html" target="_blank" style="color:var(--accent);text-decoration:none">Privacy Policy</a> and <a href="terms.html" target="_blank" style="color:var(--accent);text-decoration:none">Terms of Service</a></span>
+          </label>
+          <div class="err-text" id="step1PrivacyErr" style="margin-top:6px">Please accept the terms to continue</div>
         </div>
 
         <button class="btn btn-primary" onclick="goToStep2()">Next — Add contacts →</button>
@@ -429,6 +458,9 @@ footer a { color: var(--accent); text-decoration: none; }
             </div>
           </button>
           <input type="file" id="excelFileInput" accept=".xlsx,.xls,.csv" style="display:none" onchange="handleExcelUpload(event)" />
+          <div style="text-align:center;margin-top:8px">
+            <a href="#" onclick="downloadExcelTemplate();return false" style="font-size:12px;color:var(--accent2);text-decoration:none">⬇ Download template</a>
+          </div>
 
           <div class="or-line">or add manually</div>
           <div id="manualContactForm"></div>
@@ -476,13 +508,18 @@ footer a { color: var(--accent); text-decoration: none; }
             <tr><td>Delivery speed</td><td style="color:var(--accent)">Instant · All networks</td></tr>
           </table>
         </div>
-        <div class="preview-note" id="pvNote" style="font-size:12px;color:var(--accent2);margin-top:10px;display:none"></div>
-        <button class="btn btn-primary" onclick="openModal()">🚀 Send to everyone now →</button>
+        <button class="btn btn-primary" id="payAndSendBtn" onclick="goToStep4()">Continue →</button>
         <button class="btn btn-ghost" onclick="goToStep(2)">← Edit contacts</button>
       </div>
 
       <!-- Right: phone -->
       <div>
+        <div id="phoneNav" style="display:none;justify-content:space-between;align-items:center;margin-bottom:12px;background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:10px;padding:6px 8px;gap:8px">
+          <button onclick="previewPrev()" style="background:rgba(255,255,255,0.08);border:none;border-radius:7px;color:#F0F4FF;padding:7px 16px;cursor:pointer;font-family:var(--font);font-size:16px;font-weight:700;transition:background 0.15s" onmouseover="this.style.background='rgba(255,255,255,0.16)'" onmouseout="this.style.background='rgba(255,255,255,0.08)'">‹</button>
+          <span id="pvPhoneNote" style="font-size:13px;color:#F0F4FF;font-weight:600;letter-spacing:0.02em">1 of 5</span>
+          <button onclick="previewNext()" style="background:rgba(255,255,255,0.08);border:none;border-radius:7px;color:#F0F4FF;padding:7px 16px;cursor:pointer;font-family:var(--font);font-size:16px;font-weight:700;transition:background 0.15s" onmouseover="this.style.background='rgba(255,255,255,0.16)'" onmouseout="this.style.background='rgba(255,255,255,0.08)'">›</button>
+        </div>
+        <div id="phoneNavSingle" class="phone-label" style="margin-bottom:8px">Preview</div>
         <div class="iphone-wrap">
           <div class="iphone">
             <div class="iphone-island"></div>
@@ -522,8 +559,200 @@ footer a { color: var(--accent); text-decoration: none; }
             <div class="iphone-home"></div>
           </div>
         </div>
-        <div class="phone-label" id="pvPhoneNote">Live preview · SMS app</div>
       </div>
+    </div>
+  </div>
+
+  <!-- ═══ STEP 4: ACCOUNT ═══ -->
+  <div class="step-panel" id="panel4">
+    <button class="btn-back" onclick="goToStep(3)">← Back to preview</button>
+    <div style="max-width:480px;margin:0 auto">
+
+      <!-- Signup view -->
+      <div id="acctSignupView">
+        <div class="card" style="margin-bottom:1.25rem">
+          <div class="card-title">Create your free account</div>
+          <p style="font-size:13px;color:var(--muted);margin-bottom:1.25rem">We'll send your delivery report and receipt to your email.</p>
+
+          <div id="acctSignupForm">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1rem">
+              <div class="field" style="margin:0">
+                <label>First name</label>
+                <input type="text" id="acctFirst" placeholder="Ada" oninput="clearAcctErr('acctFirstErr')" />
+                <div class="err-text" id="acctFirstErr">Required</div>
+              </div>
+              <div class="field" style="margin:0">
+                <label>Last name</label>
+                <input type="text" id="acctLast" placeholder="Obi" oninput="clearAcctErr('acctLastErr')" />
+                <div class="err-text" id="acctLastErr">Required</div>
+              </div>
+            </div>
+            <div class="field">
+              <label>Email address</label>
+              <input type="email" id="acctEmail" placeholder="you@example.com" oninput="clearAcctErr('acctEmailErr')" readonly style="opacity:0.7;cursor:default" />
+              <div class="err-text" id="acctEmailErr">Enter a valid email</div>
+            </div>
+            <div class="field">
+              <label>Password</label>
+              <input type="password" id="acctPassword" placeholder="Min. 8 characters" oninput="clearAcctErr('acctPasswordErr')" />
+              <div class="err-text" id="acctPasswordErr">Min. 8 characters</div>
+            </div>
+            <div class="err-text" id="acctSignupErr" style="margin-bottom:8px"></div>
+            <button class="btn btn-primary" id="acctSignupBtn" onclick="sendAccountOtp()">Send verification code →</button>
+          </div>
+
+          <!-- OTP verify view (hidden until code sent) -->
+          <div id="acctOtpView" style="display:none">
+            <p style="font-size:13px;color:var(--muted);margin-bottom:1.25rem">Enter the 6-digit code we sent to <strong id="acctOtpEmail"></strong></p>
+            <div style="display:flex;gap:8px;justify-content:center;margin-bottom:1.25rem">
+              <input class="otp-input" id="aotp1" maxlength="1" oninput="acctOtpNext(this,'aotp2')" onkeydown="acctOtpBack(event,this,null)" style="width:44px;height:52px;text-align:center;font-size:20px;font-weight:700;background:var(--bg3);border:1.5px solid var(--border);border-radius:10px;color:var(--text);font-family:var(--font)" onpaste="acctOtpPaste(event)" />
+              <input class="otp-input" id="aotp2" maxlength="1" oninput="acctOtpNext(this,'aotp3')" onkeydown="acctOtpBack(event,this,'aotp1')" style="width:44px;height:52px;text-align:center;font-size:20px;font-weight:700;background:var(--bg3);border:1.5px solid var(--border);border-radius:10px;color:var(--text);font-family:var(--font)" />
+              <input class="otp-input" id="aotp3" maxlength="1" oninput="acctOtpNext(this,'aotp4')" onkeydown="acctOtpBack(event,this,'aotp2')" style="width:44px;height:52px;text-align:center;font-size:20px;font-weight:700;background:var(--bg3);border:1.5px solid var(--border);border-radius:10px;color:var(--text);font-family:var(--font)" />
+              <input class="otp-input" id="aotp4" maxlength="1" oninput="acctOtpNext(this,'aotp5')" onkeydown="acctOtpBack(event,this,'aotp3')" style="width:44px;height:52px;text-align:center;font-size:20px;font-weight:700;background:var(--bg3);border:1.5px solid var(--border);border-radius:10px;color:var(--text);font-family:var(--font)" />
+              <input class="otp-input" id="aotp5" maxlength="1" oninput="acctOtpNext(this,'aotp6')" onkeydown="acctOtpBack(event,this,'aotp4')" style="width:44px;height:52px;text-align:center;font-size:20px;font-weight:700;background:var(--bg3);border:1.5px solid var(--border);border-radius:10px;color:var(--text);font-family:var(--font)" />
+              <input class="otp-input" id="aotp6" maxlength="1" oninput="acctOtpNext(this,null)" onkeydown="acctOtpBack(event,this,'aotp5')" style="width:44px;height:52px;text-align:center;font-size:20px;font-weight:700;background:var(--bg3);border:1.5px solid var(--border);border-radius:10px;color:var(--text);font-family:var(--font)" />
+            </div>
+            <div class="err-text" id="acctOtpErr" style="margin-bottom:8px;text-align:center"></div>
+            <button class="btn btn-primary" id="acctVerifyBtn" onclick="verifyAccountOtp()">Verify &amp; create account →</button>
+            <button class="modal-back" onclick="showAcctSignupForm()" style="margin-top:8px">← Change details</button>
+          </div>
+        </div>
+        <div style="text-align:center;font-size:13px;color:var(--muted2)">Already have an account? <a href="#" onclick="switchAcctView('login');return false" style="color:var(--accent);text-decoration:none">Log in →</a></div>
+      </div>
+
+      <!-- Already signed in view -->
+      <div id="acctActiveView" style="display:none">
+        <div class="card" style="margin-bottom:1.25rem;text-align:center">
+          <div style="width:52px;height:52px;background:rgba(0,232,122,0.12);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:22px">✓</div>
+          <div class="card-title" style="margin-bottom:6px">You're signed in</div>
+          <p id="acctActiveEmail" style="font-size:14px;color:var(--muted);margin-bottom:1.5rem"></p>
+          <button class="btn btn-primary" onclick="proceedFromActiveSession()">Continue to payment →</button>
+          <div style="margin-top:12px">
+            <a href="#" onclick="window.npLogout && window.npLogout();return false" style="font-size:12px;color:var(--muted2);text-decoration:none">Not you? Log out</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Login view -->
+      <div id="acctLoginView" style="display:none">
+        <div class="card" style="margin-bottom:1.25rem">
+          <div class="card-title">Log in to your account</div>
+          <div class="field">
+            <label>Email address</label>
+            <input type="email" id="loginEmail" placeholder="you@example.com" oninput="clearAcctErr('loginEmailErr')" readonly style="opacity:0.7;cursor:default" />
+            <div class="err-text" id="loginEmailErr">Enter a valid email</div>
+          </div>
+          <div class="field">
+            <label>Password</label>
+            <input type="password" id="loginPassword" placeholder="Your password" oninput="clearAcctErr('loginPasswordErr')" />
+            <div class="err-text" id="loginPasswordErr">Enter your password</div>
+          </div>
+          <div class="err-text" id="loginErr" style="margin-bottom:8px"></div>
+          <button class="btn btn-primary" id="loginBtn" onclick="submitLogin()">Log in &amp; continue →</button>
+          <div style="text-align:center;margin-top:10px">
+            <a href="#" id="forgotLink" onclick="sendPasswordReset();return false" style="font-size:12px;color:var(--muted2);text-decoration:none">Forgot password?</a>
+            <span id="forgotMsg" style="display:none;font-size:12px;color:var(--accent)">Reset link sent — check your inbox.</span>
+          </div>
+        </div>
+        <div style="text-align:center;font-size:13px;color:var(--muted2)">No account yet? <a href="#" onclick="switchAcctView('signup');return false" style="color:var(--accent);text-decoration:none">Create one →</a></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══ STEP 5: PAYMENT ═══ -->
+  <div class="step-panel" id="panel5">
+    <button class="btn-back" onclick="goBackFromPayment()">← Back</button>
+    <div style="max-width:480px;margin:0 auto">
+
+      <!-- Order summary (always visible) -->
+      <div class="card" style="margin-bottom:1.25rem">
+        <div class="card-title">Order summary</div>
+        <div style="display:flex;justify-content:space-between;font-size:14px;margin-bottom:8px">
+          <span style="color:var(--muted)">Recipients</span><span id="p5Recipients" style="font-weight:600">—</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:14px;margin-bottom:8px">
+          <span style="color:var(--muted)">SMS parts / msg</span><span id="p5Parts" style="font-weight:600">—</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:14px;margin-bottom:8px">
+          <span style="color:var(--muted)">Rate</span><span style="font-weight:600">₦6 / SMS</span>
+        </div>
+        <div style="height:1px;background:var(--border);margin:12px 0"></div>
+        <div style="display:flex;justify-content:space-between;font-size:16px;font-weight:700">
+          <span>SMS cost</span><span id="p5SmsCost" style="color:var(--accent3)">—</span>
+        </div>
+      </div>
+
+      <!-- Loading state -->
+      <div id="p5Loading" style="text-align:center;padding:2rem;color:var(--muted);font-size:14px">Checking your balance…</div>
+
+      <!-- ── ENOUGH CREDITS ── -->
+      <div id="p5HasBalance" style="display:none">
+        <div class="card" style="margin-bottom:1.25rem;border-color:rgba(0,232,122,0.25);background:rgba(0,232,122,0.04)">
+          <div style="display:flex;align-items:center;gap:12px">
+            <div style="font-size:28px">✅</div>
+            <div>
+              <div style="font-size:14px;font-weight:600;margin-bottom:2px">You have enough credits</div>
+              <div style="font-size:13px;color:var(--muted)">Balance: ₦<span id="p5WalletBal">—</span> · Cost: <span id="p5DeductAmt">—</span></div>
+            </div>
+          </div>
+        </div>
+        <button class="btn btn-primary" id="p5SendBtn" onclick="sendFromWallet()">Send now — deduct <span id="p5DeductLabel">₦0</span> from credits →</button>
+      </div>
+
+      <!-- ── NOT ENOUGH CREDITS ── -->
+      <div id="p5NoBalance" style="display:none">
+        <div class="card" style="margin-bottom:1.25rem;border-color:rgba(255,184,0,0.3);background:rgba(255,184,0,0.05)">
+          <div style="display:flex;align-items:flex-start;gap:12px">
+            <div style="font-size:24px;flex-shrink:0">😬</div>
+            <div>
+              <div style="font-size:14px;font-weight:700;margin-bottom:4px">Not enough NotifyPro credits</div>
+              <div style="font-size:13px;color:var(--muted)">Your balance: ₦<span id="p5LowBal">—</span> · You need ₦<span id="p5Deficit">—</span> more</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-bottom:1.25rem">
+          <div style="font-size:13px;font-weight:600;margin-bottom:0.75rem;color:var(--muted)">TOP UP AMOUNT</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1rem" id="p5Presets">
+            <button onclick="setTopupPreset(500)"  class="topup-preset" data-amt="500">₦500</button>
+            <button onclick="setTopupPreset(1000)" class="topup-preset" data-amt="1000">₦1,000</button>
+            <button onclick="setTopupPreset(2000)" class="topup-preset" data-amt="2000">₦2,000</button>
+            <button onclick="setTopupPreset(5000)" class="topup-preset" data-amt="5000">₦5,000</button>
+            <button onclick="setTopupPreset(10000)" class="topup-preset" data-amt="10000">₦10,000</button>
+          </div>
+          <div style="margin-bottom:1rem">
+            <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:6px">Or enter custom amount (min ₦500)</label>
+            <input type="number" id="p5TopupInput" min="500" placeholder="e.g. 3000"
+              style="width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text);font-size:14px;font-family:var(--font);outline:none"
+              oninput="onTopupInput()" />
+          </div>
+
+          <div id="p5FeeBreakdown" style="display:none">
+            <div style="height:1px;background:var(--border);margin-bottom:12px"></div>
+            <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px">
+              <span style="color:var(--muted)">Credits added to wallet</span><span id="p5BreakCredit" style="font-weight:600">—</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px">
+              <span style="color:var(--muted)">VAT (7.5%)</span><span id="p5BreakVat" style="font-weight:600">—</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:10px">
+              <span style="color:var(--muted)">Processing fee (1.5%, max ₦2,000)</span><span id="p5BreakFee" style="font-weight:600">—</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:15px;font-weight:700">
+              <span>Total charged</span><span id="p5BreakTotal" style="color:var(--accent3)">—</span>
+            </div>
+          </div>
+        </div>
+
+        <button class="btn btn-primary" id="p5PayBtn" onclick="initiateMonnifyTopupAndSend()" disabled
+          style="opacity:0.5;cursor:not-allowed">
+          Buy credits &amp; send →
+        </button>
+        <div style="text-align:center;font-size:11px;color:var(--muted2);margin-top:8px">🔒 Secured by Monnify · Card or bank transfer</div>
+      </div>
+
+      <div id="p5SendErr" style="color:#ff4d6d;font-size:13px;margin-top:12px;text-align:center;display:none"></div>
     </div>
   </div>
 
@@ -544,52 +773,56 @@ footer a { color: var(--accent); text-decoration: none; }
   </div>
 </div>
 
-<!-- SIGNUP MODAL -->
-<div class="modal-overlay" id="modal">
-  <div class="modal">
-    <div class="modal-header">
-      <span class="modal-emoji">🎉</span>
-      <div class="modal-title">One last step</div>
-      <div class="modal-sub">Create your free account — we'll send your SMS delivery report and payment receipt to your email.</div>
-    </div>
 
-    <div class="field">
-      <label>Your email address</label>
-      <input type="email" id="signupEmail" placeholder="you@example.com" oninput="clearEmailErr()" />
-      <div class="input-hint">For your delivery report &amp; receipt — no spam, ever</div>
-      <div class="err-text" id="emailErr">Please enter a valid email address</div>
+<!-- SUCCESS SCREEN (hidden, replaces step 3 content) -->
+<div id="sendSuccess" style="display:none;max-width:980px;margin:0 auto;padding:0 1.25rem 6rem">
+  <div style="text-align:center;padding:3rem 1rem">
+    <div style="font-size:56px;margin-bottom:1.5rem">🚀</div>
+    <h2 style="font-family:'Syne',sans-serif;font-size:clamp(24px,5vw,36px);font-weight:800;letter-spacing:-1px;margin-bottom:1rem">Messages sent!</h2>
+    <p id="successSub" style="font-size:16px;color:var(--muted);margin-bottom:2rem;max-width:400px;margin-left:auto;margin-right:auto"></p>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:10px;margin-bottom:2.5rem">
+      <div id="successStats" style="display:flex;gap:2rem;flex-wrap:wrap;justify-content:center"></div>
     </div>
-
-    <div style="font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:0.4px;font-weight:600;margin-bottom:10px">I am a…</div>
-    <div class="type-row">
-      <div class="type-card" id="cardIndividual" onclick="selectType('individual')">
-        <div class="tc-icon">👤</div>
-        <div class="tc-name">Individual</div>
-        <div class="tc-desc">Sending to friends, family &amp; personal contacts</div>
-      </div>
-      <div class="type-card" id="cardBusiness" onclick="selectType('business')">
-        <div class="tc-icon">🏢</div>
-        <div class="tc-name">Business</div>
-        <div class="tc-desc">Sending to customers, staff or your audience</div>
-      </div>
+    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+      <button onclick="resetAndSendAnother()" style="background:rgba(0,232,122,0.1);border:1.5px solid rgba(0,232,122,0.3);border-radius:10px;color:var(--accent);font-size:14px;font-weight:700;padding:13px 28px;cursor:pointer;font-family:var(--font)">Send another →</button>
+      <button onclick="window.location.href='pages/dashboard.html'" style="background:none;border:1px solid var(--border);border-radius:10px;color:var(--muted);font-size:14px;font-weight:500;padding:13px 28px;cursor:pointer;font-family:var(--font)">Go to dashboard</button>
     </div>
-
-    <button class="btn btn-primary" id="signupGoBtn" onclick="proceedSignup()" style="margin-top:.25rem">Create account &amp; send →</button>
-    <div class="modal-login">Already have an account? <a href="login.html">Log in →</a></div>
-    <button class="modal-back" onclick="closeModal()">← Go back</button>
   </div>
 </div>
+
 
 <!-- FOOTER -->
 <footer>
   <a href="index.html">NotifyPro.ng</a> · Nigeria's reliable messaging platform · <a href="privacy.html">Privacy</a> · Need help? <a href="mailto:support@notifypro.com">support@notifypro.com</a>
 </footer>
 
+<script src="https://sdk.monnify.com/plugin/monnify.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script>
+  (function(){
+    const EJS_KEY = 'QK8T4uVIZyC-K8OsU';
+    if (typeof emailjs !== 'undefined') emailjs.init(EJS_KEY);
+  })();
+</script>
+
+<script type="module">
+  import { supabase } from "./assets/js/supabase-config.js";
+  window._supabase = supabase;
+
+  // Mirrors bulk-sms.html exactly — fetch done inside module so supabase instance is authoritative
+  window._doSend = async function (requestBody) {
+    // Use supabase.functions.invoke() — it handles ES256/asymmetric JWT auth automatically
+    const { data, error } = await supabase.functions.invoke('send-bulk-sms', { body: requestBody });
+    if (error) return { ok: false, error: error.message || 'Something went wrong. Please try again or contact support.' };
+    if (!data?.success) return { ok: false, error: data?.error || 'Something went wrong. Please try again or contact support.' };
+    return { ok: true, sent: data.sent, cost: data.cost };
+  };
+</script>
+
 <script>
 // ── State ──
 let contacts    = [];
 let msgEdited   = false;
-let selectedType = null;
 let customTokens = []; // user-defined token keys
 
 const DEFAULT_TEMPLATE = `Hello,\n\nThinking of you and wishing you and your loved ones the very best. May your days be filled with peace, joy, and endless blessings.\n\n- [Sender name]`;
@@ -605,54 +838,10 @@ const KNOWN_TOKENS = [
 
 // ── Boot ──
 document.addEventListener('DOMContentLoaded', function() {
-  const params        = new URLSearchParams(window.location.search);
-  const resume        = params.get('resume') === '1';
-  const savedMsg      = sessionStorage.getItem('np_sms_msg');
-  const savedContacts = sessionStorage.getItem('np_sms_contacts');
-  const savedTokens   = sessionStorage.getItem('np_sms_tokens');
+  document.getElementById('msgBody').value = DEFAULT_TEMPLATE;
+  updateMsgUI();
+  syncContactsForm();
 
-  if (resume && savedMsg && savedContacts) {
-    // Restore message
-    document.getElementById('msgBody').value = savedMsg;
-    msgEdited = true;
-
-    // Restore contacts
-    try { JSON.parse(savedContacts).forEach(c => contacts.push(c)); } catch(e) {}
-
-    // Restore any custom tokens
-    try {
-      JSON.parse(savedTokens || '[]').forEach(k => {
-        if (!KNOWN_TOKENS.find(t => t.key === k) && !customTokens.includes(k)) customTokens.push(k);
-      });
-    } catch(e) {}
-
-    updateMsgUI();
-    syncContactsForm();
-    renderChips();
-
-    // Jump straight to preview — they already did steps 1 & 2 before signup
-    setTimeout(() => {
-      buildPreview3();
-      goToStep(3);
-      // Success banner
-      const banner = document.createElement('div');
-      banner.style.cssText = `position:fixed;top:72px;left:50%;transform:translateX(-50%);
-        background:#0d1117;border:1px solid rgba(0,232,122,0.3);border-radius:12px;
-        padding:12px 24px;font-size:14px;color:#f0f4ff;z-index:100;
-        box-shadow:0 8px 32px rgba(0,0,0,0.5);white-space:nowrap`;
-      banner.innerHTML = `✅ Account created! Review your message and hit <strong>Send now</strong>.`;
-      document.body.appendChild(banner);
-      setTimeout(() => banner.remove(), 6000);
-    }, 100);
-
-    // Clear so it doesn't persist on next visit
-    ['np_sms_msg','np_sms_contacts','np_sms_tokens','np_sms_email'].forEach(k => sessionStorage.removeItem(k));
-
-  } else {
-    document.getElementById('msgBody').value = DEFAULT_TEMPLATE;
-    updateMsgUI();
-    syncContactsForm();
-  }
 });
 
 
@@ -734,13 +923,35 @@ function updateMsgUI() {
   }
   analysis.classList.remove('hidden');
 
-  const unicode = !detectGSM7(v);
-  const maxPer  = unicode ? 70 : 160;
-  const parts   = calcParts(len, unicode);
-  const partMax = parts === 1 ? maxPer : (unicode ? 67 : 153);
-  const left    = parts * partMax - len;
+  // Substitute tokens before char count — use first contact's real data if available,
+  // otherwise strip tokens to 0 chars (count only what the user typed)
+  const used = getUsedTokens();
+  let vForEncoding = v;
+  if (used.length > 0) {
+    if (contacts.length > 0) {
+      used.forEach(key => {
+        const val = contacts[0].fields?.[key] || '';
+        vForEncoding = vForEncoding.split('[' + key + ']').join(val);
+      });
+    } else {
+      used.forEach(key => {
+        vForEncoding = vForEncoding.split('[' + key + ']').join('');
+      });
+    }
+    customTokens.forEach(key => {
+      vForEncoding = vForEncoding.split('[' + key + ']').join('');
+    });
+  }
 
-  document.getElementById('charCount').textContent = len;
+  const subLen  = vForEncoding.length;
+  const unicode = !detectGSM7(vForEncoding);
+  const maxPer  = unicode ? 70 : 160;
+  const parts   = calcParts(subLen, unicode);
+  const partMax = parts === 1 ? maxPer : (unicode ? 67 : 153);
+  const left    = parts * partMax - subLen;
+
+  document.getElementById('charCount').textContent = subLen;
+  document.getElementById('charMax').textContent   = parts * partMax;
   document.getElementById('smsParts').textContent  = parts;
   const leftEl = document.getElementById('charsLeft');
   leftEl.textContent = left;
@@ -753,7 +964,8 @@ function updateMsgUI() {
   const warn = document.getElementById('unicodeWarn');
   warn.classList.toggle('show', unicode);
   if (unicode) {
-    const badChars = [...new Set([...v].filter(c => !GSM7_SET.test(c)))];
+    // Show only chars the user typed, not token brackets
+    const badChars = [...new Set([...vForEncoding].filter(c => !GSM7_SET.test(c)))];
     document.getElementById('unicodeCharList').innerHTML = badChars.map(c =>
       `<span style="display:inline-flex;align-items:center;gap:4px;background:rgba(255,184,0,0.12);border:1px solid rgba(255,184,0,0.3);border-radius:4px;padding:2px 8px;font-size:12px;font-family:monospace;color:#FFB800;">` +
       `<span style="font-size:15px">${c}</span>` +
@@ -764,7 +976,6 @@ function updateMsgUI() {
 
   // Preview: replace tokens with first contact's values or placeholder labels
   let previewText = v;
-  const used = getUsedTokens();
   if (used.length > 0 && contacts.length > 0) {
     used.forEach(key => {
       const val = contacts[0].fields?.[key] || key;
@@ -799,19 +1010,38 @@ function goToStep(n) {
 }
 
 function updateStepBar(active) {
-  [1,2,3].forEach(i => {
+  [1,2,3,4,5].forEach(i => {
     const dot = document.getElementById('sd' + i);
     const lbl = document.getElementById('sl' + i);
+    if (!dot) return;
     dot.className = 'sb-dot';
     lbl.className = 'sb-label';
     if (i < active) { dot.classList.add('done'); dot.textContent = '✓'; }
     else if (i === active) { dot.classList.add('active'); lbl.classList.add('active'); dot.textContent = i; }
     else { dot.textContent = i; }
-    if (i < 3) document.getElementById('sbl' + i).className = 'sb-line' + (i < active ? ' done' : '');
+    if (i < 5) { const line = document.getElementById('sbl' + i); if (line) line.className = 'sb-line' + (i < active ? ' done' : ''); }
   });
 }
 
-function goToStep2() {
+// Stored from Step 1 email check — used to pre-fill Step 4
+let _senderEmail      = '';
+let _senderHasAccount = false;
+
+function clearSenderEmailErr() {
+  document.getElementById('senderEmailErr').classList.remove('show');
+}
+
+async function goToStep2() {
+  // Validate email
+  const email = document.getElementById('senderEmail').value.trim();
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    document.getElementById('senderEmailErr').classList.add('show');
+    document.getElementById('senderEmail').focus();
+    return;
+  }
+  document.getElementById('senderEmailErr').classList.remove('show');
+
+  // Validate message
   const msg = document.getElementById('msgBody').value.trim();
   if (!msg) {
     document.getElementById('msgErr').classList.add('show');
@@ -819,6 +1049,38 @@ function goToStep2() {
     return;
   }
   document.getElementById('msgErr').classList.remove('show');
+
+  // Validate privacy checkbox
+  const privacyCb = document.getElementById('step1PrivacyCheck');
+  if (!privacyCb.checked) {
+    document.getElementById('step1PrivacyErr').classList.add('show');
+    privacyCb.focus();
+    return;
+  }
+  document.getElementById('step1PrivacyErr').classList.remove('show');
+
+  // Email-exists check — always runs regardless of session state
+  const sb  = window._supabase;
+  const btn = document.querySelector('#panel1 .btn-primary');
+  const orig = btn.textContent;
+  btn.disabled    = true;
+  btn.textContent = 'Checking…';
+
+  _senderEmail = email;
+  _senderHasAccount = false;
+
+  try {
+    if (sb) {
+      const { data: exists } = await sb.rpc('email_exists', { check_email: email });
+      _senderHasAccount = !!exists;
+    }
+  } catch (e) {
+    console.warn('email_exists check failed:', e);
+  }
+
+  btn.disabled    = false;
+  btn.textContent = orig;
+
   syncContactsForm();
   goToStep(2);
 }
@@ -837,6 +1099,351 @@ function goToStep3() {
   goToStep(3);
 }
 
+async function goToStep4() {
+  // Check if already logged in with the matching email
+  const sb = window._supabase;
+  if (sb) {
+    const { data: { session } } = await sb.auth.getSession();
+    if (session && session.user.email === _senderEmail) {
+      // Already signed in — skip Step 4 entirely, go straight to payment
+      goToStep(5);
+      await populatePaymentStep();
+      return;
+    }
+    // Logged in as a different email — sign out so the correct account is used
+    if (session && session.user.email !== _senderEmail) {
+      await sb.auth.signOut();
+    }
+  }
+
+  // Show login or signup form based on email_exists check from Step 1
+  if (_senderHasAccount) {
+    document.getElementById('loginEmail').value = _senderEmail;
+    switchAcctView('login');
+    document.getElementById('loginPassword').focus();
+  } else {
+    document.getElementById('acctEmail').value = _senderEmail;
+    switchAcctView('signup');
+    showAcctSignupForm();
+    document.getElementById('acctFirst').focus();
+  }
+  goToStep(4);
+}
+
+// ── Account step ──
+let _acctOtp = '';
+
+async function proceedFromActiveSession() {
+  goToStep(5);
+  await populatePaymentStep();
+}
+
+function switchAcctView(view) {
+  document.getElementById('acctSignupView').style.display  = view === 'signup' ? '' : 'none';
+  document.getElementById('acctLoginView').style.display   = view === 'login'  ? '' : 'none';
+  document.getElementById('acctActiveView').style.display  = view === 'active' ? '' : 'none';
+}
+
+function showAcctSignupForm() {
+  document.getElementById('acctSignupForm').style.display = '';
+  document.getElementById('acctOtpView').style.display    = 'none';
+}
+
+function clearAcctErr(id) {
+  const el = document.getElementById(id);
+  if (el) el.classList.remove('show');
+}
+
+async function sendAccountOtp() {
+  const first    = document.getElementById('acctFirst').value.trim();
+  const last     = document.getElementById('acctLast').value.trim();
+  const email    = document.getElementById('acctEmail').value.trim();
+  const password = document.getElementById('acctPassword').value;
+
+  let ok = true;
+  if (!first)    { document.getElementById('acctFirstErr').classList.add('show');    ok = false; }
+  if (!last)     { document.getElementById('acctLastErr').classList.add('show');     ok = false; }
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { document.getElementById('acctEmailErr').classList.add('show'); ok = false; }
+  if (password.length < 8) { document.getElementById('acctPasswordErr').classList.add('show'); ok = false; }
+  if (!ok) return;
+
+  // Check email not already in use
+  const sb = window._supabase;
+  if (sb) {
+    const { data: exists } = await sb.rpc('email_exists', { check_email: email });
+    if (exists) {
+      // Pre-fill login form and switch to login view
+      document.getElementById('loginEmail').value = email;
+      const err = document.getElementById('loginErr');
+      err.textContent = 'This email already has an account. Enter your password to continue.';
+      err.classList.add('show');
+      switchAcctView('login');
+      document.getElementById('loginPassword').focus();
+      return;
+    }
+  }
+
+  const btn = document.getElementById('acctSignupBtn');
+  btn.disabled    = true;
+  btn.textContent = 'Sending code…';
+
+  _acctOtp = Math.floor(100000 + Math.random() * 900000).toString();
+
+  try {
+    await emailjs.send('service_vancprr', 'template_6zwhom1', {
+      email,
+      to_name:  first,
+      otp_code: _acctOtp,
+    });
+    document.getElementById('acctOtpEmail').textContent = email;
+    document.getElementById('acctSignupForm').style.display = 'none';
+    document.getElementById('acctOtpView').style.display    = '';
+    document.getElementById('aotp1').focus();
+  } catch (err) {
+    console.error(err);
+    btn.disabled    = false;
+    btn.textContent = 'Send verification code →';
+    const e = document.getElementById('acctSignupErr');
+    e.textContent = 'Could not send code. Check your connection and try again.';
+    e.classList.add('show');
+  }
+}
+
+function acctOtpNext(el, nextId) {
+  el.value = el.value.replace(/[^0-9]/g, '');
+  if (el.value && nextId) document.getElementById(nextId).focus();
+}
+function acctOtpBack(e, el, prevId) {
+  if (e.key === 'Backspace' && !el.value && prevId) document.getElementById(prevId).focus();
+}
+function acctOtpPaste(e) {
+  e.preventDefault();
+  const digits = (e.clipboardData.getData('text') || '').replace(/\D/g, '').slice(0, 6);
+  ['aotp1','aotp2','aotp3','aotp4','aotp5','aotp6'].forEach((id, i) => {
+    const el = document.getElementById(id);
+    if (el) el.value = digits[i] || '';
+  });
+  const last = document.getElementById('aotp' + Math.min(digits.length, 6));
+  if (last) last.focus();
+}
+
+async function verifyAccountOtp() {
+  const code = ['aotp1','aotp2','aotp3','aotp4','aotp5','aotp6']
+    .map(id => document.getElementById(id).value).join('');
+
+  if (code.length < 6 || code !== _acctOtp) {
+    document.querySelectorAll('#acctOtpView .otp-input').forEach(i => {
+      i.style.borderColor = 'rgba(255,77,109,0.5)';
+      setTimeout(() => (i.style.borderColor = ''), 1500);
+    });
+    const err = document.getElementById('acctOtpErr');
+    err.textContent = code.length < 6 ? 'Enter all 6 digits.' : 'Incorrect code. Try again.';
+    err.classList.add('show');
+    return;
+  }
+
+  const btn = document.getElementById('acctVerifyBtn');
+  btn.disabled    = true;
+  btn.textContent = 'Creating account…';
+
+  const email    = document.getElementById('acctEmail').value.trim();
+  const password = document.getElementById('acctPassword').value;
+  const first    = document.getElementById('acctFirst').value.trim();
+  const last     = document.getElementById('acctLast').value.trim();
+  const sb       = window._supabase;
+
+  const { data, error } = await sb.auth.signUp({
+    email, password,
+    options: { data: { first_name: first, last_name: last, plan: 'starter', services: ['sms'] } },
+  });
+
+  if (error) {
+    btn.disabled    = false;
+    btn.textContent = 'Verify & create account →';
+    const err = document.getElementById('acctOtpErr');
+    err.textContent = 'Account error: ' + error.message;
+    err.classList.add('show');
+    return;
+  }
+
+  if (data.user) {
+    await sb.from('profiles').update({
+      first_name: first, last_name: last, plan: 'starter', sms_limit: 5000,
+    }).eq('id', data.user.id);
+  }
+
+  goToStep(5);
+  await populatePaymentStep();
+}
+
+async function submitLogin() {
+  const email    = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    document.getElementById('loginEmailErr').classList.add('show');
+    return;
+  }
+  if (!password) {
+    document.getElementById('loginPasswordErr').classList.add('show');
+    return;
+  }
+
+  const btn = document.getElementById('loginBtn');
+  btn.disabled    = true;
+  btn.textContent = 'Logging in…';
+
+  const sb = window._supabase;
+  const { error } = await sb.auth.signInWithPassword({ email, password });
+
+  if (error) {
+    btn.disabled    = false;
+    btn.textContent = 'Log in & continue →';
+    const err = document.getElementById('loginErr');
+    err.textContent = 'Incorrect email or password.';
+    err.classList.add('show');
+    return;
+  }
+
+  goToStep(5);
+  await populatePaymentStep();
+}
+
+async function sendPasswordReset() {
+  const email = document.getElementById('loginEmail').value.trim();
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    document.getElementById('loginEmailErr').classList.add('show');
+    document.getElementById('loginEmail').focus();
+    return;
+  }
+  const sb = window._supabase;
+  await sb.auth.resetPasswordForEmail(email, {
+    redirectTo: window.location.origin + '/pages/dashboard.html',
+  });
+  // Always show success (don't leak whether email exists)
+  document.getElementById('forgotLink').style.display = 'none';
+  document.getElementById('forgotMsg').style.display  = 'inline';
+}
+
+// ── Step 5 state ──
+let _p5SmsCost = 0;
+let _p5TopupAmt = 0;
+
+async function goBackFromPayment() {
+  // If already logged in, skip Step 4 (account) and go back to Step 3 (preview)
+  const sb = window._supabase;
+  if (sb) {
+    const { data: { session } } = await sb.auth.getSession();
+    if (session) { goToStep(3); return; }
+  }
+  goToStep(4);
+}
+
+async function populatePaymentStep() {
+  const n = contacts.length;
+  const msg  = document.getElementById('msgBody').value;
+  const used = getUsedTokens();
+
+  // Cost: ₦6 per SMS unit — sum parts across all contacts for personalised
+  const totalUnits = calcTotalUnits(msg, used);
+  _p5SmsCost = totalUnits * 6;
+
+  document.getElementById('p5Recipients').textContent = n + ' contact' + (n !== 1 ? 's' : '');
+  document.getElementById('p5Parts').textContent      = totalUnits + ' SMS unit' + (totalUnits !== 1 ? 's' : '');
+  document.getElementById('p5SmsCost').textContent    = '₦' + _p5SmsCost.toLocaleString('en-NG');
+
+  // Show loading, hide both views
+  document.getElementById('p5Loading').style.display    = 'block';
+  document.getElementById('p5HasBalance').style.display = 'none';
+  document.getElementById('p5NoBalance').style.display  = 'none';
+  document.getElementById('p5SendErr').style.display    = 'none';
+
+  // Fetch wallet balance
+  const sb = window._supabase;
+  let balance = 0;
+  try {
+    if (sb) {
+      const { data: { session } } = await sb.auth.getSession();
+      if (session) {
+        const { data: prof } = await sb.from('profiles').select('wallet_balance').eq('id', session.user.id).maybeSingle();
+        balance = Number(prof?.wallet_balance ?? 0);
+      }
+    }
+  } catch (fetchErr) {
+    console.error('populatePaymentStep balance fetch error:', fetchErr);
+  }
+
+  document.getElementById('p5Loading').style.display = 'none';
+
+  if (balance >= _p5SmsCost) {
+    // Enough credits
+    document.getElementById('p5WalletBal').textContent  = balance.toLocaleString('en-NG');
+    document.getElementById('p5DeductAmt').textContent  = '₦' + _p5SmsCost.toLocaleString('en-NG');
+    document.getElementById('p5DeductLabel').textContent = '₦' + _p5SmsCost.toLocaleString('en-NG');
+    document.getElementById('p5HasBalance').style.display = 'block';
+  } else {
+    // Not enough — show top-up UI
+    const deficit = _p5SmsCost - balance;
+    document.getElementById('p5LowBal').textContent  = balance.toLocaleString('en-NG');
+    document.getElementById('p5Deficit').textContent = deficit.toLocaleString('en-NG');
+    document.getElementById('p5NoBalance').style.display = 'block';
+
+    // Auto-select the smallest preset that covers the deficit
+    const presets = [500, 1000, 2000, 5000, 10000];
+    const auto    = presets.find(p => p >= deficit) || presets[presets.length - 1];
+    setTopupPreset(auto);
+  }
+}
+
+function calcTopupFees(amt) {
+  const vat  = Math.round(amt * 0.075);
+  const fee  = Math.min(Math.round(amt * 0.015), 2000);
+  const total = amt + vat + fee;
+  return { vat, fee, total };
+}
+
+function setTopupPreset(amt) {
+  _p5TopupAmt = amt;
+  document.getElementById('p5TopupInput').value = amt;
+  document.querySelectorAll('.topup-preset').forEach(b => {
+    b.classList.toggle('active', Number(b.dataset.amt) === amt);
+  });
+  updateTopupBreakdown();
+}
+
+function onTopupInput() {
+  const val = Number(document.getElementById('p5TopupInput').value);
+  _p5TopupAmt = val;
+  document.querySelectorAll('.topup-preset').forEach(b => b.classList.remove('active'));
+  updateTopupBreakdown();
+}
+
+function updateTopupBreakdown() {
+  const amt     = _p5TopupAmt;
+  const breakdown = document.getElementById('p5FeeBreakdown');
+  const btn       = document.getElementById('p5PayBtn');
+
+  if (!amt || amt < 500) {
+    breakdown.style.display = 'none';
+    btn.disabled    = true;
+    btn.style.opacity = '0.5';
+    btn.style.cursor  = 'not-allowed';
+    return;
+  }
+
+  const { vat, fee, total } = calcTopupFees(amt);
+  document.getElementById('p5BreakCredit').textContent = '₦' + amt.toLocaleString('en-NG');
+  document.getElementById('p5BreakVat').textContent    = '₦' + vat.toLocaleString('en-NG');
+  document.getElementById('p5BreakFee').textContent    = '₦' + fee.toLocaleString('en-NG');
+  document.getElementById('p5BreakTotal').textContent  = '₦' + total.toLocaleString('en-NG');
+  breakdown.style.display = 'block';
+
+  btn.disabled      = false;
+  btn.style.opacity = '1';
+  btn.style.cursor  = 'pointer';
+  btn.innerHTML     = 'Buy ₦' + amt.toLocaleString('en-NG') + ' credits &amp; send →';
+}
+
 // ── Sync contacts form based on used tokens ──
 function syncContactsForm() {
   const used    = getUsedTokens();
@@ -846,7 +1453,8 @@ function syncContactsForm() {
   if (used.length > 0) {
     const labels = used.map(k => {
       const t = KNOWN_TOKENS.find(t => t.key === k);
-      return `<b>${t ? t.label : k}</b>`;
+      const safe = (t ? t.label : k).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      return `<b>${safe}</b>`;
     }).join(', ');
     noteEl.innerHTML = `✨ Your message uses ${labels}. Each contact must have ${used.length > 1 ? 'these fields' : 'this field'} + phone number.`;
     noteEl.style.display = 'block';
@@ -977,7 +1585,8 @@ function renderChips() {
 
   list.innerHTML = contacts.map((c, i) => {
     const fieldParts = used.map(key => c.fields?.[key]).filter(Boolean);
-    const label = fieldParts.length ? fieldParts.join(' ') + ' · ' + c.num : c.num;
+    const raw = fieldParts.length ? fieldParts.join(' ') + ' · ' + c.num : c.num;
+    const label = raw.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
     return `<div class="chip">${label}<button onclick="removeContact(${i})">×</button></div>`;
   }).join('');
 
@@ -994,85 +1603,340 @@ function showContactErr(msg) { const e = document.getElementById('contactErr'); 
 function hideContactErr() { document.getElementById('contactErr').classList.remove('show'); }
 
 // ── Preview step 3 ──
-function buildPreview3() {
-  const msg = document.getElementById('msgBody').value;
-  const n   = contacts.length;
-  const unicode = !detectGSM7(msg);
-  const parts  = calcParts(msg.length, unicode);
-  const cost   = n * parts * 6;
-  const used   = getUsedTokens();
 
-  // Replace tokens with first contact's values for preview
-  let previewMsg = msg;
-  if (used.length > 0 && contacts.length > 0) {
-    used.forEach(key => {
-      const val = contacts[0].fields?.[key] || key;
-      previewMsg = previewMsg.split('[' + key + ']').join(val);
-    });
-    const t = KNOWN_TOKENS.find(t => t.key === used[0]);
-    const sampleVal = contacts[0].fields?.[used[0]] || used[0];
-    document.getElementById('pvNote').textContent = `Preview for "${sampleVal}" — each contact gets their own message`;
-    document.getElementById('pvNote').style.display = 'block';
-    document.getElementById('pvPhoneNote').textContent = `Preview for ${sampleVal}`;
-  } else {
-    document.getElementById('pvNote').style.display = 'none';
-    document.getElementById('pvPhoneNote').textContent = 'Preview';
+// Substitute tokens for a specific contact
+function substituteMsg(msg, used, contact) {
+  let out = msg;
+  used.forEach(key => {
+    const val = contact.fields?.[key] || key;
+    out = out.split('[' + key + ']').join(val);
+  });
+  return out;
+}
+
+// Calculate total SMS units across all contacts (each may have different length)
+function calcTotalUnits(msg, used) {
+  if (used.length === 0 || contacts.length === 0) {
+    // Bulk uniform — all messages identical
+    const unicode = !detectGSM7(msg);
+    return contacts.length * calcParts(msg.length, unicode);
   }
+  // Personalised — each contact's substituted message may differ in length
+  let total = 0;
+  contacts.forEach(c => {
+    const sub = substituteMsg(msg, used, c);
+    const unicode = !detectGSM7(sub);
+    total += calcParts(sub.length, unicode);
+  });
+  return total;
+}
+
+function buildPreview3() {
+  const msg  = document.getElementById('msgBody').value;
+  const n    = contacts.length;
+  const used = getUsedTokens();
+
+  // Build substituted message for first contact (preview)
+  const previewMsg = used.length > 0 && n > 0 ? substituteMsg(msg, used, contacts[0]) : msg;
+  const unicode = !detectGSM7(previewMsg);
+  const parts   = calcParts(previewMsg.length, unicode);
+
+  // Cost: ₦6 per SMS unit — sum parts across all contacts for personalised
+  const totalUnits = calcTotalUnits(msg, used);
+  const cost       = totalUnits * 6;
 
   document.getElementById('previewBubble3').textContent = previewMsg;
-  document.getElementById('pvBubbleMeta').textContent   = msg.length + ' chars · ' + parts + ' part' + (parts > 1 ? 's' : '');
+  document.getElementById('pvBubbleMeta').textContent   = previewMsg.length + ' chars · ' + parts + ' part' + (parts > 1 ? 's' : '');
   document.getElementById('pvRecipients').textContent   = n + ' contact' + (n !== 1 ? 's' : '');
-  document.getElementById('pvLength').textContent       = msg.length + ' characters';
-  document.getElementById('pvParts').textContent        = parts + ' part' + (parts !== 1 ? 's' : '') + ' × ' + n + ' contacts';
+  document.getElementById('pvLength').textContent       = (used.length > 0 ? 'varies per contact' : previewMsg.length + ' characters');
+  document.getElementById('pvParts').textContent        = totalUnits + ' SMS unit' + (totalUnits !== 1 ? 's' : '') + ' × ' + n + ' contacts';
   document.getElementById('pvCost').textContent         = '≈ ₦' + cost.toLocaleString('en-NG');
-}
 
-// ── Modal ──
-function openModal() {
-  sessionStorage.setItem('np_sms_msg',      document.getElementById('msgBody').value);
-  sessionStorage.setItem('np_sms_contacts', JSON.stringify(contacts));
-  sessionStorage.setItem('np_sms_tokens',   JSON.stringify(getUsedTokens()));
-  document.getElementById('modal').classList.add('open');
-  document.body.style.overflow = 'hidden';
-  document.getElementById('signupEmail').focus();
-}
-function closeModal() {
-  document.getElementById('modal').classList.remove('open');
-  document.body.style.overflow = '';
-}
-document.getElementById('modal').addEventListener('click', e => { if (e.target === document.getElementById('modal')) closeModal(); });
-
-function selectType(t) {
-  selectedType = t;
-  document.getElementById('cardIndividual').classList.toggle('selected', t === 'individual');
-  document.getElementById('cardBusiness').classList.toggle('selected',   t === 'business');
-}
-
-function clearEmailErr() { document.getElementById('emailErr').classList.remove('show'); }
-
-function proceedSignup() {
-  const email = document.getElementById('signupEmail').value.trim();
-  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    document.getElementById('emailErr').classList.add('show');
-    document.getElementById('signupEmail').focus();
-    return;
+  // Show phone nav for any multi-contact send
+  const multiContact = n > 1;
+  document.getElementById('phoneNav').style.display        = multiContact ? 'flex' : 'none';
+  document.getElementById('phoneNavSingle').style.display  = multiContact ? 'none' : 'block';
+  if (multiContact) {
+    document.getElementById('pvPhoneNote').textContent = `1 of ${n}`;
   }
-  if (!selectedType) {
-    document.getElementById('cardIndividual').style.borderColor = 'rgba(255,184,0,0.5)';
-    document.getElementById('cardBusiness').style.borderColor  = 'rgba(255,184,0,0.5)';
-    setTimeout(() => {
-      document.getElementById('cardIndividual').style.borderColor = '';
-      document.getElementById('cardBusiness').style.borderColor  = '';
-    }, 1500);
-    return;
+  _previewIdx = 0;
+}
+
+let _previewIdx = 0;
+
+function previewNext() {
+  if (contacts.length === 0) return;
+  _previewIdx = (_previewIdx + 1) % contacts.length;
+  updatePreviewContact(_previewIdx);
+}
+function previewPrev() {
+  if (contacts.length === 0) return;
+  _previewIdx = (_previewIdx - 1 + contacts.length) % contacts.length;
+  updatePreviewContact(_previewIdx);
+}
+function updatePreviewContact(idx) {
+  const msg  = document.getElementById('msgBody').value;
+  const used = getUsedTokens();
+  const previewMsg = used.length > 0 && contacts[idx] ? substituteMsg(msg, used, contacts[idx]) : msg;
+  const unicode = !detectGSM7(previewMsg);
+  const parts   = calcParts(previewMsg.length, unicode);
+  document.getElementById('previewBubble3').textContent = previewMsg;
+  document.getElementById('pvBubbleMeta').textContent   = previewMsg.length + ' chars · ' + parts + ' part' + (parts > 1 ? 's' : '');
+  document.getElementById('pvPhoneNote').textContent    = `${idx + 1} of ${contacts.length}`;
+}
+
+async function sendFromWallet() {
+  const btn   = document.getElementById('p5SendBtn');
+  const errEl = document.getElementById('p5SendErr');
+  btn.disabled    = true;
+  btn.textContent = 'Sending…';
+  errEl.style.display = 'none';
+
+  // send-bulk-sms handles wallet deduction atomically server-side
+  await executeSend(null, btn);
+}
+
+async function initiateMonnifyTopupAndSend() {
+  const btn   = document.getElementById('p5PayBtn');
+  const errEl = document.getElementById('p5SendErr');
+  errEl.style.display = 'none';
+
+  try {
+    const amt = _p5TopupAmt;
+    if (!amt || amt < 500) return;
+
+    if (typeof MonnifySDK === 'undefined') {
+      errEl.textContent   = 'Payment SDK failed to load. Please refresh the page and try again.';
+      errEl.style.display = 'block';
+      return;
+    }
+
+    const sb = window._supabase;
+    if (!sb) throw new Error('Supabase client not ready. Please refresh.');
+
+    const { data: { session } } = await sb.auth.getSession();
+    if (!session) { goToStep(4); return; }
+
+    const { vat, fee, total } = calcTopupFees(amt);
+    const user     = session.user;
+    const fullName = user.user_metadata?.first_name
+      ? (user.user_metadata.first_name + ' ' + (user.user_metadata.last_name || '')).trim()
+      : user.email;
+
+    MonnifySDK.initialize({
+      apiKey:             'MK_TEST_S9X5EPVQ0Q',
+      contractCode:       '4599283456',
+      amount:             total,
+      currency:           'NGN',
+      reference:          'NFYPRO-' + Date.now() + '-' + Math.random().toString(36).slice(2,7).toUpperCase(),
+      customerFullName:   fullName,
+      customerEmail:      user.email,
+      paymentDescription: 'NotifyPro Credits – ₦' + amt.toLocaleString('en-NG'),
+      isTestMode:         true,
+      paymentMethods:     ['CARD', 'ACCOUNT_TRANSFER'],
+      onLoadStart:        () => {},
+      onLoadComplete:     () => {},
+      onComplete: function (response) {
+        if (response.paymentStatus !== 'PAID') return;
+        btn.disabled    = true;
+        btn.textContent = 'Crediting wallet…';
+        (async () => {
+          const { data: creditResult, error: creditErr } = await sb.rpc('credit_wallet_atomic', {
+            p_user_id: user.id,
+            p_amount:  amt,
+          });
+
+          if (creditErr || !creditResult?.success) {
+            console.error('credit_wallet_atomic error:', creditErr, creditResult, 'ref:', response.paymentReference);
+            errEl.textContent   = 'Something went wrong crediting your wallet. Contact support — your payment reference is: ' + response.paymentReference;
+            errEl.style.display = 'block';
+            btn.disabled  = false;
+            btn.innerHTML = 'Buy ₦' + amt.toLocaleString('en-NG') + ' credits &amp; send →';
+            return;
+          }
+
+          // Show top-up success state
+          showTopupSuccess(amt, session);
+        })();
+      },
+      onClose: function () {
+        btn.disabled  = false;
+        btn.innerHTML = 'Buy ₦' + amt.toLocaleString('en-NG') + ' credits &amp; send →';
+      },
+    });
+  } catch (sdkErr) {
+    console.error('Monnify SDK error:', sdkErr);
+    errEl.textContent   = 'Could not open payment: ' + (sdkErr.message || 'unknown error');
+    errEl.style.display = 'block';
   }
-  sessionStorage.setItem('np_sms_email', email);
-  window.location.href = `signup.html?type=${selectedType}&ref=sms&email=${encodeURIComponent(email)}`;
+}
+
+async function executeSend(session, btn) {
+  const errEl = document.getElementById('p5SendErr');
+  const msg   = document.getElementById('msgBody').value;
+
+  const activeErrEl = document.getElementById('p5TopupSendErr') || errEl;
+
+  try {
+    // Build request body — personalised if tokens are used, bulk uniform otherwise
+    const used = getUsedTokens();
+    let requestBody;
+    if (used.length > 0 && contacts.length > 0) {
+      const messages = contacts.map(c => {
+        let personalMsg = msg;
+        used.forEach(key => {
+          const val = c.fields?.[key] || '';
+          personalMsg = personalMsg.split('[' + key + ']').join(val);
+        });
+        return { to: c.num, message: personalMsg };
+      });
+      requestBody = {
+        messages,
+        campaignName: 'Personalised SMS – ' + new Date().toLocaleDateString('en-NG'),
+      };
+    } else {
+      requestBody = {
+        recipients:   contacts.map(c => c.num),
+        message:      msg,
+        campaignName: 'SMS Send – ' + new Date().toLocaleDateString('en-NG'),
+      };
+    }
+
+    // Delegate the actual fetch to the module script (same pattern as bulk-sms.html)
+    if (!window._doSend) throw new Error('Page not ready. Please refresh and try again.');
+    const result = await window._doSend(requestBody);
+    if (!result.ok) throw new Error(result.error || 'Something went wrong. Please try again or contact support.');
+
+    showSendSuccess(result.sent, result.cost);
+  } catch (err) {
+    if (btn) { btn.disabled = false; btn.textContent = 'Retry →'; }
+    activeErrEl.textContent   = err.message;
+    activeErrEl.style.display = 'block';
+  }
+}
+
+function showTopupSuccess(amt, session) {
+  // Replace the No-Balance view with a success + send button
+  document.getElementById('p5NoBalance').style.display = 'none';
+
+  const wrap = document.getElementById('panel5').querySelector('div[style*="max-width:480px"]');
+  const existing = document.getElementById('p5TopupSuccess');
+  if (existing) existing.remove();
+
+  const el = document.createElement('div');
+  el.id = 'p5TopupSuccess';
+  el.innerHTML = `
+    <div class="card" style="margin-bottom:1.25rem;border-color:rgba(0,232,122,0.3);background:rgba(0,232,122,0.06);text-align:center;padding:1.75rem">
+      <div style="font-size:36px;margin-bottom:0.75rem">🎉</div>
+      <div style="font-size:16px;font-weight:700;margin-bottom:6px">₦${amt.toLocaleString('en-NG')} added to your credits!</div>
+      <div style="font-size:13px;color:var(--muted)">Your wallet has been topped up. Ready to send.</div>
+    </div>
+    <button class="btn btn-primary" id="p5SendAfterTopup">Send ${contacts.length} message${contacts.length !== 1 ? 's' : ''} now →</button>
+    <div id="p5TopupSendErr" style="color:#ff4d6d;font-size:13px;margin-top:10px;text-align:center;display:none"></div>
+  `;
+  wrap.appendChild(el);
+
+  document.getElementById('p5SendAfterTopup').addEventListener('click', async function () {
+    this.disabled    = true;
+    this.textContent = 'Sending…';
+    document.getElementById('p5SendErr').style.display = 'none';
+    document.getElementById('p5TopupSendErr').style.display = 'none';
+    await executeSend(null, this);
+  });
+}
+
+function showSendSuccess(totalSent, totalCost) {
+  document.querySelector('.wizard').style.display = 'none';
+  document.getElementById('sendSuccess').style.display = 'block';
+
+  document.getElementById('successSub').textContent =
+    `Your message is on its way to ${totalSent} contact${totalSent !== 1 ? 's' : ''}. Delivery typically takes under 30 seconds.`;
+
+  document.getElementById('successStats').innerHTML = `
+    <div style="text-align:center;padding:1rem 1.5rem;background:var(--bg2);border:1px solid var(--border);border-radius:12px">
+      <div style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:var(--accent)">${totalSent}</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:4px">Sent</div>
+    </div>
+    <div style="text-align:center;padding:1rem 1.5rem;background:var(--bg2);border:1px solid var(--border);border-radius:12px">
+      <div style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:var(--accent3)">₦${Number(totalCost).toLocaleString('en-NG')}</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:4px">Charged</div>
+    </div>`;
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function resetAndSendAnother() {
+  contacts.length = 0;
+  customTokens.length = 0;
+  msgEdited = false;
+  _acctOtp = '';
+  _p5SmsCost = 0;
+  _p5TopupAmt = 0;
+  document.getElementById('sendSuccess').style.display = 'none';
+  document.querySelector('.wizard').style.display = 'block';
+  document.getElementById('msgBody').value = DEFAULT_TEMPLATE;
+  // Clean up Step 5 — remove top-up success card if present
+  const topupEl = document.getElementById('p5TopupSuccess');
+  if (topupEl) topupEl.remove();
+  document.getElementById('p5HasBalance').style.display = 'none';
+  document.getElementById('p5NoBalance').style.display  = 'none';
+  document.getElementById('p5SendErr').style.display    = 'none';
+  document.getElementById('p5Loading').style.display    = 'block';
+  // Reset send button
+  const sendBtn = document.getElementById('p5SendBtn');
+  if (sendBtn) { sendBtn.disabled = false; sendBtn.innerHTML = 'Send now — deduct <span id="p5DeductLabel">₦0</span> from credits →'; }
+  // Reset account step to signup view + signup form
+  switchAcctView('signup');
+  showAcctSignupForm();
+  updateMsgUI();
+  syncContactsForm();
+  renderChips();
+  goToStep(1);
 }
 
 // ── EXCEL / CSV UPLOAD ──
 let _sheetRows = [];   // raw rows from parsed file
 let _sheetHeaders = []; // column headers
+
+async function downloadExcelTemplate() {
+  // Lazy-load SheetJS (same CDN used for upload)
+  if (!window.XLSX) {
+    await new Promise((res, rej) => {
+      const s = document.createElement('script');
+      s.src = 'https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js';
+      s.onload = res; s.onerror = rej;
+      document.head.appendChild(s);
+    });
+  }
+
+  // Build columns: Phone first, then any tokens used in the message
+  const used = getUsedTokens();
+  const headers = ['Phone', ...used.map(key => {
+    const t = KNOWN_TOKENS.find(t => t.key === key);
+    return t ? t.label : key;
+  })];
+
+  // Two sample rows so the user can see the expected format
+  const sample1 = ['08012345678', ...used.map(key => {
+    const samples = { 'FIRST NAME': 'Ada', 'LAST NAME': 'Obi', 'EMAIL': 'ada@example.com', 'ID': 'REF001', 'USERNAME': 'ada_obi' };
+    const t = KNOWN_TOKENS.find(t => t.key === key);
+    return samples[key] || (t ? t.label : key);
+  })];
+  const sample2 = ['09087654321', ...used.map(key => {
+    const samples = { 'FIRST NAME': 'Emeka', 'LAST NAME': 'Eze', 'EMAIL': 'emeka@example.com', 'ID': 'REF002', 'USERNAME': 'emeka_eze' };
+    const t = KNOWN_TOKENS.find(t => t.key === key);
+    return samples[key] || (t ? t.label : key);
+  })];
+
+  const ws = XLSX.utils.aoa_to_sheet([headers, sample1, sample2]);
+
+  // Style the header row width
+  ws['!cols'] = headers.map(() => ({ wch: 20 }));
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Contacts');
+  XLSX.writeFile(wb, 'notifypro-contacts-template.xlsx');
+}
 
 async function handleExcelUpload(e) {
   const file = e.target.files[0];

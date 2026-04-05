@@ -1932,7 +1932,7 @@
               <span id="feeVAT">—</span>
             </div>
             <div class="topup-fee-row">
-              <span>Monnify fee (1.5%, max ₦2,000)</span>
+              <span>Processing fee (1.5%, max ₦2,000)</span>
               <span id="feePaystack">—</span>
             </div>
             <div class="topup-fee-row total">
@@ -1942,7 +1942,7 @@
           </div>
 
           <div class="modal-actions">
-            <button class="btn-primary" id="topupPayBtn" onclick="initiateTopup()">Pay with Monnify</button>
+            <button class="btn-primary" id="topupPayBtn" onclick="initiateTopup()">Continue →</button>
             <button class="btn-outline" onclick="document.getElementById('topupModal').classList.remove('show')">Cancel</button>
           </div>
         </div>
@@ -2722,14 +2722,14 @@
           onLoadComplete:     () => {},
           onComplete: function (response) {
             btn.disabled = false;
-            btn.textContent = "Pay with Monnify";
+            btn.textContent = "Continue →";
             if (response.paymentStatus === "PAID") {
               creditWallet(session, amt, response.paymentReference);
             }
           },
           onClose: function () {
             btn.disabled = false;
-            btn.textContent = "Pay with Monnify";
+            btn.textContent = "Continue →";
           },
         });
       };

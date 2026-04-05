@@ -1933,7 +1933,8 @@
     </script>
     <script>window.NP_PAGE = 'dashboard';</script>
     <script src="../assets/js/sidebar.js"></script>
-    <script type="module" src="../assets/js/auth-guard.js"></script>
+    <script src="https://sdk.monnify.com/plugin/monnify.js"></script>
+  <script type="module" src="../assets/js/auth-guard.js"></script>
     <script type="module">
       import { supabase } from "../assets/js/supabase-config.js";
 
@@ -2111,32 +2112,12 @@
 
         const fullName  = [profile.first_name || session.user.user_metadata?.first_name, profile.last_name || session.user.user_metadata?.last_name].filter(Boolean).join(" ") || session.user.email;
         const initials  = fullName.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2);
-        const planLabel = { starter: "Starter Plan", business: "Business Plan", enterprise: "Enterprise Plan" };
-        const smsUsed   = profile.sms_used  ?? 0;
-        const smsLimit  = profile.sms_limit ?? 5000;
-        const smsPct    = smsLimit > 0 ? Math.min((smsUsed / smsLimit) * 100, 100).toFixed(1) : 0;
-        const smsRemain = smsLimit > 0 ? smsLimit - smsUsed : "∞";
-
         const avatarEl = document.getElementById("userAvatar");
         if (avatarEl) avatarEl.textContent = initials;
         const sideNameEl = document.getElementById("userName");
         if (sideNameEl) sideNameEl.textContent = fullName;
-        const planEl = document.querySelector(".user-plan");
-        if (planEl) planEl.textContent = planLabel[profile.plan] || "Starter Plan";
         const balanceEl = document.getElementById("walletBalance");
         if (balanceEl) balanceEl.textContent = Number(profile.wallet_balance ?? 0).toLocaleString("en-NG");
-        const estEl = document.getElementById("walletEst");
-        if (estEl) estEl.textContent = `≈ ${smsRemain === "∞" ? "∞" : Number(smsRemain).toLocaleString("en-NG")} SMS remaining`;
-        const fillEl = document.getElementById("usageFill");
-        if (fillEl) fillEl.style.width = smsPct + "%";
-        const noteEl = document.querySelector(".usage-note");
-        // Days until next billing cycle (1st of next month)
-        const now3 = new Date();
-        const nextFirst = new Date(now3.getFullYear(), now3.getMonth() + 1, 1);
-        const daysLeft = Math.ceil((nextFirst - now3) / 86400000);
-        if (noteEl) noteEl.textContent = `${smsPct}% used · resets in ${daysLeft} day${daysLeft !== 1 ? 's' : ''}`;
-        const topEl = document.querySelector(".usage-top strong");
-        if (topEl) topEl.textContent = `${smsUsed.toLocaleString()} / ${smsLimit > 0 ? smsLimit.toLocaleString() : "∞"}`;
 
 
         // ── Wallet health ──

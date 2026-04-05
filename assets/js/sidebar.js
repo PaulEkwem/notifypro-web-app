@@ -22,7 +22,7 @@
     {
       section: 'Services',
       items: [
-        { id: 'bulk-sms',   label: 'Campaigns',       href: 'bulk-sms.html',   icon: iconSMS(),        badge: null },
+        { id: 'bulk-sms',   label: 'Bulk SMS',         href: 'bulk-sms.html',   icon: iconSMS(),        badge: null },
         { id: 'email',      label: 'Email',           href: 'email.html',      icon: iconEmail(),      badge: null },
         { id: 'otp',        label: 'Security & Verify', href: 'otp.html',      icon: iconLock(),       badge: null },
       ],
@@ -87,25 +87,12 @@
             <span class="wallet-label">Wallet Balance</span>
             <a class="wallet-topup" href="#">+ Top Up</a>
           </div>
-          <div class="wallet-amount">₦<em id="walletBalance">47,500</em></div>
-          <div class="wallet-est" id="walletEst">≈ 11,875 SMS remaining</div>
-          <div class="wallet-health" id="walletHealth"></div>
-        </div>
-        <div class="usage-wrap">
-          <div class="usage-top">
-            <span>Monthly SMS Usage</span>
-            <strong id="usageTopText">— / —</strong>
-          </div>
-          <div class="usage-track">
-            <div class="usage-fill" id="usageFill"></div>
-          </div>
-          <div class="usage-note">— · resets in — days</div>
+          <div class="wallet-amount">₦<em id="walletBalance">—</em></div>
         </div>
         <div class="user-card" id="userCard">
           <div class="user-avatar" id="userAvatar">–</div>
           <div>
             <div class="user-name" id="userName">Loading…</div>
-            <div class="user-plan">Starter Plan</div>
           </div>
         </div>
         <button class="logout-btn" onclick="window.npLogout()">
@@ -114,6 +101,187 @@
         </button>
       </div>
     </aside>`;
+
+  // ── TOP-UP MODAL HTML ──
+  const topupModalHTML = `
+  <div id="npTopupOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:999;backdrop-filter:blur(4px);align-items:center;justify-content:center">
+    <div style="background:#0D1117;border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:2rem;width:90%;max-width:400px;position:relative">
+      <button onclick="window.closeTopUp()" style="position:absolute;top:14px;right:16px;background:none;border:none;color:#8892A4;font-size:20px;cursor:pointer;line-height:1">×</button>
+      <h3 style="font-family:'Syne',sans-serif;font-size:18px;font-weight:800;margin:0 0 4px">Top Up Wallet</h3>
+      <p style="font-size:13px;color:#8892A4;margin:0 0 1.25rem">Funds are added to your balance instantly.</p>
+
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1rem" id="npTopupPresets">
+        <button onclick="npSetPreset(5000)"  data-amt="5000"  class="np-preset">₦5,000</button>
+        <button onclick="npSetPreset(10000)" data-amt="10000" class="np-preset">₦10,000</button>
+        <button onclick="npSetPreset(25000)" data-amt="25000" class="np-preset">₦25,000</button>
+        <button onclick="npSetPreset(50000)" data-amt="50000" class="np-preset">₦50,000</button>
+      </div>
+
+      <label style="font-size:12px;color:#8892A4;display:block;margin-bottom:6px">Or enter amount (₦)</label>
+      <input type="number" id="npTopupAmt" placeholder="e.g. 3000" min="1000"
+        style="width:100%;background:#161B22;border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:10px 14px;color:#F0F4FF;font-size:14px;outline:none;box-sizing:border-box;margin-bottom:1rem"
+        oninput="npOnAmtInput()" />
+
+      <div id="npTopupBreakdown" style="display:none;background:#161B22;border-radius:8px;padding:12px;margin-bottom:1rem;font-size:13px">
+        <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="color:#8892A4">Wallet credit</span><span id="npBkCredit" style="font-weight:600;color:#F0F4FF">—</span></div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="color:#8892A4">VAT (7.5%)</span><span id="npBkVat" style="font-weight:600;color:#F0F4FF">—</span></div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:10px"><span style="color:#8892A4">Processing fee (1.5%)</span><span id="npBkFee" style="font-weight:600;color:#F0F4FF">—</span></div>
+        <div style="display:flex;justify-content:space-between;border-top:1px solid rgba(255,255,255,0.06);padding-top:10px"><span style="font-weight:700;color:#F0F4FF">Total charged</span><span id="npBkTotal" style="font-weight:700;color:#FFB800">—</span></div>
+      </div>
+
+      <button id="npTopupPayBtn" onclick="npInitiateTopup()"
+        style="width:100%;background:#00E87A;color:#000;border:none;border-radius:10px;padding:13px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Syne',sans-serif;opacity:0.4;pointer-events:none">
+        Continue →
+      </button>
+      <div id="npTopupErr" style="color:#FF4D6D;font-size:12px;margin-top:8px;text-align:center;display:none"></div>
+    </div>
+  </div>
+
+  <style>
+    .np-preset{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:8px;color:#F0F4FF;font-size:13px;font-weight:600;padding:7px 14px;cursor:pointer;transition:border-color .2s}
+    .np-preset:hover{border-color:rgba(0,232,122,0.4)}
+    .np-preset.active{border-color:#00E87A;background:rgba(0,232,122,0.08);color:#00E87A}
+  </style>`;
+
+  document.body.insertAdjacentHTML('beforeend', topupModalHTML);
+
+  // ── TOP-UP MODAL LOGIC ──
+  let _npTopupAmt = 0;
+
+  window.openTopUp = function () {
+    _npTopupAmt = 0;
+    document.getElementById('npTopupAmt').value = '';
+    document.getElementById('npTopupBreakdown').style.display = 'none';
+    document.querySelectorAll('.np-preset').forEach(b => b.classList.remove('active'));
+    const btn = document.getElementById('npTopupPayBtn');
+    btn.style.opacity = '0.4'; btn.style.pointerEvents = 'none';
+    document.getElementById('npTopupErr').style.display = 'none';
+    const overlay = document.getElementById('npTopupOverlay');
+    overlay.style.display = 'flex';
+  };
+
+  window.closeTopUp = function () {
+    document.getElementById('npTopupOverlay').style.display = 'none';
+  };
+
+  document.getElementById('npTopupOverlay').addEventListener('click', function (e) {
+    if (e.target === this) window.closeTopUp();
+  });
+
+  window.npSetPreset = function (amt) {
+    _npTopupAmt = amt;
+    document.getElementById('npTopupAmt').value = amt;
+    document.querySelectorAll('.np-preset').forEach(b => b.classList.toggle('active', Number(b.dataset.amt) === amt));
+    npUpdateBreakdown();
+  };
+
+  window.npOnAmtInput = function () {
+    _npTopupAmt = Number(document.getElementById('npTopupAmt').value);
+    document.querySelectorAll('.np-preset').forEach(b => b.classList.remove('active'));
+    npUpdateBreakdown();
+  };
+
+  function npUpdateBreakdown() {
+    const amt = _npTopupAmt;
+    const btn = document.getElementById('npTopupPayBtn');
+    const bd  = document.getElementById('npTopupBreakdown');
+    if (!amt || amt < 1000) {
+      bd.style.display = 'none';
+      btn.style.opacity = '0.4'; btn.style.pointerEvents = 'none';
+      return;
+    }
+    const vat   = Math.round(amt * 0.075);
+    const fee   = Math.min(Math.round(amt * 0.015), 2000);
+    const total = amt + vat + fee;
+    document.getElementById('npBkCredit').textContent = '₦' + amt.toLocaleString('en-NG');
+    document.getElementById('npBkVat').textContent    = '₦' + vat.toLocaleString('en-NG');
+    document.getElementById('npBkFee').textContent    = '₦' + fee.toLocaleString('en-NG');
+    document.getElementById('npBkTotal').textContent  = '₦' + total.toLocaleString('en-NG');
+    bd.style.display = 'block';
+    btn.style.opacity = '1'; btn.style.pointerEvents = 'auto';
+    btn.textContent = 'Pay ₦' + total.toLocaleString('en-NG') + ' →';
+  }
+
+  window.npInitiateTopup = async function () {
+    const amt = _npTopupAmt;
+    if (!amt || amt < 1000) return;
+
+    const errEl = document.getElementById('npTopupErr');
+    errEl.style.display = 'none';
+
+    if (typeof MonnifySDK === 'undefined') {
+      errEl.textContent   = 'Payment SDK not loaded. Please refresh and try again.';
+      errEl.style.display = 'block';
+      return;
+    }
+
+    // Wait up to 3s for the page's module script to set window._supabase
+    let sb = window._supabase;
+    if (!sb) {
+      await new Promise(resolve => {
+        let tries = 0;
+        const poll = setInterval(() => {
+          if (window._supabase || ++tries > 30) { clearInterval(poll); resolve(); }
+        }, 100);
+      });
+      sb = window._supabase;
+    }
+    if (!sb) { errEl.textContent = 'Not authenticated.'; errEl.style.display = 'block'; return; }
+
+    const { data: { session } } = await sb.auth.getSession();
+    if (!session) { window.location.href = '../login.html'; return; }
+
+    const vat   = Math.round(amt * 0.075);
+    const fee   = Math.min(Math.round(amt * 0.015), 2000);
+    const total = amt + vat + fee;
+
+    const btn      = document.getElementById('npTopupPayBtn');
+    const fullName = session.user.user_metadata?.first_name
+      ? (session.user.user_metadata.first_name + ' ' + (session.user.user_metadata.last_name || '')).trim()
+      : session.user.email;
+
+    MonnifySDK.initialize({
+      apiKey:             'MK_TEST_S9X5EPVQ0Q',
+      contractCode:       '4599283456',
+      amount:             total,
+      currency:           'NGN',
+      reference:          'NFYPRO-' + Date.now() + '-' + Math.random().toString(36).slice(2,7).toUpperCase(),
+      customerFullName:   fullName,
+      customerEmail:      session.user.email,
+      paymentDescription: 'NotifyPro Wallet Top-Up',
+      isTestMode:         true,
+      paymentMethods:     ['CARD', 'ACCOUNT_TRANSFER'],
+      onLoadStart:        () => {},
+      onLoadComplete:     () => {},
+      onComplete: function (response) {
+        if (response.paymentStatus !== 'PAID') return;
+        btn.textContent = 'Crediting…';
+        btn.style.pointerEvents = 'none';
+        (async () => {
+          const { data: result, error } = await sb.rpc('credit_wallet_atomic', {
+            p_user_id: session.user.id,
+            p_amount:  amt,
+          });
+          if (error || !result?.success) {
+            console.error('credit_wallet_atomic error:', error, result);
+            errEl.textContent   = 'Payment received but balance update failed. Contact support.';
+            errEl.style.display = 'block';
+            btn.textContent = 'Pay ₦' + total.toLocaleString('en-NG') + ' →';
+            btn.style.pointerEvents = 'auto';
+            return;
+          }
+          // Update balance in sidebar live
+          const balEl = document.getElementById('walletBalance');
+          if (balEl) balEl.textContent = Number(result.new_balance).toLocaleString('en-NG');
+          window.closeTopUp();
+        })();
+      },
+      onClose: function () {
+        btn.textContent = 'Pay ₦' + total.toLocaleString('en-NG') + ' →';
+        btn.style.pointerEvents = 'auto';
+      },
+    });
+  };
 
   // ── INJECT ──
   const layout = document.querySelector('.dash-layout');
@@ -166,14 +334,13 @@
     if (backdrop) backdrop.addEventListener('click', closeSidebar);
     if (closeBtn) closeBtn.addEventListener('click', closeSidebar);
 
-    // Wire Top Up link to modal if available on current page
+    // Wire Top Up link to shared modal
     const topUpLink = document.querySelector('.wallet-topup');
     if (topUpLink) {
       topUpLink.addEventListener('click', (e) => {
         e.preventDefault();
         closeSidebar();
-        if (typeof window.openTopUp === 'function') window.openTopUp();
-        else window.location.href = 'bulk-sms.html';
+        window.openTopUp();
       });
     }
 

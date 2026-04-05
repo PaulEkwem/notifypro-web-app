@@ -29,15 +29,13 @@
         <div class="progress-wrap">
           <div class="step-labels">
             <span class="step-label active" id="lbl-1">Account</span>
-            <span class="step-label" id="lbl-2">Plan</span>
-            <span class="step-label" id="lbl-3">Services</span>
-            <span class="step-label" id="lbl-4">Verify</span>
+            <span class="step-label" id="lbl-2">Verify</span>
           </div>
           <div class="progress-track">
             <div
               class="progress-fill"
               id="progress-fill"
-              style="width: 25%"
+              style="width: 50%"
             ></div>
           </div>
         </div>
@@ -156,116 +154,12 @@
             </div>
 
             <div class="btn-row" style="margin-top: 1.5rem">
-              <button class="btn-primary" onclick="goStep(2)">
+              <button class="btn-primary" onclick="goStep(4)">
                 Continue →
               </button>
             </div>
             <div class="login-link">
               Already have an account? <a href="login.html">Log in</a>
-            </div>
-          </div>
-
-          <!-- STEP 2: Choose Plan -->
-          <div class="step" id="step-2">
-            <h2 class="step-heading">Choose your plan</h2>
-            <p class="step-sub">
-              You can upgrade anytime. All plans include a free trial.
-            </p>
-
-            <div class="plan-grid">
-              <label
-                class="plan-card"
-                id="plan-starter"
-                onclick="selectPlan('starter')"
-              >
-                <input type="radio" name="plan" value="starter" />
-                <div class="plan-name">Starter</div>
-                <div class="plan-price">₦5k<span>/mo</span></div>
-                <div class="plan-detail">5,000 SMS units</div>
-              </label>
-              <label
-                class="plan-card selected"
-                id="plan-business"
-                onclick="selectPlan('business')"
-              >
-                <div class="plan-popular">POPULAR</div>
-                <input type="radio" name="plan" value="business" checked />
-                <div class="plan-name">Business</div>
-                <div class="plan-price">₦25k<span>/mo</span></div>
-                <div class="plan-detail">30,000 SMS units</div>
-              </label>
-              <label
-                class="plan-card"
-                id="plan-enterprise"
-                onclick="selectPlan('enterprise')"
-              >
-                <input type="radio" name="plan" value="enterprise" />
-                <div class="plan-name">Enterprise</div>
-                <div
-                  class="plan-price"
-                  style="font-size: 16px; padding-top: 3px"
-                >
-                  Custom
-                </div>
-                <div class="plan-detail">Unlimited volume</div>
-              </label>
-            </div>
-
-            <div class="btn-row">
-              <button class="btn-back" onclick="goStep(1)">←</button>
-              <button class="btn-primary" onclick="goStep(3)">
-                Continue →
-              </button>
-            </div>
-          </div>
-
-          <!-- STEP 3: Choose Services -->
-          <div class="step" id="step-3">
-            <h2 class="step-heading">What do you need?</h2>
-            <p class="step-sub">
-              Pick all services you plan to use. You can change this later.
-            </p>
-
-            <div class="service-grid">
-              <div class="service-card selected" id="svc-sms">
-                <div class="service-icon">💬</div>
-                <div class="service-info">
-                  <h4>Bulk SMS</h4>
-                  <p>Mass messaging to Nigerian networks</p>
-                </div>
-                <div class="service-check">✓</div>
-              </div>
-              <div class="service-card" id="svc-email">
-                <div class="service-icon">📧</div>
-                <div class="service-info">
-                  <h4>Email Campaigns</h4>
-                  <p>Design & track email campaigns</p>
-                </div>
-                <div class="service-check"></div>
-              </div>
-              <div class="service-card" id="svc-otp">
-                <div class="service-icon">🔐</div>
-                <div class="service-info">
-                  <h4>OTP Verification</h4>
-                  <p>Sub 3s one-time passwords</p>
-                </div>
-                <div class="service-check"></div>
-              </div>
-              <div class="service-card" id="svc-2fa">
-                <div class="service-icon">🛡️</div>
-                <div class="service-info">
-                  <h4>2FA Authentication</h4>
-                  <p>Secure your app with 2-factor auth</p>
-                </div>
-                <div class="service-check"></div>
-              </div>
-            </div>
-
-            <div class="btn-row">
-              <button class="btn-back" onclick="goStep(2)">←</button>
-              <button class="btn-primary" onclick="goStep(4)">
-                Continue →
-              </button>
             </div>
           </div>
 
@@ -355,21 +249,7 @@
             <div class="success-wrap">
               <div class="success-icon">🎉</div>
               <h2>You're all set!</h2>
-              <p>
-                Welcome to NotifyPro. Your account is ready. Start sending in
-                seconds.
-              </p>
-              <a
-                href="pages/dashboard.html"
-                class="btn-primary"
-                style="
-                  display: inline-block;
-                  text-decoration: none;
-                  padding: 14px 40px;
-                  width: auto;
-                "
-                >Go to Dashboard →</a
-              >
+              <p id="success-msg">Welcome to NotifyPro. Your account is ready.</p>
             </div>
           </div>
         </div>
