@@ -1,0 +1,17 @@
+# Claude Code internals — contains bash permissions with tokens
+.claude/
+
+# Supabase local temp files
+supabase/.temp/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Node
+node_modules/
+
+# OS
+.DS_Store
+Thumbs.db
