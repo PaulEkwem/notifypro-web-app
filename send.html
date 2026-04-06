@@ -1852,24 +1852,42 @@ async function initiateMonnifyTopupAndSend() {
       onComplete: function (response) {
         if (response.paymentStatus !== 'PAID') return;
         btn.disabled    = true;
-        btn.textContent = 'Crediting wallet…';
+        btn.textContent = 'Verifying payment…';
         (async () => {
-          const { data: creditResult, error: creditErr } = await sb.rpc('credit_wallet_atomic', {
-            p_user_id: user.id,
-            p_amount:  amt,
-          });
+          try {
+            const { data: { session: sess } } = await sb.auth.getSession();
+            const res = await fetch(
+              'https://oilnrhqcfzkonoumsfav.supabase.co/functions/v1/verify-payment',
+              {
+                method:  'POST',
+                headers: {
+                  'Content-Type':  'application/json',
+                  'Authorization': 'Bearer ' + sess.access_token,
+                },
+                body: JSON.stringify({
+                  paymentReference: response.paymentReference,
+                  creditAmount:     amt,
+                }),
+              }
+            );
+            const result = await res.json();
 
-          if (creditErr || !creditResult?.success) {
-            console.error('credit_wallet_atomic error:', creditErr, creditResult, 'ref:', response.paymentReference);
-            errEl.textContent   = 'Something went wrong crediting your wallet. Contact support — your payment reference is: ' + response.paymentReference;
+            if (!res.ok || !result.success) {
+              errEl.textContent   = result.error || 'Could not credit wallet. Contact support — reference: ' + response.paymentReference;
+              errEl.style.display = 'block';
+              btn.disabled  = false;
+              btn.innerHTML = 'Buy ₦' + amt.toLocaleString('en-NG') + ' credits &amp; send →';
+              return;
+            }
+
+            // Show top-up success state
+            showTopupSuccess(amt, sess);
+          } catch (e) {
+            errEl.textContent   = 'Network error verifying payment. Contact support — reference: ' + response.paymentReference;
             errEl.style.display = 'block';
             btn.disabled  = false;
             btn.innerHTML = 'Buy ₦' + amt.toLocaleString('en-NG') + ' credits &amp; send →';
-            return;
           }
-
-          // Show top-up success state
-          showTopupSuccess(amt, session);
         })();
       },
       onClose: function () {

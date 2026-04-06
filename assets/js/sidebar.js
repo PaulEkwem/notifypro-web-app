@@ -255,25 +255,43 @@
       onLoadComplete:     () => {},
       onComplete: function (response) {
         if (response.paymentStatus !== 'PAID') return;
-        btn.textContent = 'Crediting…';
+        btn.textContent = 'Verifying payment…';
         btn.style.pointerEvents = 'none';
         (async () => {
-          const { data: result, error } = await sb.rpc('credit_wallet_atomic', {
-            p_user_id: session.user.id,
-            p_amount:  amt,
-          });
-          if (error || !result?.success) {
-            console.error('credit_wallet_atomic error:', error, result);
-            errEl.textContent   = 'Payment received but balance update failed. Contact support.';
+          try {
+            const { data: { session: sess } } = await sb.auth.getSession();
+            const res = await fetch(
+              'https://oilnrhqcfzkonoumsfav.supabase.co/functions/v1/verify-payment',
+              {
+                method:  'POST',
+                headers: {
+                  'Content-Type':  'application/json',
+                  'Authorization': 'Bearer ' + sess.access_token,
+                },
+                body: JSON.stringify({
+                  paymentReference: response.paymentReference,
+                  creditAmount:     amt,
+                }),
+              }
+            );
+            const result = await res.json();
+            if (!res.ok || !result.success) {
+              errEl.textContent   = result.error || 'Payment received but balance update failed. Contact support.';
+              errEl.style.display = 'block';
+              btn.textContent = 'Pay ₦' + total.toLocaleString('en-NG') + ' →';
+              btn.style.pointerEvents = 'auto';
+              return;
+            }
+            // Update balance in sidebar live
+            const balEl = document.getElementById('walletBalance');
+            if (balEl) balEl.textContent = Number(result.new_balance).toLocaleString('en-NG');
+            window.closeTopUp();
+          } catch (e) {
+            errEl.textContent   = 'Network error. Contact support with your payment reference.';
             errEl.style.display = 'block';
             btn.textContent = 'Pay ₦' + total.toLocaleString('en-NG') + ' →';
             btn.style.pointerEvents = 'auto';
-            return;
           }
-          // Update balance in sidebar live
-          const balEl = document.getElementById('walletBalance');
-          if (balEl) balEl.textContent = Number(result.new_balance).toLocaleString('en-NG');
-          window.closeTopUp();
         })();
       },
       onClose: function () {
