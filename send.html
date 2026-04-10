@@ -1280,6 +1280,11 @@ async function sendAccountOtp() {
   if (password.length < 8) { document.getElementById('acctPasswordErr').classList.add('show'); ok = false; }
   if (!ok) return;
 
+  // Disable immediately to prevent double-clicks during async checks
+  const btn = document.getElementById('acctSignupBtn');
+  btn.disabled    = true;
+  btn.textContent = 'Checking…';
+
   // Check email not already in use
   const sb = window._supabase;
   if (sb) {
@@ -1292,12 +1297,12 @@ async function sendAccountOtp() {
       err.classList.add('show');
       switchAcctView('login');
       document.getElementById('loginPassword').focus();
+      btn.disabled    = false;
+      btn.textContent = 'Send verification code →';
       return;
     }
   }
 
-  const btn = document.getElementById('acctSignupBtn');
-  btn.disabled    = true;
   btn.textContent = 'Sending code…';
 
   _acctOtp = Math.floor(100000 + Math.random() * 900000).toString();
